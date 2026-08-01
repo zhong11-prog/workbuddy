@@ -1,0 +1,1014 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="工作台">
+<meta name="theme-color" content="#FF9AAF">
+<link rel="manifest" href="/manifest.json">
+<link rel="apple-touch-icon" href="/icons/icon-192.png">
+<title>钟雁羚的工作台</title>
+<style>
+:root{--bg:#FFF0F5;--card-bg:#fff;--primary:#FF9AAF;--primary-light:#FFD6E0;--primary-dark:#E8738A;--text:#5D4E5D;--text-light:#9B8E9B;--text-muted:#C4B8C4;--border:#F0E0E8;--shadow:0 2px 12px rgba(255,154,175,.12);--shadow-lg:0 8px 30px rgba(255,154,175,.18);--radius:16px;--radius-sm:10px;--sidebar-w:220px;--success:#7ECB9A;--warning:#FFB347;--danger:#FF6B7A;--info:#7EB8FF;--transition:.25s cubic-bezier(.4,0,.2,1)}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Hiragino Sans GB','Microsoft YaHei',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden}
+a{color:var(--primary-dark);text-decoration:none}
+.app{display:flex;min-height:100vh}
+.sidebar{width:var(--sidebar-w);background:var(--card-bg);border-right:1px solid var(--border);position:fixed;top:0;left:0;bottom:0;z-index:100;box-shadow:2px 0 20px rgba(255,154,175,.08);display:flex;flex-direction:column;transition:transform var(--transition)}
+.sidebar-header{padding:24px 20px 16px;text-align:center;border-bottom:1px solid var(--border)}
+.sidebar-header h2{font-size:16px;color:var(--primary-dark);font-weight:700}
+.sidebar-header .sub{font-size:11px;color:var(--text-muted)}
+.sidebar-nav{flex:1;overflow-y:auto;padding:12px 8px}
+.nav-item{display:flex;align-items:center;gap:10px;padding:11px 14px;border-radius:var(--radius-sm);cursor:pointer;transition:all var(--transition);font-size:14px;color:var(--text);margin-bottom:2px;border:none;background:none;width:100%;text-align:left;font-family:inherit}
+.nav-item:hover{background:var(--primary-light);color:var(--primary-dark)}
+.nav-item.active{background:var(--primary);color:#fff;font-weight:600}
+.nav-item .icon{font-size:18px;width:22px;text-align:center;flex-shrink:0}
+.main{margin-left:var(--sidebar-w);flex:1;display:flex;flex-direction:column;min-height:100vh}
+.page{display:none;padding:28px 32px;flex:1}
+.page.active{display:block}
+.page-title{font-size:22px;font-weight:700;color:var(--text);margin-bottom:20px;display:flex;align-items:center;gap:10px}
+.card{background:var(--card-bg);border-radius:var(--radius);padding:20px;margin-bottom:16px;box-shadow:var(--shadow);border:1px solid var(--border);transition:box-shadow var(--transition)}
+.card:hover{box-shadow:var(--shadow-lg)}
+.card-title{font-size:15px;font-weight:600;color:var(--text);margin-bottom:12px;display:flex;align-items:center;gap:8px}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:8px 18px;border-radius:20px;font-size:13px;font-weight:500;cursor:pointer;border:none;transition:all var(--transition);font-family:inherit}
+.btn-primary{background:var(--primary);color:#fff}.btn-primary:hover{background:var(--primary-dark);transform:translateY(-1px)}
+.btn-outline{background:transparent;border:1.5px solid var(--primary);color:var(--primary)}.btn-outline:hover{background:var(--primary-light)}
+.btn-sm{padding:5px 12px;font-size:12px;border-radius:14px}
+.btn-danger{background:var(--danger);color:#fff}.btn-success{background:var(--success);color:#fff}
+.btn-block{display:flex;flex-direction:column;align-items:center;gap:6px;padding:16px 12px;border-radius:var(--radius);border:2px solid var(--border);background:var(--card-bg);cursor:pointer;transition:all var(--transition);font-family:inherit;font-size:14px;font-weight:600;width:100%}
+.btn-block:hover{border-color:var(--primary);background:var(--primary-light);transform:translateY(-2px)}
+.btn-block .big-icon{font-size:36px}
+.input,.select,.textarea{padding:10px 14px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-size:13px;font-family:inherit;color:var(--text);background:var(--card-bg);transition:border-color var(--transition);width:100%}
+.input:focus,.select:focus,.textarea:focus{outline:none;border-color:var(--primary)}
+.textarea{resize:vertical;min-height:60px}
+.tag{display:inline-block;padding:3px 10px;border-radius:12px;font-size:11px;font-weight:500}
+.tag-pink{background:var(--primary-light);color:var(--primary-dark)}.tag-yellow{background:#FFF3CD;color:#856404}
+.tag-green{background:#D4EDDA;color:#155724}.tag-blue{background:#D6EAF8;color:#1A5276}.tag-red{background:#FADBD8;color:#922B21}
+.form-group{margin-bottom:14px}.form-group label{display:block;font-size:12px;font-weight:600;color:var(--text-light);margin-bottom:5px}
+.form-row{display:flex;gap:10px}.form-row>*{flex:1}
+.toast{position:fixed;top:20px;right:20px;z-index:9999;background:var(--card-bg);padding:12px 20px;border-radius:var(--radius-sm);box-shadow:var(--shadow-lg);font-size:13px;animation:slideIn .3s ease;border-left:3px solid var(--primary)}
+@keyframes slideIn{from{transform:translateX(100%);opacity:0}to{transform:translateX(0);opacity:1}}
+.modal-overlay{position:fixed;inset:0;z-index:1000;background:rgba(0,0,0,.3);display:flex;align-items:center;justify-content:center}
+.modal{background:var(--card-bg);border-radius:var(--radius);padding:24px;max-width:500px;width:92%;max-height:85vh;overflow-y:auto;box-shadow:var(--shadow-lg)}
+.modal-title{font-size:17px;font-weight:700;margin-bottom:16px;color:var(--primary-dark)}
+.dash-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:14px;margin-bottom:20px}
+.stat-card{background:var(--card-bg);border-radius:var(--radius);padding:18px;text-align:center;border:1px solid var(--border);box-shadow:var(--shadow);transition:all var(--transition);cursor:pointer}
+.stat-card:hover{transform:translateY(-3px);box-shadow:var(--shadow-lg)}
+.stat-value{font-size:32px;font-weight:700;color:var(--primary-dark)}
+.stat-label{font-size:12px;color:var(--text-muted);margin-top:4px}
+.progress-bar{height:8px;background:var(--primary-light);border-radius:4px;overflow:hidden;margin-top:8px}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--primary),var(--primary-dark));border-radius:4px;transition:width .5s}
+.table-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{text-align:left;padding:10px 12px;font-weight:600;color:var(--text-light);border-bottom:2px solid var(--border);font-size:11px}
+td{padding:10px 12px;border-bottom:1px solid var(--border)}
+.checkbox-wrap{display:flex;align-items:center;gap:8px;cursor:pointer}
+.checkbox-wrap input[type=checkbox]{appearance:none;width:20px;height:20px;border:2px solid var(--border);border-radius:50%;cursor:pointer;transition:all .2s;flex-shrink:0}
+.checkbox-wrap input[type=checkbox]:checked{background:var(--success);border-color:var(--success)}
+.checkbox-wrap input[type=checkbox]:checked::after{content:'✓';color:#fff;font-size:12px;display:flex;align-items:center;justify-content:center;width:100%;height:100%}
+.empty-state{text-align:center;padding:40px 20px;color:var(--text-muted)}.empty-state .icon{font-size:48px;margin-bottom:12px}
+.fade-in{animation:fadeIn .4s ease}@keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.level-tabs{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap}
+.level-tab{padding:8px 16px;border-radius:20px;font-size:13px;cursor:pointer;border:1.5px solid var(--border);background:var(--card-bg);transition:all var(--transition);font-family:inherit}
+.level-tab.active{background:var(--primary);color:#fff;border-color:var(--primary)}
+.study-tabs{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap}
+.study-tab{padding:8px 18px;border-radius:20px;font-size:13px;cursor:pointer;border:1.5px solid var(--border);background:var(--card-bg);transition:all var(--transition);font-family:inherit}
+.study-tab.active{background:var(--primary);color:#fff;border-color:var(--primary)}
+.grammar-card{background:var(--card-bg);border-radius:var(--radius);padding:18px;margin-bottom:12px;border:1px solid var(--border);box-shadow:var(--shadow)}
+.grammar-card .g-title{font-size:18px;font-weight:700;color:var(--primary-dark)}
+.grammar-card .g-explain{font-size:14px;color:var(--text);margin:8px 0}
+.grammar-card .g-example{background:var(--bg);padding:10px 14px;border-radius:var(--radius-sm);margin:6px 0;font-size:14px}
+.book-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px}
+.book-card{background:var(--card-bg);border-radius:var(--radius);padding:16px;border:1px solid var(--border);transition:all var(--transition);cursor:pointer}
+.book-card:hover{transform:translateY(-2px);box-shadow:var(--shadow-lg)}
+.book-cover{height:100px;border-radius:var(--radius-sm);background:linear-gradient(135deg,var(--primary-light),#E8D5F0);display:flex;align-items:center;justify-content:center;font-size:28px;margin-bottom:10px}
+.book-status{display:inline-block;padding:2px 10px;border-radius:10px;font-size:10px;font-weight:600;margin-bottom:6px}
+.book-status.want{background:#FFF3CD;color:#856404}.book-status.reading{background:#D6EAF8;color:#1A5276}.book-status.done{background:#D4EDDA;color:#155724}
+.timer-circle{width:180px;height:180px;border-radius:50%;border:6px solid var(--primary-light);display:flex;align-items:center;justify-content:center;margin:0 auto 20px;background:var(--card-bg);box-shadow:0 0 40px rgba(255,154,175,.15)}
+.timer-display{font-size:42px;font-weight:700;color:var(--primary-dark);font-variant-numeric:tabular-nums}
+.note-float-btn{position:fixed;bottom:190px;right:24px;z-index:999;width:44px;height:44px;border-radius:50%;background:var(--primary);color:#fff;font-size:20px;border:none;cursor:pointer;box-shadow:var(--shadow-lg);display:flex;align-items:center;justify-content:center;transition:all var(--transition)}
+.note-float-btn:hover{transform:scale(1.1)}
+.note-float-panel{position:fixed;bottom:180px;right:80px;z-index:999;width:280px;background:var(--card-bg);border-radius:var(--radius);box-shadow:var(--shadow-lg);padding:16px;display:none}
+.note-float-panel.show{display:block;animation:slideIn .3s ease}
+/* Cat SVG */
+.cat-container{position:fixed;bottom:20px;right:20px;z-index:1000;cursor:pointer;transition:transform .3s;filter:drop-shadow(0 4px 12px rgba(180,160,190,.25))}
+.cat-container:hover{transform:scale(1.08)}
+.cat-container svg{width:130px;height:140px}
+.cat-bubble{position:fixed;background:var(--card-bg);padding:8px 14px;border-radius:16px;font-size:12px;white-space:nowrap;box-shadow:var(--shadow);opacity:0;transition:opacity .3s;pointer-events:none;border:1px solid var(--border);z-index:1001;max-width:200px}
+.cat-bubble.show{opacity:1}
+.cat-bubble.above::after{content:'';position:absolute;bottom:-6px;left:50%;transform:translateX(-50%) rotate(45deg);width:12px;height:12px;background:var(--card-bg);border-right:1px solid var(--border);border-bottom:1px solid var(--border)}
+.cat-bubble.below::after{content:'';position:absolute;top:-6px;left:50%;transform:translateX(-50%) rotate(45deg);width:12px;height:12px;background:var(--card-bg);border-left:1px solid var(--border);border-top:1px solid var(--border)}
+/* Speaker animation */
+.speaker-btn{display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:50%;border:1.5px solid var(--primary);background:var(--card-bg);cursor:pointer;font-size:14px;transition:all .2s;margin-left:8px;flex-shrink:0}
+.speaker-btn:hover{background:var(--primary-light)}
+.speaker-btn.playing{background:var(--primary);color:#fff;animation:pulse .6s infinite}
+@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.15)}}
+/* Dictation area */
+.dictation-box{background:#FFFAFD;border:2px dashed var(--primary-light);border-radius:var(--radius);padding:20px;margin-top:16px}
+.dictation-score{font-size:13px;color:var(--primary-dark);font-weight:600;text-align:center;margin-bottom:8px}
+/* Korean keyboard */
+.kr-keyboard{display:none;background:#FFF8FA;border-radius:var(--radius-sm);padding:8px;margin-top:8px;border:1px solid var(--border)}
+.kr-keyboard.show{display:block}
+.kr-key-row{display:flex;gap:3px;margin-bottom:3px;justify-content:center}
+.kr-key{padding:6px 10px;border-radius:6px;border:1px solid var(--border);background:var(--card-bg);cursor:pointer;font-size:15px;font-family:inherit;min-width:32px;text-align:center;transition:all .15s}
+.kr-key:hover{background:var(--primary);color:#fff;border-color:var(--primary)}
+.hearts{position:absolute;bottom:80%;left:50%;pointer-events:none;z-index:1002;transform:translateX(-50%)}
+.heart-p{position:absolute;font-size:16px;animation:floatUp 1.5s ease-out forwards;opacity:0}
+@keyframes floatUp{0%{transform:translateY(0)scale(.5);opacity:1}100%{transform:translateY(-60px)scale(1.3);opacity:0}}
+.confetti{position:fixed;z-index:10000;font-size:20px;animation:confettiFall 2.5s ease-out forwards;pointer-events:none}
+@keyframes confettiFall{0%{transform:translateY(-10px)rotate(0);opacity:1}100%{transform:translateY(100vh)rotate(720deg);opacity:0}}
+.mood-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
+.mood-cell{aspect-ratio:1;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:14px;cursor:pointer;background:#FAF5F8}.mood-cell.today{border:2px solid var(--primary)}
+.period-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px}
+.period-day{padding:8px 2px;border-radius:50%;font-size:12px;text-align:center}.period-day.normal{background:#F8F4F8}.period-day.period{background:#FFCDD2;color:#C62828;font-weight:600}.period-day.ovulation{background:#BBDEFB;color:#1565C0;font-weight:600}.period-day.predicted{background:#FFE0E6;color:#D32F2F;border:1px dashed #E57373}.period-day.today{border:2px solid var(--primary)}
+.sound-grid{display:flex;gap:8px;flex-wrap:wrap}
+.sound-btn{padding:8px 14px;border-radius:20px;border:1.5px solid var(--border);background:var(--card-bg);cursor:pointer;font-size:12px;font-family:inherit}.sound-btn.active{background:var(--primary);color:#fff;border-color:var(--primary)}
+.task-detail-row{cursor:pointer;padding:8px 12px;margin:4px 0;border-radius:8px;transition:background .2s;display:flex;align-items:center;gap:8px;font-size:13px}
+.task-detail-row:hover{background:var(--primary-light)}
+.task-expand{display:none;padding:8px 12px 8px 36px;font-size:12px;color:var(--text-light);border-bottom:1px solid var(--border)}
+.task-expand.show{display:block}
+@media(max-width:768px){.sidebar{transform:translateX(-100%);width:260px}.sidebar.open{transform:translateX(0)}.main{margin-left:0}.page{padding:16px}.menu-toggle{display:flex!important;position:fixed;top:12px;left:12px;z-index:200;width:36px;height:36px;border-radius:50%;background:var(--primary);color:#fff;border:none;font-size:18px;cursor:pointer;align-items:center;justify-content:center;box-shadow:var(--shadow)}.cat-container{bottom:16px;right:8px;transform:scale(.7)}.note-float-btn{bottom:160px;right:8px}.dash-grid{grid-template-columns:repeat(2,1fr)}}
+@media(min-width:769px){.menu-toggle{display:none}}
+::-webkit-scrollbar{width:6px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:var(--primary-light);border-radius:3px}
+
+/* Detail panel */
+.detail-panel{position:fixed;right:0;top:0;bottom:0;width:380px;max-width:90vw;background:var(--card-bg);z-index:500;box-shadow:-4px 0 30px rgba(0,0,0,.1);transform:translateX(100%);transition:transform .3s;overflow-y:auto;padding:24px}
+.detail-panel.show{transform:translateX(0)}
+.detail-panel .close-btn{position:absolute;top:12px;right:12px;width:32px;height:32px;border-radius:50%;border:none;background:var(--bg);cursor:pointer;font-size:16px}
+.detail-overlay{position:fixed;inset:0;background:rgba(0,0,0,.2);z-index:499;display:none}
+.detail-overlay.show{display:block}
+/* Flip card */
+.kc-inner.flipped{transform:rotateY(180deg)!important}
+/* Cat drag */
+.cat-container.dragging{cursor:grabbing;opacity:.85}
+.cat-container.dragging *{transition:none!important}
+/* Period click */
+.period-day:not(.normal):hover{transform:scale(1.2);z-index:1}
+/* Match3 */
+.match3-wrap{position:relative;max-width:480px;margin:0 auto}
+.match3-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;padding:12px 16px;background:rgba(255,255,255,.7);backdrop-filter:blur(10px);border-radius:var(--radius);border:1px solid var(--border)}
+.match3-info{text-align:center}
+.match3-info .val{font-size:24px;font-weight:700;color:var(--primary-dark)}
+.match3-info .lbl{font-size:10px;color:var(--text-muted)}
+.m3-grid{display:grid;gap:3px;background:var(--border);padding:4px;border-radius:var(--radius);margin:0 auto;touch-action:none}
+.m3-cell{aspect-ratio:1;display:flex;align-items:center;justify-content:center;background:var(--card-bg);border-radius:6px;cursor:pointer;font-size:28px;transition:all .15s;user-select:none;position:relative}
+.m3-cell:hover{transform:scale(1.05)}
+.m3-cell.selected{transform:scale(1.12);box-shadow:0 0 12px rgba(255,154,175,.5);z-index:1}
+.m3-cell.matched{animation:m3Pop .3s ease-out}
+@keyframes m3Pop{0%{transform:scale(1)}50%{transform:scale(1.3);opacity:.7}100%{transform:scale(0);opacity:0}}
+.m3-cell.drop{animation:m3Drop .3s ease-out}
+@keyframes m3Drop{0%{transform:translateY(-50px)}100%{transform:translateY(0)}}
+.m3-bar-wrap{height:8px;background:var(--primary-light);border-radius:4px;margin-top:8px;overflow:hidden}
+.m3-bar-fill{height:100%;background:linear-gradient(90deg,#FFD700,#FF9AAF);border-radius:4px;transition:width .5s}
+.m3-level-bg{position:absolute;inset:0;opacity:.06;pointer-events:none;font-size:80px;display:flex;align-items:center;justify-content:center;font-weight:900;color:var(--primary)}
+.m3-level-select{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;max-width:500px;margin:0 auto}
+.m3-lv-btn{aspect-ratio:1;border-radius:var(--radius);border:2px solid var(--border);background:var(--card-bg);cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;transition:all .2s;font-family:inherit;font-size:18px;font-weight:700}
+.m3-lv-btn:hover{border-color:var(--primary);transform:scale(1.05)}
+.m3-lv-btn.unlocked{background:var(--primary-light);border-color:var(--primary)}
+.m3-lv-btn.completed{background:var(--success);border-color:var(--success);color:#fff}
+.m3-lv-btn.locked{opacity:.4;cursor:not-allowed}.m3-lv-btn .stars{font-size:11px;margin-top:2px}
+</style>
+</head>
+<body>
+<div class="app">
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-header"><div style="font-size:28px">🐱</div><h2>钟雁羚的工作台</h2><div class="sub">WorkBuddy Dashboard</div></div>
+  <nav class="sidebar-nav" id="sidebarNav"></nav>
+  <div style="padding:8px 16px;font-size:11px;color:var(--text-muted);border-top:1px solid var(--border)" id="syncStatus">
+    <span id="syncBadge" style="display:none;background:var(--warning);color:#fff;padding:1px 6px;border-radius:10px;font-size:10px;margin-right:4px">0</span>
+    🐱 本地数据模式
+  </div>
+</aside>
+<button class="menu-toggle" onclick="toggleSidebar()">☰</button>
+<main class="main" id="mainContent"></main>
+</div>
+
+<!-- Detail panel -->
+<div class="detail-overlay" id="detailOverlay" onclick="closeDetail()"></div>
+<div class="detail-panel" id="detailPanel"><button class="close-btn" onclick="closeDetail()">✕</button><div id="detailContent"></div></div>
+
+<!-- Cat -->
+<div class="cat-container" id="catContainer">
+<svg viewBox="0 0 200 220" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <radialGradient id="furGrad" cx="50%" cy="40%"><stop offset="0%" stop-color="#FFFFFF"/><stop offset="60%" stop-color="#F5F0F8"/><stop offset="100%" stop-color="#E8DCE8"/></radialGradient>
+    <radialGradient id="pinkInner" cx="50%" cy="50%"><stop offset="0%" stop-color="#FFB8C8"/><stop offset="100%" stop-color="#F090A8"/></radialGradient>
+  </defs>
+  <!-- Tail -->
+  <g transform="translate(145,80)">
+    <path d="M0,40 Q10,20 20,10 Q30,0 35,5 Q40,10 35,20 Q25,30 15,45 Q10,55 5,50Z" fill="url(#furGrad)" stroke="#E0D0E4" stroke-width="1.5">
+      <animateTransform attributeName="transform" type="rotate" values="-5,0,80;15,0,80;-5,0,80" dur="3s" repeatCount="indefinite"/>
+    </path>
+  </g>
+  <!-- Body -->
+  <ellipse cx="100" cy="150" rx="55" ry="45" fill="url(#furGrad)" stroke="#E0D0E4" stroke-width="1.5"/>
+  <!-- Body fluff -->
+  <ellipse cx="100" cy="180" rx="45" ry="20" fill="url(#furGrad)"/>
+  <!-- Paws -->
+  <ellipse cx="70" cy="185" rx="18" ry="12" fill="#F8F4FA" stroke="#E0D0E4" stroke-width="1.5"/>
+  <ellipse cx="130" cy="185" rx="18" ry="12" fill="#F8F4FA" stroke="#E0D0E4" stroke-width="1.5"/>
+  <!-- Paw details -->
+  <circle cx="64" cy="188" r="3" fill="#E8D8EC"/><circle cx="70" cy="190" r="3" fill="#E8D8EC"/><circle cx="76" cy="188" r="3" fill="#E8D8EC"/>
+  <circle cx="124" cy="188" r="3" fill="#E8D8EC"/><circle cx="130" cy="190" r="3" fill="#E8D8EC"/><circle cx="136" cy="188" r="3" fill="#E8D8EC"/>
+  <!-- Head -->
+  <ellipse cx="100" cy="85" rx="55" ry="50" fill="url(#furGrad)" stroke="#E0D0E4" stroke-width="1.5"/>
+  <!-- Cheek fluff -->
+  <ellipse cx="55" cy="95" rx="15" ry="10" fill="#FAF6FC" opacity="0.8"/><ellipse cx="145" cy="95" rx="15" ry="10" fill="#FAF6FC" opacity="0.8"/>
+  <!-- Ears -->
+  <path d="M55,45 L40,5 L75,35Z" fill="url(#furGrad)" stroke="#E0D0E4" stroke-width="1.5"/>
+  <path d="M145,45 L160,5 L125,35Z" fill="url(#furGrad)" stroke="#E0D0E4" stroke-width="1.5"/>
+  <path d="M53,42 L44,15 L70,35Z" fill="url(#pinkInner)"/>
+  <path d="M147,42 L156,15 L130,35Z" fill="url(#pinkInner)"/>
+  <!-- Eyes -->
+  <ellipse cx="80" cy="80" rx="12" ry="14" fill="#2D1B2D"/><ellipse cx="120" cy="80" rx="12" ry="14" fill="#2D1B2D"/>
+  <circle cx="84" cy="75" r="4.5" fill="#fff"/><circle cx="124" cy="75" r="4.5" fill="#fff"/>
+  <circle cx="78" cy="83" r="2" fill="#fff" opacity="0.5"/><circle cx="118" cy="83" r="2" fill="#fff" opacity="0.5"/>
+  <!-- Nose -->
+  <ellipse cx="100" cy="98" rx="6" ry="4.5" fill="#F090A8"/>
+  <!-- Mouth -->
+  <path d="M94,102 Q100,110 106,102" fill="none" stroke="#D0B8D4" stroke-width="2" stroke-linecap="round"/>
+  <line x1="100" y1="102" x2="100" y2="108" stroke="#D0B8D4" stroke-width="1.5"/>
+  <!-- Whiskers -->
+  <line x1="40" y1="92" x2="70" y2="96" stroke="#D8C4DC" stroke-width="1.5"/><line x1="38" y1="100" x2="68" y2="100" stroke="#D8C4DC" stroke-width="1.5"/>
+  <line x1="160" y1="92" x2="130" y2="96" stroke="#D8C4DC" stroke-width="1.5"/><line x1="162" y1="100" x2="132" y2="100" stroke="#D8C4DC" stroke-width="1.5"/>
+  <!-- Blush -->
+  <ellipse cx="65" cy="95" rx="10" ry="6" fill="#FFD0DA" opacity="0.4"/><ellipse cx="135" cy="95" rx="10" ry="6" fill="#FFD0DA" opacity="0.4"/>
+  <!-- Sleeping eyes overlay -->
+  <g id="sleepEyes" style="display:none">
+    <path d="M68,80 Q80,90 92,80" fill="none" stroke="#2D1B2D" stroke-width="2.5" stroke-linecap="round"/>
+    <path d="M108,80 Q120,90 132,80" fill="none" stroke="#2D1B2D" stroke-width="2.5" stroke-linecap="round"/>
+  </g>
+</svg>
+<div class="hearts" id="heartsContainer"></div>
+</div>
+<div class="cat-bubble" id="catBubble"></div>
+
+<button class="note-float-btn" id="noteFloatBtn">📝</button>
+<div class="note-float-panel" id="noteFloatPanel">
+  <textarea class="textarea" id="quickNote" placeholder="一闪而过的灵感..." rows="3"></textarea>
+  <div style="margin-top:8px;display:flex;gap:8px;justify-content:flex-end"><button class="btn btn-sm btn-outline" onclick="toggleNoteFloat()">关闭</button><button class="btn btn-sm btn-primary" onclick="saveQuickNote()">保存</button></div>
+</div>
+
+<script>
+const API='',today=()=>new Date().toISOString().split('T')[0];
+const PAGES=[
+  {id:'dashboard',icon:'🏠',label:'首页仪表盘'},{id:'tasks',icon:'📋',label:'今日计划'},
+  {id:'finance',icon:'💰',label:'智能记账'},{id:'fitness',icon:'🏃',label:'健身'},
+  {id:'korean',icon:'🇰🇷',label:'韩语陪考'},{id:'reading',icon:'📚',label:'电子阅读'},
+  {id:'menu',icon:'🍜',label:'随机菜单'},{id:'recipes',icon:'👩‍🍳',label:'家常菜谱'},
+  {id:'shopping',icon:'🛒',label:'待购清单'},{id:'health',icon:'💪',label:'健康打卡'},
+  {id:'period',icon:'📅',label:'经期记录'},{id:'mood',icon:'💝',label:'心情日记'},
+  {id:'pomodoro',icon:'🍅',label:'番茄专注'},
+  {id:'games',icon:'🎮',label:'开心消消乐'},
+];
+let currentPage='dashboard',sidebarOpen=false;
+
+function renderNav(){document.getElementById('sidebarNav').innerHTML=PAGES.map(p=>`<button class="nav-item${p.id===currentPage?' active':''}" onclick="navigate('${p.id}')"><span class="icon">${p.icon}</span><span>${p.label}</span></button>`).join('')}
+function navigate(id){currentPage=id;renderNav();loadPage(id);if(window.innerWidth<=768)toggleSidebar(false)}
+function toggleSidebar(f){sidebarOpen=f!==undefined?f:!sidebarOpen;document.getElementById('sidebar').classList.toggle('open',sidebarOpen)}
+function toast(m){const t=document.createElement('div');t.className='toast';t.textContent=m;document.body.appendChild(t);setTimeout(()=>{t.style.opacity='0';setTimeout(()=>t.remove(),300)},2500)}
+function closeDetail(){document.getElementById('detailPanel').classList.remove('show');document.getElementById('detailOverlay').classList.remove('show')}
+function openDetail(html){document.getElementById('detailContent').innerHTML=html;document.getElementById('detailPanel').classList.add('show');document.getElementById('detailOverlay').classList.add('show')}
+// Custom confirm dialog (replaces blocked confirm())
+function showConfirm(msg,onYes){
+  var o=document.createElement('div');o.className='modal-overlay';o.id='confirmModal';
+  o.innerHTML='<div class="modal" style="max-width:320px;text-align:center"><p style="font-size:15px;margin-bottom:16px">'+msg+'</p><div style="display:flex;gap:10px;justify-content:center"><button class="btn btn-outline btn-sm" onclick="document.getElementById(\'confirmModal\').remove()">取消</button><button class="btn btn-danger btn-sm" id="confirmYesBtn">确认删除</button></div></div>';
+  o.addEventListener('click',function(e){if(e.target===o)o.remove()});document.body.appendChild(o);
+  document.getElementById('confirmYesBtn').onclick=function(){o.remove();onYes()}
+}
+
+// Cat
+let catTimer,catSleep=false;
+function positionBubble(msg,duration){
+  var b=document.getElementById('catBubble'),cat=document.getElementById('catContainer');
+  var cr=cat.getBoundingClientRect(),bw=180,bh=50;
+  b.textContent=msg;b.classList.remove('above','below');
+  // Default: above cat
+  var top=cr.top-bh-8,left=cr.left+cr.width/2-bw/2;
+  var arrow='above';
+  // If too close to top edge, show below
+  if(top<10){top=cr.bottom+8;arrow='below'}
+  // Keep within horizontal bounds
+  if(left<10)left=10;
+  if(left+bw>window.innerWidth-10)left=window.innerWidth-bw-10;
+  b.style.top=top+'px';b.style.left=left+'px';
+  b.classList.add(arrow,'show');
+  setTimeout(function(){b.classList.remove('show','above','below')},duration||2500);
+}
+function catAct(a){
+  clearTimeout(catTimer);
+  if(catSleep){document.getElementById('sleepEyes').style.display='none';catSleep=false}
+  switch(a){
+    case'happy':spawnHearts();break;
+    case'talk':positionBubble(['加油哦~','你真棒！','喵~','好厉害！'][Math.floor(Math.random()*4)],2500);break;
+    case'greet':var h=new Date().getHours(),g;if(h<6)g='夜深了，早点休息~';else if(h<9)g='早安呀！☀️';else if(h<12)g='上午好！';else if(h<14)g='中午好！记得吃饭🍱';else if(h<18)g='下午好！加油~';else if(h<22)g='晚上好！辛苦了🌙';else g='晚安！💤';positionBubble(g,3000);break;
+  }resetCatTimer()
+}
+function resetCatTimer(){clearTimeout(catTimer);catTimer=setTimeout(()=>{document.getElementById('sleepEyes').style.display='block';catSleep=true;positionBubble('zzZ...💤',2000)},60000)}
+function spawnHearts(){const c=document.getElementById('heartsContainer');for(let i=0;i<5;i++){const h=document.createElement('span');h.className='heart-p';h.textContent=['❤️','💕','💖','✨','🌟'][i];h.style.left=(Math.random()*60-30)+'px';h.style.animationDelay=(i*.15)+'s';c.appendChild(h);setTimeout(()=>h.remove(),2000)}}
+function spawnConfetti(){for(let i=0;i<20;i++){const p=document.createElement('div');p.className='confetti';p.textContent=['🌸','🎉','✨','🌟','💫','🎊','💐'][i%7];p.style.left=Math.random()*100+'%';p.style.animationDelay=Math.random()*.5+'s';p.style.animationDuration=(2+Math.random()*2)+'s';document.body.appendChild(p);setTimeout(()=>p.remove(),4000)}}
+// Cat drag + click
+let catDragging=false,catStartX,catStartY,catOrigX,catOrigY;
+const catEl=document.getElementById('catContainer');
+catEl.addEventListener('mousedown',e=>{
+  if(e.button!==0)return;
+  catDragging=true;catEl.classList.add('dragging');
+  const rect=catEl.getBoundingClientRect();
+  catStartX=e.clientX;catStartY=e.clientY;
+  catOrigX=rect.left;catOrigY=rect.top;
+  e.preventDefault();
+});
+document.addEventListener('mousemove',e=>{
+  if(!catDragging)return;
+  const dx=e.clientX-catStartX,dy=e.clientY-catStartY;
+  catEl.style.left=(catOrigX+dx)+'px';catEl.style.top=(catOrigY+dy)+'px';
+  catEl.style.right='auto';catEl.style.bottom='auto';
+});
+document.addEventListener('mouseup',e=>{
+  if(!catDragging){catDragging=false;return}
+  const dx=Math.abs(e.clientX-catStartX),dy=Math.abs(e.clientY-catStartY);
+  catEl.classList.remove('dragging');catDragging=false;
+  if(dx<5&&dy<5){// Was a click, not drag
+    positionBubble(['呼噜呼噜~','喵呜~','咕噜咕噜~','再摸就撒娇啦！'][Math.floor(Math.random()*4)],2500);spawnHearts();
+    if(catSleep){document.getElementById('sleepEyes').style.display='none';catSleep=false}resetCatTimer()
+  }
+});
+// Touch support
+catEl.addEventListener('touchstart',e=>{
+  catDragging=true;const t=e.touches[0];
+  const rect=catEl.getBoundingClientRect();
+  catStartX=t.clientX;catStartY=t.clientY;catOrigX=rect.left;catOrigY=rect.top;
+});
+document.addEventListener('touchmove',e=>{
+  if(!catDragging)return;
+  const t=e.touches[0],dx=t.clientX-catStartX,dy=t.clientY-catStartY;
+  catEl.style.left=(catOrigX+dx)+'px';catEl.style.top=(catOrigY+dy)+'px';
+  catEl.style.right='auto';catEl.style.bottom='auto';
+});
+document.addEventListener('touchend',()=>{catDragging=false});
+
+setTimeout(()=>catAct('greet'),2000);resetCatTimer();
+
+function loadPage(id){
+  document.getElementById('mainContent').innerHTML=`<div style="text-align:center;padding:60px;color:var(--text-muted)"><div style="font-size:40px">🐱</div><p>加载中...</p></div>`;
+  setTimeout(()=>{const fns={dashboard:renderDashboard,tasks:renderTasks,finance:renderFinance,fitness:renderFitness,korean:renderKorean,reading:renderReading,menu:renderMenu,recipes:renderRecipes,shopping:renderShopping,health:renderHealth,period:renderPeriod,mood:renderMood,pomodoro:renderPomodoro,games:renderGames};if(fns[id])fns[id]();else renderDashboard()},100)
+}
+
+// ========== DASHBOARD ==========
+async function renderDashboard(){
+  const m=document.getElementById('mainContent');
+  try{
+    const r=await fetch(API+'/api/dashboard');const d=await r.json();
+    let ex='';if(d.examCountdown&&d.examCountdown.days>0)ex=`<div class="stat-card" style="border-color:${d.examCountdown.days<=30?'var(--danger)':'var(--warning)'};cursor:pointer" onclick="navigate('korean')"><div class="stat-value" style="color:${d.examCountdown.days<=30?'var(--danger)':'var(--warning)'}">📅 ${d.examCountdown.days}天</div><div class="stat-label">${d.examCountdown.name} Lv.${d.examCountdown.targetLevel}</div></div>`;
+    let pr='';if(d.periodPrediction){const p=d.periodPrediction;pr=`<div class="stat-card" onclick="navigate('period')"><div class="stat-value" style="font-size:24px">${p.daysUntil<=5?'🔴':p.daysUntil<=7?'🟡':'🟢'} ${p.daysUntil>0?'约'+p.daysUntil+'天':'预计今天'}</div><div class="stat-label">预测 ${p.nextPredicted}</div></div>`}
+    m.innerHTML=`<div class="fade-in"><div class="page-title"><span>🏠</span> 首页仪表盘</div>
+      <div class="dash-grid">
+        <div class="stat-card" onclick="openTaskDetail()"><div class="stat-value">${d.taskCount.done||0}/${d.taskCount.total}</div><div class="stat-label">📋 今日待办 (点击查看)</div><div class="progress-bar"><div class="progress-fill" style="width:${d.taskCount.total>0?Math.round((d.taskCount.done||0)/d.taskCount.total*100):0}%"></div></div></div>
+        <div class="stat-card" onclick="openFinanceDetail()"><div class="stat-value" style="color:var(--success)">¥${d.financeSummary.expense.toFixed(0)}</div><div class="stat-label">💰 今日支出 (点击查看)</div></div>
+        <div class="stat-card" onclick="navigate('health')"><div class="stat-value">${d.streak}天</div><div class="stat-label">💪 连续打卡</div></div>${ex}${pr}
+      </div>
+      <div class="card" style="background:linear-gradient(135deg,#FFF0F5,#F5E6F0)"><div class="card-title">🇰🇷 오늘의 한마디</div>
+        <p style="font-size:18px;line-height:1.6;color:var(--primary-dark);text-align:center;padding:10px 10px 4px" id="dqKo"></p>
+        <p style="font-size:14px;text-align:center;color:var(--text-light);padding-bottom:8px" id="dqCn"></p>
+      </div>
+      </div>
+      <div class="card" id="networkCard"><div class="card-title">🌐 访问地址</div><div id="networkInfo" style="font-size:12px;color:var(--text-light)">加载中...</div></div>
+      <div class="card" style="cursor:pointer" onclick="openTaskDetail()"><div class="card-title">📋 今日待办 <span style="font-size:11px;color:var(--text-muted);font-weight:400">点击查看详情</span></div><div id="dashTasks">加载中...</div></div>
+    </div>`;
+    setTimeout(()=>{
+      const q=d.quote.text,p=q.split('—'),ko=p[0].trim(),cn=p[1]?p[1].trim():'';
+      const elKo=document.getElementById('dqKo'),elCn=document.getElementById('dqCn');
+      if(elKo)elKo.textContent=ko;
+      if(elCn)elCn.textContent=cn||'(试着翻译一下吧~)';
+    },50);
+    // Network info
+    fetch(API+'/api/network').then(r=>r.json()).then(n=>{
+      var h='';
+      if(n.lan.length>0){h+='<div style="margin:2px 0">🏠 局域网：';n.lan.forEach(function(ip){h+='<a href="http://'+ip.address+':'+n.port+'" target="_blank" style="color:var(--primary-dark);text-decoration:underline;margin-right:8px">'+ip.address+':'+n.port+'</a>'})}
+      if(n.tailscale){h+='<div style="margin:2px 0">🔗 Tailscale：<a href="http://'+n.tailscale.address+':'+n.port+'" target="_blank" style="color:var(--primary-dark);text-decoration:underline">'+n.tailscale.address+':'+n.port+'</a></div>'}
+      h+='<div style="margin:2px 0;color:var(--text-muted)">📱 手机/其他设备可通过以上地址访问</div>';
+      h+='<div style="margin:2px 0;color:var(--text-muted)">⚠️ 需在同一网络或已连接 Tailscale</div>';
+      var el=document.getElementById('networkInfo');if(el)el.innerHTML=h;
+    }).catch(function(){});
+    try{const tr=await fetch(API+'/api/tasks?date='+today());const ts=await tr.json();const el=document.getElementById('dashTasks');if(el){if(ts.length===0)el.innerHTML='<p style="color:var(--text-muted);text-align:center;padding:10px">今天还没有待办~</p>';
+    else el.innerHTML=ts.slice(0,5).map(t=>`<div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--border);font-size:13px"><span>${t.completed?'✅':'⭕'}</span><span style="${t.completed?'text-decoration:line-through;color:var(--text-muted)':''}">${t.title}</span>${t.priority==='high'?'<span class="tag tag-red">高优</span>':''}${t.time_slot?`<span class="tag tag-blue">${t.time_slot==='morning'?'上午':t.time_slot==='afternoon'?'下午':t.time_slot==='evening'?'傍晚':'晚上'}</span>`:''}</div>`).join('');if(ts.length>5)el.innerHTML+=`<p style="text-align:center;margin-top:8px;font-size:12px;color:var(--text-muted)">还有 ${ts.length-5} 项，点击查看全部</p>`}}catch(e){}
+  }catch(e){m.innerHTML='<div class="empty-state"><div class="icon">🔌</div><p>无法连接服务器</p></div>'}
+}
+async function openTaskDetail(){
+  const r=await fetch(API+'/api/tasks?date='+today());const ts=await r.json();
+  let h='<h3 style="margin-bottom:16px">📋 今日待办详情</h3>';
+  if(ts.length===0){h+='<p style="color:var(--text-muted)">今天还没有待办事项</p>'}
+  else{
+    const done=ts.filter(t=>t.completed),undone=ts.filter(t=>!t.completed);
+    h+=`<div style="margin-bottom:12px"><span style="color:var(--success);font-weight:600">✅ 已完成 ${done.length}</span> | <span style="color:var(--text-light)">⭕ 未完成 ${undone.length}</span></div>`;
+    if(undone.length>0){h+='<div class="card-title">⭕ 未完成</div>'+undone.map(t=>`<div style="padding:6px 0;font-size:14px">⭕ ${t.title} ${t.priority==='high'?'<span class="tag tag-red">高优</span>':''}${t.time_slot?`<span class="tag tag-blue">${t.time_slot==='morning'?'上午':t.time_slot==='afternoon'?'下午':t.time_slot==='evening'?'傍晚':'晚上'}</span>`:''}${t.description?`<div style="font-size:11px;color:var(--text-muted);margin-left:20px">${t.description}</div>`:''}</div>`).join('')}
+    if(done.length>0){h+='<div class="card-title" style="margin-top:16px">✅ 已完成</div>'+done.map(t=>`<div style="padding:6px 0;font-size:14px;text-decoration:line-through;color:var(--text-muted)">${t.title}</div>`).join('')}
+  }
+  h+='<div style="margin-top:16px"><button class="btn btn-primary btn-sm" onclick="navigate(\'tasks\');closeDetail()">前往管理</button></div>';
+  openDetail(h)
+}
+async function openFinanceDetail(){
+  const r=await fetch(API+'/api/finances?month='+today().substring(0,7));const d=await r.json();
+  const todayRecs=d.records.filter(r=>r.date===today());
+  let h=`<h3 style="margin-bottom:16px">💰 今日支出详情</h3>`;
+  const tExp=todayRecs.filter(r=>r.type==='expense');
+  const tInc=todayRecs.filter(r=>r.type==='income');
+  const totalExp=tExp.reduce((s,r)=>s+r.amount,0);
+  const totalInc=tInc.reduce((s,r)=>s+r.amount,0);
+  h+=`<div style="display:flex;gap:12px;margin-bottom:16px"><div style="flex:1;text-align:center;padding:10px;background:#E8F8E8;border-radius:var(--radius-sm)"><div style="font-size:11px;color:var(--text-light)">今日支出</div><div style="font-size:22px;font-weight:700;color:var(--success)">¥${totalExp.toFixed(0)}</div></div><div style="flex:1;text-align:center;padding:10px;background:var(--primary-light);border-radius:var(--radius-sm)"><div style="font-size:11px;color:var(--text-light)">今日收入</div><div style="font-size:22px;font-weight:700;color:#E8738A">¥${totalInc.toFixed(0)}</div></div></div>`;
+  if(todayRecs.length===0)h+='<p style="color:var(--text-muted)">今天还没有记账记录</p>';
+  else h+='<table><tr><th>类型</th><th>分类</th><th>金额</th><th>备注</th></tr>'+todayRecs.map(r=>`<tr><td>${r.type==='income'?'💰收入':'💸支出'}</td><td>${r.category}</td><td style="font-weight:600;color:${r.type==='income'?'#E8738A':'#7ECB9A'}">${r.type==='income'?'+':'-'}¥${r.amount.toFixed(2)}</td><td>${r.note||'-'}</td></tr>`).join('')+'</table>';
+  h+='<div style="margin-top:16px"><button class="btn btn-primary btn-sm" onclick="navigate(\'finance\');closeDetail()">前往记账</button></div>';
+  openDetail(h)
+}
+
+// ========== TASKS ==========
+async function renderTasks(){
+  document.getElementById('mainContent').innerHTML=`<div class="fade-in"><div class="page-title">📋 今日计划</div><div class="card"><div style="display:flex;gap:10px;align-items:center;margin-bottom:12px;flex-wrap:wrap"><input type="date" class="input" style="width:auto;max-width:160px" id="taskDate" value="${today()}" onchange="loadTasks()"><button class="btn btn-primary btn-sm" onclick="showAddTask()">+ 添加任务</button></div><div id="taskList">加载中...</div></div></div>`;loadTasks()}
+async function loadTasks(){
+  const d=document.getElementById('taskDate')?.value||today();const r=await fetch(API+'/api/tasks?date='+d);const ts=await r.json();const el=document.getElementById('taskList');if(!el)return;
+  if(ts.length===0){el.innerHTML='<div class="empty-state"><div class="icon">📝</div><p>没有待办</p></div>';return}
+  el.innerHTML=ts.map(t=>`<div style="padding:8px 0;border-bottom:1px solid var(--border)"><div class="task-detail-row" onclick="this.nextElementSibling?.classList.toggle(\'show\')"><label class="checkbox-wrap" onclick="event.stopPropagation()"><input type="checkbox" ${t.completed?'checked':''} onchange="toggleTask(${t.id},this.checked)"></label><span style="flex:1;font-size:14px;${t.completed?'text-decoration:line-through;color:var(--text-muted)':''}">${t.title}</span><span class="tag ${t.priority==='high'?'tag-red':t.priority==='low'?'tag-green':'tag-yellow'}">${t.priority==='high'?'高':t.priority==='low'?'低':'中'}</span>${t.time_slot?`<span class="tag tag-blue">${t.time_slot==='morning'?'上午':t.time_slot==='afternoon'?'下午':t.time_slot==='evening'?'傍晚':'晚上'}</span>`:''}<button class="btn btn-sm btn-outline" onclick="event.stopPropagation();editTask(${t.id})">编辑</button><button class="btn btn-sm btn-danger" onclick="event.stopPropagation();deleteTask(${t.id})">删除</button></div><div class="task-expand">${t.description?`<div>📝 ${t.description}</div>`:'<div style="color:var(--text-muted)">暂无备注</div>'}<div style="margin-top:4px">🕐 创建于 ${t.created_at||'--'}</div></div></div>`).join('')}
+async function toggleTask(id,c){await fetch(API+'/api/tasks/'+id,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({completed:c?1:0})});if(c){catAct('happy');spawnConfetti();toast('完成！🎉')}loadTasks()}
+function showAddTask(t){
+  const is=!!t;const o=document.createElement('div');o.className='modal-overlay';
+  o.innerHTML=`<div class="modal"><div class="modal-title">${is?'编辑':'添加'}任务</div>
+    <div class="form-group"><label>标题</label><input class="input" id="taTitle" value="${is?t.title:''}"></div>
+    <div class="form-row"><div class="form-group"><label>优先级</label><select class="select" id="taPri"><option value="high" ${is&&t.priority==='high'?'selected':''}>🔴 高</option><option value="medium" ${is&&t.priority==='medium'?'selected':''} selected>🟡 中</option><option value="low" ${is&&t.priority==='low'?'selected':''}>🟢 低</option></select></div><div class="form-group"><label>时段</label><select class="select" id="taSlot"><option value="">全天</option><option value="morning" ${is&&t.time_slot==='morning'?'selected':''}>🌅 上午</option><option value="afternoon" ${is&&t.time_slot==='afternoon'?'selected':''}>☀️ 下午</option><option value="evening" ${is&&t.time_slot==='evening'?'selected':''}>🌆 傍晚</option><option value="night" ${is&&t.time_slot==='night'?'selected':''}>🌙 晚上</option></select></div></div>
+    <div class="form-group"><label>备注</label><textarea class="textarea" id="taDesc">${is?t.description||'':''}</textarea></div>
+    <div style="display:flex;gap:10px;justify-content:flex-end"><button class="btn btn-outline btn-sm" onclick="this.closest('.modal-overlay').remove()">取消</button><button class="btn btn-primary btn-sm" onclick="saveTask(${is?t.id:0})">保存</button></div></div>`;
+  o.addEventListener('click',e=>{if(e.target===o)o.remove()});document.body.appendChild(o)}
+async function saveTask(id){const ti=document.getElementById('taTitle').value.trim();if(!ti)return toast('请输入标题');const d={title:ti,description:document.getElementById('taDesc').value,priority:document.getElementById('taPri').value,time_slot:document.getElementById('taSlot').value,date:document.getElementById('taskDate')?.value||today()};if(id)await fetch(API+'/api/tasks/'+id,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(d)});else await fetch(API+'/api/tasks',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(d)});document.querySelector('.modal-overlay')?.remove();catAct('talk');loadTasks()}
+async function editTask(id){const d=document.getElementById('taskDate')?.value||today();const r=await fetch(API+'/api/tasks?date='+d);const ts=await r.json();const t=ts.find(x=>x.id===id);if(t)showAddTask(t)}
+async function deleteTask(id){showConfirm('确定删除这个任务吗？',async()=>{await fetch(API+'/api/tasks/'+id,{method:'DELETE'});loadTasks()})}
+
+// ========== FINANCE ==========
+const FIN_CATS=['餐饮','交通','购物','居住','娱乐','医疗','生活','学习','游戏','服饰','数码','旅行','红包','其他'];
+async function renderFinance(){
+  document.getElementById('mainContent').innerHTML=`<div class="fade-in"><div class="page-title">💰 智能记账</div><div class="card"><div style="display:flex;gap:10px;align-items:center;margin-bottom:12px;flex-wrap:wrap"><input type="month" class="input" style="width:auto;max-width:160px" id="finMonth" value="${today().substring(0,7)}" onchange="loadFinances()"><button class="btn btn-primary btn-sm" onclick="showAddFinance()">+ 记一笔</button></div><div id="finSum"></div><div id="finList" style="margin-top:12px">加载中...</div></div></div>`;loadFinances()}
+async function loadFinances(){
+  const mo=document.getElementById('finMonth')?.value||today().substring(0,7);const r=await fetch(API+'/api/finances?month='+mo);const d=await r.json();const b=d.summary.income-d.summary.expense;
+  const se=document.getElementById('finSum');if(se)se.innerHTML=`<div style="display:flex;gap:14px;flex-wrap:wrap"><div style="flex:1;min-width:110px;text-align:center;padding:12px;background:var(--primary-light);border-radius:var(--radius-sm)"><div style="font-size:11px;color:var(--text-light)">收入</div><div style="font-size:22px;font-weight:700;color:#E8738A">¥${d.summary.income.toFixed(0)}</div></div><div style="flex:1;min-width:110px;text-align:center;padding:12px;background:#E8F8E8;border-radius:var(--radius-sm)"><div style="font-size:11px;color:var(--text-light)">支出</div><div style="font-size:22px;font-weight:700;color:var(--success)">¥${d.summary.expense.toFixed(0)}</div></div><div style="flex:1;min-width:110px;text-align:center;padding:12px;background:${b>=0?'#FFF0F5':'#FFE8E8'};border-radius:var(--radius-sm)"><div style="font-size:11px;color:var(--text-light)">结余</div><div style="font-size:22px;font-weight:700;color:${b>=0?'var(--primary-dark)':'var(--danger)'}">¥${b.toFixed(0)}</div></div></div>`;
+  const le=document.getElementById('finList');if(!le)return;if(d.records.length===0){le.innerHTML='<div class="empty-state"><div class="icon">💰</div><p>本月无记录</p></div>';return}
+  le.innerHTML='<div class="table-wrap"><table><tr><th>日期</th><th>类型</th><th>分类</th><th>金额</th><th>备注</th><th>操作</th></tr>'+d.records.map(r=>`<tr><td>${r.date}</td><td>${r.type==='income'?'<span class="tag tag-pink">收入</span>':'<span class="tag tag-green">支出</span>'}</td><td>${r.category}</td><td style="font-weight:600;color:${r.type==='income'?'#E8738A':'#7ECB9A'}">${r.type==='income'?'+':'-'}¥${r.amount.toFixed(2)}</td><td>${r.note||'-'}</td><td><button class="btn btn-sm btn-danger" onclick="deleteFinance(${r.id})">删除</button></td></tr>`).join('')+'</table></div>'}
+function showAddFinance(){
+  const o=document.createElement('div');o.className='modal-overlay';
+  o.innerHTML=`<div class="modal"><div class="modal-title">记一笔</div>
+    <div class="form-row"><div class="form-group"><label>类型</label><select class="select" id="fiType"><option value="expense">💸 支出</option><option value="income">💰 收入</option></select></div><div class="form-group"><label>金额 ¥</label><input class="input" type="number" step="0.01" id="fiAmt" placeholder="0.00"></div></div>
+    <div class="form-group"><label>分类</label><select class="select" id="fiCat">${FIN_CATS.map(c=>`<option>${c}</option>`).join('')}</select></div>
+    <div class="form-row"><div class="form-group"><label>日期</label><input class="input" type="date" id="fiDate" value="${today()}"></div><div class="form-group"><label>备注</label><input class="input" id="fiNote"></div></div>
+    <div style="display:flex;gap:10px;justify-content:flex-end"><button class="btn btn-outline btn-sm" onclick="this.closest('.modal-overlay').remove()">取消</button><button class="btn btn-primary btn-sm" onclick="saveFinance()">保存</button></div></div>`;
+  o.addEventListener('click',e=>{if(e.target===o)o.remove()});document.body.appendChild(o)}
+async function saveFinance(){
+  const a=parseFloat(document.getElementById('fiAmt').value);if(!a||a<=0)return toast('请输入有效金额');
+  await fetch(API+'/api/finances',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({type:document.getElementById('fiType').value,amount:a,category:document.getElementById('fiCat').value,note:document.getElementById('fiNote').value,date:document.getElementById('fiDate').value})});
+  document.querySelector('.modal-overlay')?.remove();catAct('talk');loadFinances()}
+async function deleteFinance(id){showConfirm('确定删除这条记录吗？',async()=>{await fetch(API+'/api/finances/'+id,{method:'DELETE'});loadFinances()})}
+
+// ========== FITNESS ==========
+let ftInt,ftSec=0,ftRun=false;
+async function renderFitness(){
+  document.getElementById('mainContent').innerHTML=`<div class="fade-in"><div class="page-title">🏃 健身</div>
+    <div class="card" style="text-align:center"><div class="card-title">⏱️ 运动计时器</div>
+      <div style="font-size:48px;font-weight:700;color:var(--primary-dark);margin:10px 0" id="ftDisp">00:00</div>
+      <div style="display:flex;gap:10px;justify-content:center"><button class="btn btn-primary" id="ftBtn" onclick="toggleFT()">▶ 开始</button><button class="btn btn-outline" onclick="resetFT()">↺ 重置</button><button class="btn btn-success" id="ftSave" disabled onclick="saveFT()">💾 保存</button></div>
+    </div>
+    <div class="card"><div class="card-title">🏋️ 快速开始</div>
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px" id="ftQuick">${[
+        {icon:'🏊',name:'游泳',cal:8},{icon:'🏋️',name:'力量训练',cal:6},
+        {icon:'🏸',name:'羽毛球',cal:7},{icon:'🏃',name:'有氧训练',cal:7}
+      ].map(e=>`<button class="btn-block" onclick="startQuickFT('${e.name}',${e.cal})"><span class="big-icon">${e.icon}</span>${e.name}<span style="font-size:10px;color:var(--text-muted);font-weight:400">约${e.cal}kcal/min</span></button>`).join('')}</div>
+    </div>
+    <div class="card"><div class="card-title">📊 运动记录</div>
+      <div style="display:flex;gap:10px;margin-bottom:12px"><select class="input" style="width:auto" id="ftView" onchange="loadFitness()"><option value="week">本周</option><option value="month">本月</option></select></div>
+      <div id="ftList">加载中...</div>
+    </div></div>`;loadFitness()}
+function toggleFT(){if(ftRun){clearInterval(ftInt);ftRun=false;document.getElementById('ftBtn').textContent='▶ 继续';document.getElementById('ftSave').disabled=false}else{ftRun=true;document.getElementById('ftBtn').textContent='⏸ 暂停';document.getElementById('ftSave').disabled=true;ftInt=setInterval(()=>{ftSec++;document.getElementById('ftDisp').textContent=String(Math.floor(ftSec/60)).padStart(2,'0')+':'+String(ftSec%60).padStart(2,'0')},1000)}}
+function resetFT(){clearInterval(ftInt);ftRun=false;ftSec=0;document.getElementById('ftDisp').textContent='00:00';document.getElementById('ftBtn').textContent='▶ 开始';document.getElementById('ftSave').disabled=true}
+function startQuickFT(name,cal){if(!ftRun){ftSec=0;document.getElementById('ftDisp').textContent='00:00'}toggleFT();toast(`开始${name}训练！`)}
+function saveFT(){if(ftSec<10)return toast('运动时间太短~');
+  const o=document.createElement('div');o.className='modal-overlay';
+  o.innerHTML=`<div class="modal"><div class="modal-title">保存记录</div>
+    <div class="form-group"><label>运动类型</label><select class="select" id="exType"><option>🏊 游泳</option><option>🏋️ 力量训练</option><option>🏸 羽毛球</option><option>🏃 有氧训练</option><option>🧘 瑜伽</option><option>🚴 骑行</option><option>其他</option></select></div>
+    <div class="form-row"><div class="form-group"><label>时长(分)</label><input class="input" type="number" id="exDur" value="${Math.round(ftSec/60)}" readonly></div><div class="form-group"><label>卡路里</label><input class="input" type="number" id="exCal" placeholder="约${Math.round(ftSec/60*6)}"></div></div>
+    <div style="display:flex;gap:10px;justify-content:flex-end"><button class="btn btn-outline btn-sm" onclick="this.closest('.modal-overlay').remove()">取消</button><button class="btn btn-primary btn-sm" onclick="confirmFT()">保存</button></div></div>`;
+  o.addEventListener('click',e=>{if(e.target===o)o.remove()});document.body.appendChild(o)}
+async function confirmFT(){
+  await fetch(API+'/api/fitness',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({exercise_type:document.getElementById('exType').value,duration:Math.round(ftSec/60),calories:parseFloat(document.getElementById('exCal').value)||Math.round(ftSec/60*6),date:today()})});
+  document.querySelector('.modal-overlay')?.remove();resetFT();catAct('happy');spawnConfetti();toast('保存成功！');loadFitness()}
+async function loadFitness(){
+  const v=document.getElementById('ftView')?.value||'week';const r=await fetch(API+'/api/fitness?view='+v);const rs=await r.json();const el=document.getElementById('ftList');if(!el)return;
+  if(rs.length===0){el.innerHTML='<div class="empty-state"><div class="icon">🏃</div><p>暂无记录</p></div>';return}
+  el.innerHTML='<table><tr><th>日期</th><th>类型</th><th>时长</th><th>卡路里</th><th>操作</th></tr>'+rs.map(r=>`<tr><td>${r.date}</td><td>${r.exercise_type}</td><td>${r.duration}分钟</td><td>${r.calories}kcal</td><td><button class="btn btn-sm btn-danger" onclick="delFt(${r.id})">删除</button></td></tr>`).join('')+'</table>'}
+async function delFt(id){showConfirm('确定删除这条运动记录吗？',async()=>{await fetch(API+'/api/fitness/'+id,{method:'DELETE'});loadFitness()})}
+
+// ========== KOREAN ==========
+let kMode='daily',kLevel=1,todayVocab=[],todayGrammar=[],_ci=0;
+function getSeed(){let h=0;for(let i=0;i<today().length;i++)h=((h<<5)-h)+today().charCodeAt(i);return Math.abs(h)}
+async function renderKorean(){
+  document.getElementById('mainContent').innerHTML=`<div class="fade-in"><div class="page-title">🇰🇷 韩语陪考</div>
+    <div class="card" style="background:linear-gradient(135deg,var(--primary-light),#E8D5F0)"><div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap"><div style="font-size:14px;font-weight:600" id="exCD">加载中...</div><button class="btn btn-sm btn-outline" onclick="showSetExam()">设置考试</button></div></div>
+    <div class="card"><div class="card-title">📊 今日学习</div><div id="kToday">加载中...</div><button class="btn btn-primary btn-sm" style="margin-top:10px" onclick="checkinK()">📝 学习打卡</button></div>
+    <div class="card"><div class="study-tabs"><button class="study-tab${kMode==='daily'?' active':''}" onclick="swKM('daily')">📖 今日推荐</button><button class="study-tab${kMode==='vocab'?' active':''}" onclick="swKM('vocab')">📚 词汇库</button><button class="study-tab${kMode==='grammar'?' active':''}" onclick="swKM('grammar')">📐 语法库</button></div><div id="kContent">加载中...</div></div></div>`;
+  loadExCD();loadKToday();loadKContent()}
+async function loadExCD(){const r=await fetch(API+'/api/exam');const e=await r.json();const el=document.getElementById('exCD');if(!el)return;if(!e){el.innerHTML='📅 还没有设置考试日期，<a href="#" onclick="showSetExam()">点击设置</a>';return}const days=Math.ceil((new Date(e.exam_date)-new Date(today()))/86400000);el.innerHTML=`${days<=30?'🔥':'📚'} 距 <b>${e.exam_name}</b> Lv.${e.target_level} 还有 <b style="color:${days<=30?'var(--danger)':'var(--primary-dark)'};font-size:20px">${days}</b> 天`}
+function showSetExam(){
+  const o=document.createElement('div');o.className='modal-overlay';
+  o.innerHTML=`<div class="modal"><div class="modal-title">设置考试</div><div class="form-group"><label>名称</label><input class="input" id="exName" value="TOPIK"></div><div class="form-group"><label>日期</label><input class="input" type="date" id="exDate" value="${today()}"></div><div class="form-group"><label>目标</label><select class="select" id="exLv"><option value="1">TOPIK 1级</option><option value="2">TOPIK 2级</option><option value="3" selected>TOPIK 3级</option><option value="4">TOPIK 4级</option></select></div><div style="display:flex;gap:10px;justify-content:flex-end"><button class="btn btn-outline btn-sm" onclick="this.closest('.modal-overlay').remove()">取消</button><button class="btn btn-primary btn-sm" onclick="saveEx()">保存</button></div></div>`;
+  o.addEventListener('click',e=>{if(e.target===o)o.remove()});document.body.appendChild(o)}
+async function saveEx(){const d={exam_name:document.getElementById('exName').value||'TOPIK',exam_date:document.getElementById('exDate').value,target_level:parseInt(document.getElementById('exLv').value)};if(!d.exam_date)return toast('请选择日期');await fetch(API+'/api/exam',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(d)});document.querySelector('.modal-overlay')?.remove();loadExCD();catAct('talk')}
+async function loadKToday(){const r=await fetch(API+'/api/korean/progress');const rs=await r.json();const t=rs.find(r=>r.date===today())||{vocab_learned:0,grammar_learned:0,study_minutes:0};const el=document.getElementById('kToday');if(!el)return;el.innerHTML=`<div style="display:flex;gap:16px"><div style="text-align:center"><div style="font-size:24px;font-weight:700;color:var(--primary-dark)">${t.vocab_learned}</div><div style="font-size:11px;color:var(--text-muted)">词汇</div></div><div style="text-align:center"><div style="font-size:24px;font-weight:700;color:var(--primary-dark)">${t.grammar_learned}</div><div style="font-size:11px;color:var(--text-muted)">语法</div></div><div style="text-align:center"><div style="font-size:24px;font-weight:700;color:var(--primary-dark)">${t.study_minutes}</div><div style="font-size:11px;color:var(--text-muted)">分钟</div></div></div>`}
+async function checkinK(){
+  var o=document.createElement('div');o.className='modal-overlay';
+  o.innerHTML='<div class="modal"><div class="modal-title">📝 学习打卡</div>'+
+    '<div class="form-row"><div class="form-group"><label>📖 学习词汇数</label><input class="input" type="number" id="ckVocab" value="5" min="0"></div><div class="form-group"><label>📐 学习语法数</label><input class="input" type="number" id="ckGram" value="2" min="0"></div></div>'+
+    '<div class="form-group"><label>⏱ 学习时长（分钟）</label><input class="input" type="number" id="ckMins" value="25" min="1"></div>'+
+    '<div class="form-group"><label>📝 学习笔记</label><input class="input" id="ckNote" placeholder="今天学了什么..."></div>'+
+    '<div style="display:flex;gap:10px;justify-content:flex-end"><button class="btn btn-outline btn-sm" onclick="this.closest(\'.modal-overlay\').remove()">取消</button><button class="btn btn-primary btn-sm" onclick="saveCheckin()">✅ 打卡</button></div></div>';
+  o.addEventListener('click',function(e){if(e.target===o)o.remove()});document.body.appendChild(o)
+}
+async function saveCheckin(){
+  var v=parseInt(document.getElementById('ckVocab').value)||0,g=parseInt(document.getElementById('ckGram').value)||0,m=parseInt(document.getElementById('ckMins').value)||0,n=document.getElementById('ckNote').value;
+  if(v===0&&g===0&&m===0)return toast('至少填写一项学习内容');
+  await fetch(API+'/api/korean/progress',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({date:today(),vocab_learned:v,grammar_learned:g,study_minutes:m,note:n||'打卡'})});
+  document.querySelector('.modal-overlay')?.remove();catAct('happy');spawnHearts();toast('打卡成功！📝');loadKToday()
+}
+function swKM(m){kMode=m;loadKContent();document.querySelectorAll('.study-tab').forEach((t,i)=>{const ms=['daily','vocab','grammar'];t.classList.toggle('active',ms[i]===m)})}
+function swKL(l){kLevel=l;loadKContent();document.querySelectorAll('.level-tab').forEach((t,i)=>t.classList.toggle('active',i+1===l))}
+async function loadKContent(){
+  const el=document.getElementById('kContent');if(!el)return;
+  if(kMode==='daily'){await loadDaily(el);return}
+  if(kMode==='vocab'){
+    el.innerHTML='<div class="level-tabs">'+[1,2,3,4].map(function(l){return '<button class="level-tab'+(l===kLevel?' active':'')+'" onclick="swKL('+l+')">TOPIK '+l+'级</button>'}).join('')+'</div><div id="vList">加载中...</div>';
+    const r=await fetch(API+'/api/korean/vocab?level='+kLevel);const v=await r.json();
+    var h='';for(var i=0;i<v.length;i++){var w=v[i];h+='<div class="card" style="padding:14px;margin-bottom:8px"><div style="display:flex;align-items:center;justify-content:space-between"><div><span style="font-size:22px;font-weight:700;color:var(--primary-dark)">'+w.korean+'</span><span style="font-size:13px;color:var(--text-light);margin-left:8px">['+w.pronunciation+']</span><button class="speaker-btn" style="width:22px;height:22px;font-size:12px;margin-left:4px" onclick="speakKorean(\''+w.korean+'\',this)">🔊</button></div><span class="tag tag-blue">'+(w.part_of_speech||'')+'</span></div><div style="margin-top:6px;font-size:14px;color:var(--text)">'+w.meaning+'</div></div>'}
+    document.getElementById('vList').innerHTML=h;return
+  }
+  el.innerHTML='<div class="level-tabs">'+[1,2,3,4].map(function(l){return '<button class="level-tab'+(l===kLevel?' active':'')+'" onclick="swKL('+l+')">TOPIK '+l+'级</button>'}).join('')+'</div><div id="gList">加载中...</div>';
+  const r2=await fetch(API+'/api/korean/grammar?level='+kLevel);const g2=await r2.json();
+  var h2='';for(var j=0;j<g2.length;j++){var g=g2[j];h2+='<div class="grammar-card"><div class="g-title">'+g.title+'</div><div class="g-explain">'+g.explanation+'</div><div class="g-example"><div style="color:var(--primary-dark);font-size:15px">'+g.example_korean+'</div><div style="color:var(--text-light);font-size:13px;margin-top:4px">'+g.example_meaning+'</div></div></div>'}
+  document.getElementById('gList').innerHTML=h2
+}
+// TTS Speaker
+let ttsSpeaking=false;
+function speakKorean(word,btn){
+  if(!('speechSynthesis' in window)){toast('请使用Chrome等现代浏览器播放发音');return}
+  if(ttsSpeaking){window.speechSynthesis.cancel();ttsSpeaking=false;if(btn)btn.classList.remove('playing');return}
+  var u=new SpeechSynthesisUtterance(word);u.lang='ko-KR';u.rate=0.8;u.pitch=1;
+  u.onstart=function(){ttsSpeaking=true;if(btn)btn.classList.add('playing')};
+  u.onend=function(){ttsSpeaking=false;if(btn)btn.classList.remove('playing')};
+  u.onerror=function(){ttsSpeaking=false;if(btn)btn.classList.remove('playing');toast('发音播放失败')};
+  window.speechSynthesis.speak(u)
+}
+// Dictation state
+async function loadDaily(el){
+  const[va,ga]=await Promise.all([fetch(API+'/api/korean/vocab'),fetch(API+'/api/korean/grammar')]);
+  const allV=await va.json(),allG=await ga.json();const s=getSeed();
+  const vs=s%Math.max(1,allV.length-20);todayVocab=allV.slice(vs,vs+20);if(todayVocab.length<20)todayVocab=[...todayVocab,...allV.slice(0,20-todayVocab.length)];
+  const gs=(s*7)%Math.max(1,allG.length-2);todayGrammar=allG.slice(gs,gs+2);if(todayGrammar.length<2)todayGrammar=[...todayGrammar,...allG.slice(0,2-todayGrammar.length)];
+  _ci=0;const w=todayVocab[0];
+  el.innerHTML='<div style="text-align:center;margin-bottom:12px"><span class="tag tag-pink">📖 今日'+todayVocab.length+'词 | 📐 '+todayGrammar.length+'语法</span> <span style="font-size:11px;color:var(--text-muted);margin-left:8px">🃏 点击卡片翻转</span></div>'+
+    '<div class="card" style="text-align:center;cursor:pointer;padding:24px" onclick="var f=document.getElementById(\'kcFlip\');if(f)f.classList.toggle(\'flipped\')">'+
+      '<div style="position:relative;min-height:180px;perspective:1000px">'+
+        '<div class="kc-inner" id="kcFlip" style="position:relative;width:100%;transition:transform .6s;transform-style:preserve-3d">'+
+          '<div style="backface-visibility:hidden;padding:10px"><div style="font-size:38px;font-weight:700;color:var(--primary-dark)" id="kcWord">'+w.korean+'</div><div style="font-size:16px;color:var(--text-light);margin-top:6px" id="kcPron">['+w.pronunciation+']</div><div style="font-size:12px;color:var(--text-muted);margin-top:4px" id="kcPos">'+(w.part_of_speech||'')+'</div><button class="speaker-btn" style="margin-top:8px" onclick="event.stopPropagation();speakKorean(\''+w.korean+'\',this)">🔊</button></div>'+
+          '<div style="position:absolute;inset:0;backface-visibility:hidden;transform:rotateY(180deg);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:10px" onclick="event.stopPropagation()"><div style="font-size:20px;font-weight:700;color:var(--text)" id="kcMean">'+w.meaning+'</div><div style="margin-top:12px"><div class="form-group"><label>🖊 看中文写韩文</label><input class="input" id="kcWrite" placeholder="输入对应的韩文..." style="text-align:center;max-width:200px;font-size:18px" onkeydown="if(event.key===\'Enter\')checkWrite()"></div><button class="btn btn-sm btn-primary" onclick="event.stopPropagation();checkWrite()">检查 ✓</button></div><div id="kcResult" style="margin-top:6px;font-size:12px"></div></div>'+
+        '</div>'+
+      '</div>'+
+    '</div>'+
+    '<div style="display:flex;gap:8px;justify-content:center;margin:8px 0"><button class="btn btn-sm btn-outline" onclick="prevCard()">⬅️</button><span style="font-size:13px;color:var(--text-light);padding:5px" id="kcIdx">1/'+todayVocab.length+'</span><button class="btn btn-sm btn-outline" onclick="nextCard()">➡️</button></div>'+
+    '<div style="margin-top:12px"><div class="card-title">📐 今日语法（举一反三）</div>'+todayGrammar.map(function(g){return '<div class="grammar-card"><div class="g-title">'+g.title+'</div><div class="g-explain">'+g.explanation+'</div><div class="g-example"><div style="color:var(--primary-dark);font-size:15px">'+g.example_korean+' <button class="speaker-btn" style="width:24px;height:24px;font-size:12px" onclick="speakKorean(\''+g.example_korean.replace(/'/g,"\\'")+'\',this)">🔊</button></div><div style="color:var(--text-light);font-size:13px;margin-top:4px">'+g.example_meaning+'</div></div><div style="margin-top:8px;padding:8px;background:#FFF9F5;border-radius:8px;font-size:12px;color:var(--text-light)">💡 '+g.title.replace(/-/g,'')+' 可与不同词结合使用，练习时尝试替换关键词。</div></div>'}).join('')+'</div>';
+}
+function checkWrite(){const w=todayVocab[_ci],u=document.getElementById('kcWrite').value.trim(),r=document.getElementById('kcResult');if(!u)return;var correct=u===w.korean||u.replace(/\s/g,'')===w.korean.replace(/\s/g,'');if(correct){r.innerHTML='<span style="color:var(--success)">✅ 正确！</span>'}else{r.innerHTML='<span style="color:var(--danger)">❌ 正确答案：</span><span style="font-size:22px;color:var(--primary-dark);font-weight:700">'+w.korean+'</span> <button class="speaker-btn" style="width:22px;height:22px;font-size:12px" onclick="speakKorean(\''+w.korean+'\',this)">🔊</button>'}}
+function nextCard(){if(_ci<todayVocab.length-1){_ci++;updCard()}else toast('最后一个了~')}
+function prevCard(){if(_ci>0){_ci--;updCard()}else toast('第一个了~')}
+function updCard(){const w=todayVocab[_ci];document.getElementById('kcWord').textContent=w.korean;document.getElementById('kcPron').textContent='['+w.pronunciation+']';document.getElementById('kcPos').textContent=w.part_of_speech||'';document.getElementById('kcMean').textContent=w.meaning;document.getElementById('kcIdx').textContent=(_ci+1)+'/'+todayVocab.length;document.getElementById('kcFlip').classList.remove('flipped');document.querySelector('.kc-inner')?.classList.remove('flipped');document.getElementById('kcWrite').value='';document.getElementById('kcResult').innerHTML=''}
+
+// ========== READING ==========
+let readerState={bookId:null,chapters:[],chIdx:0,fontSize:16,darkMode:false};
+
+async function renderReading(){
+  document.getElementById('mainContent').innerHTML='<div class="fade-in"><div class="page-title">📚 电子阅读</div>'+
+    '<div class="card"><div style="display:flex;gap:10px;align-items:center;margin-bottom:12px;flex-wrap:wrap">'+
+    '<input class="input" id="bkSearch" placeholder="🔍 搜索书名或作者..." style="max-width:200px;flex:1" oninput="loadBooks()">'+
+    '<select class="input" style="width:auto;max-width:140px" id="bkFilter" onchange="loadBooks()"><option value="">全部</option><option value="want">📌 想读</option><option value="reading">📖 在读</option><option value="done">✅ 已读</option></select>'+
+    '<button class="btn btn-primary btn-sm" onclick="showAddBook()">+ 添加</button>'+
+    '<label class="btn btn-outline btn-sm" style="cursor:pointer;margin:0">📤 导入电子书<input type="file" accept=".epub,.txt,.pdf" style="display:none" onchange="uploadBook(this)"></label>'+
+    '</div><div class="book-grid" id="bkList">加载中...</div></div></div>';
+  loadBooks()
+}
+async function loadBooks(){
+  var s=document.getElementById('bkFilter')?.value||'',search=document.getElementById('bkSearch')?.value||'';
+  var u=s?API+'/api/books?status='+s:API+'/api/books';var r=await fetch(u);var bs=await r.json();
+  if(search){bs=bs.filter(function(b){return b.title.includes(search)||(b.author||'').includes(search)})}
+  var el=document.getElementById('bkList');if(!el)return;
+  if(bs.length===0){el.innerHTML='<div class="empty-state"><div class="icon">📚</div><p>书架空空，点击"导入电子书"开始阅读</p></div>';return}
+  // Check which books have files
+  var hasFiles={};try{var fr=await fetch(API+'/api/books/1/read');hasFiles['1']=true}catch(e){}
+  el.innerHTML=bs.map(function(b){var pct=b.total_pages>0?Math.round(b.current_page/b.total_pages*100):0;
+    return'<div class="book-card" onclick="openReader('+b.id+')"><div class="book-cover">'+['📕','📗','📘','📙','📓'][b.id%5]+'</div>'+
+    '<span class="book-status '+b.status+'">'+(b.status==='want'?'想读':b.status==='reading'?'在读':'已读')+'</span>'+
+    '<div style="font-weight:600;font-size:14px">'+b.title+'</div><div style="font-size:12px;color:var(--text-light)">'+(b.author||'未知')+'</div>'+
+    (pct>0?'<div class="progress-bar" style="margin-top:8px"><div class="progress-fill" style="width:'+pct+'%"></div></div><div style="font-size:11px;color:var(--text-muted);margin-top:4px">'+b.current_page+'/'+b.total_pages+'页 ('+pct+'%)</div>':'')+
+    '<div style="margin-top:6px;display:flex;gap:6px"><button class="btn btn-sm btn-outline" onclick="event.stopPropagation();editBookMeta('+b.id+')">编辑</button><button class="btn btn-sm btn-danger" onclick="event.stopPropagation();delBook('+b.id+')">删除</button></div></div>'
+  }).join('')
+}
+function showAddBook(){
+  var o=document.createElement('div');o.className='modal-overlay';
+  o.innerHTML='<div class="modal"><div class="modal-title">添加书籍</div><div class="form-group"><label>书名</label><input class="input" id="bkTitle"></div><div class="form-group"><label>作者</label><input class="input" id="bkAuthor"></div><div class="form-group"><label>总页数</label><input class="input" type="number" id="bkPages" value="0"></div><div style="display:flex;gap:10px;justify-content:flex-end"><button class="btn btn-outline btn-sm" onclick="this.closest(\'.modal-overlay\').remove()">取消</button><button class="btn btn-primary btn-sm" onclick="saveBook()">添加</button></div></div>';
+  o.addEventListener('click',function(e){if(e.target===o)o.remove()});document.body.appendChild(o)
+}
+function editBookMeta(id){
+  fetch(API+'/api/books').then(async function(r){var bs=await r.json();var b=bs.find(function(x){return x.id===id});if(!b)return;
+    var o=document.createElement('div');o.className='modal-overlay';
+    o.innerHTML='<div class="modal"><div class="modal-title">编辑《'+b.title+'》</div><div class="form-row"><div class="form-group"><label>书名</label><input class="input" id="bkTitle" value="'+b.title+'"></div><div class="form-group"><label>作者</label><input class="input" id="bkAuthor" value="'+(b.author||'')+'"></div></div><div class="form-group"><label>状态</label><select class="select" id="bkStatus"><option value="want" '+(b.status==='want'?'selected':'')+'>📌 想读</option><option value="reading" '+(b.status==='reading'?'selected':'')+'>📖 在读</option><option value="done" '+(b.status==='done'?'selected':'')+'>✅ 已读</option></select></div><div class="form-row"><div class="form-group"><label>总页数</label><input class="input" type="number" id="bkPages" value="'+(b.total_pages||0)+'"></div><div class="form-group"><label>当前页</label><input class="input" type="number" id="bkCur" value="'+(b.current_page||0)+'"></div></div><div class="form-group"><label>笔记</label><textarea class="textarea" id="bkNote">'+(b.note||'')+'</textarea></div><div style="display:flex;gap:10px;justify-content:space-between"><button class="btn btn-danger btn-sm" onclick="delBook('+id+');this.closest(\'.modal-overlay\').remove()">删除</button><div style="display:flex;gap:10px"><button class="btn btn-outline btn-sm" onclick="this.closest(\'.modal-overlay\').remove()">取消</button><button class="btn btn-primary btn-sm" onclick="updateBookMeta('+id+')">保存</button></div></div></div>';
+    o.addEventListener('click',function(e){if(e.target===o)o.remove()});document.body.appendChild(o)
+  })
+}
+async function updateBookMeta(id){
+  var s=document.getElementById('bkStatus').value,d={title:document.getElementById('bkTitle').value,status:s,total_pages:parseInt(document.getElementById('bkPages').value)||0,current_page:parseInt(document.getElementById('bkCur').value)||0,note:document.getElementById('bkNote').value};
+  if(s==='done')d.end_date=today();if(s==='reading'&&!d.start_date)d.start_date=today();
+  await fetch(API+'/api/books/'+id,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(d)});
+  document.querySelector('.modal-overlay')?.remove();loadBooks()
+}
+async function saveBook(){
+  var t=document.getElementById('bkTitle').value.trim();if(!t)return toast('请输入书名');
+  await fetch(API+'/api/books',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({title:t,author:document.getElementById('bkAuthor').value,total_pages:parseInt(document.getElementById('bkPages').value)||0})});
+  document.querySelector('.modal-overlay')?.remove();catAct('talk');loadBooks()
+}
+async function delBook(id){if(!confirm('确定删除？'))return;await fetch(API+'/api/books/'+id,{method:'DELETE'});loadBooks();toast('已删除')}
+
+// Upload ebook
+function uploadBook(input){
+  var file=input.files[0];if(!file)return;var fmt=file.name.endsWith('.epub')?'epub':file.name.endsWith('.pdf')?'pdf':'txt';
+  var reader=new FileReader();reader.onload=async function(){
+    var base64=reader.result.split(',')[1];
+    toast('正在解析电子书...');
+    try{
+      var r=await fetch(API+'/api/books/upload',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({title:'',author:'',filename:file.name,data:base64,format:fmt})});
+      var b=await r.json();
+      if(b.error){toast('上传失败：'+b.error);return}
+      toast('导入成功！《'+b.title+'》共'+b.total_pages+'章');catAct('happy');loadBooks()
+    }catch(e){toast('上传失败')}
+  };reader.readAsDataURL(file)
+}
+
+// Reader
+async function openReader(id){
+  readerState={bookId:id,chapters:[],chIdx:0,fontSize:16,darkMode:false};
+  // Get book info + chapters
+  try{var rr=await fetch(API+'/api/books/'+id+'/read');var rd=await rr.json();readerState.chapters=rd.chapters||[]}
+  catch(e){readerState.chapters=[]}
+  // Get book metadata
+  var br=await fetch(API+'/api/books');var bs=await br.json();var book=bs.find(function(x){return x.id===id})||{};
+  readerState.chIdx=book.current_page>0?Math.min(book.current_page-1,readerState.chapters.length-1):0;
+  if(readerState.chapters.length===0){toast('暂无阅读内容');return}
+  renderReader(book)
+}
+function renderReader(book){
+  var rs=readerState,ch=rs.chapters[rs.chIdx]||{};
+  var m=document.getElementById('mainContent');
+  m.innerHTML='<div class="fade-in"><div class="game-bar"><span class="back-btn" onclick="saveProgress();loadBooks()">← 书架</span>'+
+    '<span style="font-size:12px;color:var(--text-light)">'+(book.title||'')+' | '+(rs.chIdx+1)+'/'+rs.chapters.length+'</span>'+
+    '<div style="display:flex;gap:6px">'+
+    '<button class="btn btn-sm btn-outline" onclick="toggleDark()">'+(rs.darkMode?'☀️':'🌙')+'</button>'+
+    '<button class="btn btn-sm btn-outline" onclick="changeFS(-2)">A-</button>'+
+    '<button class="btn btn-sm btn-outline" onclick="changeFS(2)">A+</button>'+
+    '<button class="btn btn-sm btn-outline" onclick="showNotes()">📝笔记</button>'+
+    '</div></div>'+
+    '<div class="card" id="readerContent" style="'+(rs.darkMode?'background:#2D2430;color:#E8DCE8;':'')+'min-height:60vh;font-size:'+rs.fontSize+'px;line-height:1.8;padding:24px;white-space:pre-wrap;user-select:text;cursor:text"'+
+    ' onmouseup="onTextSelect()">'+
+    '<div style="text-align:center;font-weight:700;font-size:'+(rs.fontSize+4)+'px;margin-bottom:16px">'+ch.title+'</div>'+
+    '<div id="chapterText">'+(ch.text||'')+'</div>'+
+    '</div>'+
+    '<div style="display:flex;gap:10px;justify-content:center;margin-top:12px">'+
+    '<button class="btn btn-outline" '+(rs.chIdx===0?'disabled':'')+' onclick="prevChapter()">⬅️ 上一章</button>'+
+    '<button class="btn btn-outline" '+(rs.chIdx>=rs.chapters.length-1?'disabled':'')+' onclick="nextChapter()">下一章 ➡️</button>'+
+    '</div></div>';
+  // Also show cat reading
+  setTimeout(function(){catAct('greet')},1000)
+}
+function changeFS(d){readerState.fontSize=Math.max(12,Math.min(28,readerState.fontSize+d));var c=document.getElementById('readerContent');if(c)c.style.fontSize=readerState.fontSize+'px'}
+function toggleDark(){readerState.darkMode=!readerState.darkMode;var c=document.getElementById('readerContent');if(c)c.style.background=readerState.darkMode?'#2D2430':'#fff';if(c)c.style.color=readerState.darkMode?'#E8DCE8':'var(--text)'}
+async function prevChapter(){if(readerState.chIdx>0){readerState.chIdx--;await saveProgress();var br=await fetch(API+'/api/books');var bs=await br.json();var b=bs.find(function(x){return x.id===readerState.bookId});renderReader(b||{})}}
+async function nextChapter(){if(readerState.chIdx<readerState.chapters.length-1){readerState.chIdx++;await saveProgress();var br=await fetch(API+'/api/books');var bs=await br.json();var b=bs.find(function(x){return x.id===readerState.bookId});renderReader(b||{})}}
+async function saveProgress(){await fetch(API+'/api/books/'+readerState.bookId+'/progress',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({current_page:readerState.chIdx+1})})}
+
+// Notes
+function onTextSelect(){
+  var sel=window.getSelection();if(!sel||!sel.toString().trim())return;
+  setTimeout(function(){
+    var s=window.getSelection();if(!s||!s.toString().trim())return;
+    var text=s.toString().trim();
+    var ch=readerState.chapters[readerState.chIdx];
+    var o=document.createElement('div');o.className='modal-overlay';o.id='noteModal';
+    o.innerHTML='<div class="modal"><div class="modal-title">📝 添加笔记</div><div style="background:var(--bg);padding:8px;border-radius:6px;margin-bottom:12px;font-size:13px;font-style:italic">'+text.substring(0,200)+(text.length>200?'...':'')+'</div><textarea class="textarea" id="noteContent" rows="3" placeholder="写下你的想法..."></textarea><div style="display:flex;gap:10px;justify-content:flex-end;margin-top:12px"><button class="btn btn-outline btn-sm" onclick="this.closest(\'.modal-overlay\').remove()">取消</button><button class="btn btn-primary btn-sm" onclick="saveNote(\''+text.replace(/'/g,"\\'")+'\')">保存笔记</button></div></div>';
+    o.addEventListener('click',function(e){if(e.target===o)o.remove()});document.body.appendChild(o)
+  },100)
+}
+async function saveNote(selectedText){
+  var content=document.getElementById('noteContent').value.trim();if(!content)return toast('请写点内容');
+  await fetch(API+'/api/books/'+readerState.bookId+'/notes',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({content:content,position:readerState.chIdx+1,chapter:readerState.chapters[readerState.chIdx].title,note_type:'highlight',selected_text:selectedText})});
+  document.getElementById('noteModal')?.remove();toast('笔记已保存！📝')
+}
+async function showNotes(){
+  var r=await fetch(API+'/api/books/'+readerState.bookId+'/notes');var notes=await r.json();
+  var h='<h3 style="margin-bottom:16px">📝 读书笔记 ('+notes.length+')</h3>';
+  if(notes.length===0)h+='<p style="color:var(--text-muted)">还没有笔记，选中文字即可添加</p>';
+  else h+=notes.map(function(n){return'<div style="padding:8px 0;border-bottom:1px solid var(--border)"><div style="font-size:11px;color:var(--text-muted)">'+n.chapter+' | 位置'+n.position+'</div>'+(n.selected_text?'<div style="background:var(--bg);padding:4px 8px;border-radius:4px;margin:4px 0;font-size:12px;font-style:italic">"'+n.selected_text+'"</div>':'')+'<div style="font-size:13px;margin:4px 0">'+n.content+'</div><button class="btn btn-sm btn-danger" onclick="delNote('+n.id+')">删除</button></div>'}).join('');
+  h+='<div style="margin-top:12px"><div class="form-group"><label>💡 全局笔记</label><textarea class="textarea" id="globalNote" rows="2"></textarea></div><button class="btn btn-primary btn-sm" onclick="saveGlobalNote()">保存</button></div>';
+  openDetail(h)
+}
+async function saveGlobalNote(){
+  var c=document.getElementById('globalNote').value.trim();if(!c)return;
+  await fetch(API+'/api/books/'+readerState.bookId+'/notes',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({content:c,note_type:'global',position:readerState.chIdx+1})});
+  closeDetail();toast('笔记已保存')
+}
+async function delNote(nid){await fetch(API+'/api/books/'+readerState.bookId+'/notes/'+nid,{method:'DELETE'});showNotes()}
+
+// ========== MENU ==========
+async function renderMenu(){
+  document.getElementById('mainContent').innerHTML=`<div class="fade-in"><div class="page-title">🍜 随机菜单</div><div class="card" style="text-align:center"><div style="font-size:48px;margin-bottom:8px" id="rRes">🍽️</div><div style="font-size:18px;font-weight:700;color:var(--primary-dark);margin-bottom:4px" id="rName">今天吃什么呢？</div><div id="rExt" style="font-size:12px;color:var(--text-muted);margin-bottom:12px"></div><div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap"><button class="btn btn-primary" onclick="rMenu('any')">🎲 随便吃</button><button class="btn btn-outline btn-sm" onclick="rMenu('breakfast')">🌅 早餐</button><button class="btn btn-outline btn-sm" onclick="rMenu('lunch')">☀️ 午餐</button><button class="btn btn-outline btn-sm" onclick="rMenu('dinner')">🌙 晚餐</button><button class="btn btn-outline btn-sm" onclick="rMenu('snack')">🍪 小吃</button></div></div><div class="card"><div style="display:flex;gap:10px;align-items:center;margin-bottom:12px"><span class="card-title" style="margin:0">📋 菜单列表</span><button class="btn btn-primary btn-sm" onclick="showAddMI()">+ 添加</button></div><div id="mList">加载中...</div></div></div>`;loadMI()}
+async function rMenu(mt){const r=await fetch(API+'/api/menu/random?meal_type='+mt);const i=await r.json();if(!i){document.getElementById('rName').textContent='还没有菜单~';document.getElementById('rRes').textContent='😿';return}document.getElementById('rRes').textContent='🍽️';document.getElementById('rName').textContent=i.name;document.getElementById('rExt').innerHTML=`${i.meal_type==='breakfast'?'🌅':i.meal_type==='lunch'?'☀️':i.meal_type==='dinner'?'🌙':i.meal_type==='snack'?'🍪':'🍽️'} | ${i.category==='home'?'🏠':i.category==='takeout'?'🛵':'🍴'}`;catAct('happy')}
+async function loadMI(){const r=await fetch(API+'/api/menu');const is=await r.json();const el=document.getElementById('mList');if(!el)return;if(is.length===0){el.innerHTML='<div class="empty-state"><div class="icon">🍜</div><p>还没有添加</p></div>';return}el.innerHTML=is.map(i=>`<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border)"><span style="flex:1;font-size:14px">${i.name}</span><span class="tag tag-blue">${i.meal_type==='breakfast'?'早餐':i.meal_type==='lunch'?'午餐':i.meal_type==='dinner'?'晚餐':i.meal_type==='snack'?'小吃':'不限'}</span><span class="tag tag-pink">${i.category==='home'?'家常':i.category==='takeout'?'外卖':'餐厅'}</span><button class="btn btn-sm btn-danger" onclick="delMI(${i.id})">删除</button></div>`).join('')}
+function showAddMI(){const o=document.createElement('div');o.className='modal-overlay';o.innerHTML=`<div class="modal"><div class="modal-title">添加菜单</div><div class="form-group"><label>名称</label><input class="input" id="miName"></div><div class="form-row"><div class="form-group"><label>餐别</label><select class="select" id="miMeal"><option value="any">不限</option><option value="breakfast">早餐</option><option value="lunch">午餐</option><option value="dinner">晚餐</option><option value="snack">小吃</option></select></div><div class="form-group"><label>类型</label><select class="select" id="miCat"><option value="home">家常</option><option value="takeout">外卖</option><option value="restaurant">餐厅</option></select></div></div><div style="display:flex;gap:10px;justify-content:flex-end"><button class="btn btn-outline btn-sm" onclick="this.closest('.modal-overlay').remove()">取消</button><button class="btn btn-primary btn-sm" onclick="saveMI()">添加</button></div></div>`;o.addEventListener('click',e=>{if(e.target===o)o.remove()});document.body.appendChild(o)}
+async function saveMI(){const n=document.getElementById('miName').value.trim();if(!n)return toast('请输入名称');await fetch(API+'/api/menu',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name:n,meal_type:document.getElementById('miMeal').value,category:document.getElementById('miCat').value})});document.querySelector('.modal-overlay')?.remove();loadMI()}
+async function delMI(id){showConfirm('确定删除这个菜单项吗？',async()=>{await fetch(API+'/api/menu/'+id,{method:'DELETE'});loadMI()})}
+
+// ========== RECIPES ==========
+async function renderRecipes(){
+  document.getElementById('mainContent').innerHTML=`<div class="fade-in"><div class="page-title">👩‍🍳 家常菜谱</div><div class="card"><div style="display:flex;gap:10px;align-items:center;margin-bottom:12px;flex-wrap:wrap"><input class="input" id="rcSearch" placeholder="搜索菜谱..." style="max-width:200px" oninput="loadRecipes()"><button class="btn btn-primary btn-sm" onclick="showAddRecipe()">+ 新增</button><button class="btn btn-outline btn-sm" onclick="searchWebRecipe()">🔍 搜索更多</button></div><div id="rcList">加载中...</div></div></div>`;loadRecipes()}
+async function loadRecipes(){const s=document.getElementById('rcSearch')?.value||'';const u=s?API+'/api/recipes?search='+encodeURIComponent(s):API+'/api/recipes';const r=await fetch(u);const rs=await r.json();const el=document.getElementById('rcList');if(!el)return;if(rs.length===0){el.innerHTML='<div class="empty-state"><div class="icon">👩‍🍳</div><p>还没有菜谱，试试搜索功能</p></div>';return}el.innerHTML=rs.map(rc=>`<div class="card" style="padding:16px;margin-bottom:10px;cursor:pointer" onclick="viewRecipe(${rc.id})"><div style="display:flex;justify-content:space-between;align-items:center"><span style="font-weight:600">🍳 ${rc.name}</span><span style="display:flex;gap:4px"><span class="tag tag-pink">${rc.difficulty==='easy'?'简单':rc.difficulty==='medium'?'中等':'困难'}</span><span class="tag tag-yellow">⏱${rc.cook_time}min</span></span></div>${rc.flavor_tags?`<div style="margin-top:6px;font-size:12px;color:var(--text-light)">🏷 ${rc.flavor_tags}</div>`:''}</div>`).join('')}
+function searchWebRecipe(){
+  const s=document.getElementById('rcSearch')?.value.trim();
+  if(!s)return toast('请先输入菜名搜索');
+  const q=encodeURIComponent(s+' 菜谱 做法');
+  window.open('https://www.xiaohongshu.com/search_result?keyword='+q,'_blank');
+  toast('已在新窗口打开小红书搜索 🔍')}
+function showAddRecipe(){
+  const o=document.createElement('div');o.className='modal-overlay';
+  o.innerHTML=`<div class="modal"><div class="modal-title">新增菜谱</div><div class="form-group"><label>菜名</label><input class="input" id="rcName"></div><div class="form-group"><label>食材</label><textarea class="textarea" id="rcIng" rows="3" placeholder="每行一个"></textarea></div><div class="form-group"><label>步骤</label><textarea class="textarea" id="rcStep" rows="4" placeholder="每行一步"></textarea></div><div class="form-row"><div class="form-group"><label>口味</label><input class="input" id="rcTags" placeholder="如：清淡,酸辣"></div><div class="form-group"><label>难度</label><select class="select" id="rcDiff"><option value="easy">简单</option><option value="medium" selected>中等</option><option value="hard">困难</option></select></div></div><div class="form-group"><label>时间(分钟)</label><input class="input" type="number" id="rcTime" value="30"></div><div style="display:flex;gap:10px;justify-content:flex-end"><button class="btn btn-outline btn-sm" onclick="this.closest('.modal-overlay').remove()">取消</button><button class="btn btn-primary btn-sm" onclick="saveRecipe()">保存</button></div></div>`;
+  o.addEventListener('click',e=>{if(e.target===o)o.remove()});document.body.appendChild(o)}
+async function saveRecipe(){
+  const n=document.getElementById('rcName').value.trim();if(!n)return toast('请输入菜名');
+  await fetch(API+'/api/recipes',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name:n,ingredients:document.getElementById('rcIng').value,steps:document.getElementById('rcStep').value,flavor_tags:document.getElementById('rcTags').value,difficulty:document.getElementById('rcDiff').value,cook_time:parseInt(document.getElementById('rcTime').value)||30})});
+  document.querySelector('.modal-overlay')?.remove();loadRecipes();toast('菜谱已保存')}
+async function viewRecipe(id){const r=await fetch(API+'/api/recipes');const rs=await r.json();const rc=rs.find(x=>x.id===id);if(!rc)return;
+  openDetail(`<h3 style="margin-bottom:12px">🍳 ${rc.name}</h3><div style="display:flex;gap:8px;margin-bottom:12px"><span class="tag tag-pink">${rc.difficulty==='easy'?'简单':rc.difficulty==='medium'?'中等':'困难'}</span><span class="tag tag-yellow">⏱ ${rc.cook_time}分钟</span>${rc.flavor_tags?`<span class="tag tag-blue">🏷 ${rc.flavor_tags}</span>`:''}</div><div class="card-title">🥬 食材</div><p style="white-space:pre-wrap;font-size:13px;line-height:1.6;margin-bottom:12px">${rc.ingredients||'暂无'}</p><div class="card-title">📝 步骤</div><p style="white-space:pre-wrap;font-size:13px;line-height:1.8">${rc.steps||'暂无'}</p><div style="margin-top:16px;display:flex;gap:10px;justify-content:flex-end"><button class="btn btn-outline btn-sm" onclick="closeDetail();editRecipeModal(${rc.id})">编辑</button><button class="btn btn-danger btn-sm" onclick="delRecipe(${rc.id});closeDetail()">删除</button></div>`)}
+
+// ========== SHOPPING ==========
+async function renderShopping(){
+  document.getElementById('mainContent').innerHTML=`<div class="fade-in"><div class="page-title">🛒 待购清单</div><div class="card"><div style="display:flex;gap:10px;align-items:center;margin-bottom:12px"><button class="btn btn-primary btn-sm" onclick="showAddShop()">+ 添加</button><label style="font-size:12px;cursor:pointer"><input type="checkbox" id="shPurchased" onchange="loadShop()">显示已购</label></div><div id="shList">加载中...</div></div></div>`;loadShop()}
+async function loadShop(){const sp=document.getElementById('shPurchased')?.checked;const r=await fetch(API+'/api/shopping?show_purchased='+(sp?'true':'false'));const is=await r.json();const el=document.getElementById('shList');if(!el)return;if(is.length===0){el.innerHTML='<div class="empty-state"><div class="icon">🛒</div><p>清单为空</p></div>';return}el.innerHTML=is.map(i=>`<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border)"><label class="checkbox-wrap" style="flex:1"><input type="checkbox" ${i.purchased?'checked':''} onchange="toggleShop(${i.id},this.checked)"><span style="${i.purchased?'text-decoration:line-through;color:var(--text-muted)':''}">${i.name}</span></label><span class="tag ${i.priority==='high'?'tag-red':i.priority==='low'?'tag-green':'tag-yellow'}">${i.priority==='high'?'高':i.priority==='low'?'低':'中'}</span><span class="tag tag-blue">${i.category}</span><button class="btn btn-sm btn-danger" onclick="delShop(${i.id})">删除</button></div>`).join('')}
+async function toggleShop(id,c){await fetch(API+'/api/shopping/'+id,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({purchased:c?1:0})});if(c){catAct('happy');toast('买到啦！')}loadShop()}
+function showAddShop(){const o=document.createElement('div');o.className='modal-overlay';o.innerHTML=`<div class="modal"><div class="modal-title">添加物品</div><div class="form-group"><label>名称</label><input class="input" id="shName"></div><div class="form-row"><div class="form-group"><label>分类</label><input class="input" id="shCat"></div><div class="form-group"><label>优先级</label><select class="select" id="shPri"><option value="high">高</option><option value="medium" selected>中</option><option value="low">低</option></select></div></div><div style="display:flex;gap:10px;justify-content:flex-end"><button class="btn btn-outline btn-sm" onclick="this.closest('.modal-overlay').remove()">取消</button><button class="btn btn-primary btn-sm" onclick="saveShop()">添加</button></div></div>`;o.addEventListener('click',e=>{if(e.target===o)o.remove()});document.body.appendChild(o)}
+async function saveShop(){const n=document.getElementById('shName').value.trim();if(!n)return toast('请输入名称');await fetch(API+'/api/shopping',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name:n,category:document.getElementById('shCat').value||'其他',priority:document.getElementById('shPri').value})});document.querySelector('.modal-overlay')?.remove();loadShop()}
+async function delShop(id){showConfirm('确定删除这个物品吗？',async()=>{await fetch(API+'/api/shopping/'+id,{method:'DELETE'});loadShop()})}
+
+// ========== HEALTH ==========
+async function renderHealth(){
+  document.getElementById('mainContent').innerHTML=`<div class="fade-in"><div class="page-title">💪 健康打卡</div><div class="card"><div class="card-title">今日打卡</div><div id="hhList">加载中...</div><button class="btn btn-outline btn-sm" style="margin-top:8px" onclick="showAddHabit()">+ 添加</button></div></div>`;loadHealth()}
+async function loadHealth(){const[hr,cr,ar]=await Promise.all([fetch(API+'/api/health/habits'),fetch(API+'/api/health/checkins?date='+today()),fetch(API+'/api/health/checkins')]);const hs=await hr.json(),cs=await cr.json(),ac=await ar.json();const ci=new Set(cs.map(c=>c.habit_id));const el=document.getElementById('hhList');if(!el)return;if(hs.length===0){el.innerHTML='<div class="empty-state"><div class="icon">💪</div><p>还没有习惯</p></div>';return}const sm={};hs.forEach(h=>{let s=0,d=new Date(today());while(true){const ds=d.toISOString().split('T')[0];if(ac.some(c=>c.habit_id===h.id&&c.date===ds)){s++;d.setDate(d.getDate()-1)}else break}sm[h.id]=s});el.innerHTML=hs.map(h=>`<div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)"><span style="font-size:24px">${h.icon}</span><span style="flex:1;font-size:14px">${h.name}</span><span style="font-size:12px;color:var(--primary-dark);font-weight:600">🔥 ${sm[h.id]}天</span><button class="btn btn-sm ${ci.has(h.id)?'btn-success':'btn-outline'}" onclick="toggleCheckin(${h.id},${!ci.has(h.id)})">${ci.has(h.id)?'✅ 已打卡':'打卡'}</button><button class="btn btn-sm btn-danger" onclick="delHabit(${h.id})">删除</button></div>`).join('')}
+async function toggleCheckin(hid,ch){if(ch){await fetch(API+'/api/health/checkins',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({habit_id:hid,date:today()})});catAct('happy');spawnHearts();toast('打卡成功！')}else await fetch(API+'/api/health/checkins',{method:'DELETE',headers:{'Content-Type':'application/json'},body:JSON.stringify({habit_id:hid,date:today()})});loadHealth()}
+function showAddHabit(){const o=document.createElement('div');o.className='modal-overlay';o.innerHTML=`<div class="modal"><div class="modal-title">添加习惯</div><div class="form-row"><div class="form-group"><label>图标</label><input class="input" id="hbIcon" value="✅"></div><div class="form-group"><label>名称</label><input class="input" id="hbName" placeholder="如：喝水8杯"></div></div><div style="display:flex;gap:10px;justify-content:flex-end"><button class="btn btn-outline btn-sm" onclick="this.closest('.modal-overlay').remove()">取消</button><button class="btn btn-primary btn-sm" onclick="saveHabit()">添加</button></div></div>`;o.addEventListener('click',e=>{if(e.target===o)o.remove()});document.body.appendChild(o)}
+async function saveHabit(){const n=document.getElementById('hbName').value.trim();if(!n)return toast('请输入名称');await fetch(API+'/api/health/habits',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name:n,icon:document.getElementById('hbIcon').value||'✅'})});document.querySelector('.modal-overlay')?.remove();loadHealth()}
+async function delHabit(id){showConfirm('确定删除这个打卡习惯吗？历史记录也会清除。',async()=>{await fetch(API+'/api/health/habits/'+id,{method:'DELETE'});loadHealth()})}
+
+// ========== PERIOD ==========
+async function renderPeriod(){
+  document.getElementById('mainContent').innerHTML=`<div class="fade-in"><div class="page-title">📅 经期记录</div><div class="card"><div class="card-title">📊 统计</div><div id="pdStats">加载中...</div></div><div class="card"><div class="card-title">🗓 日历</div><div id="pdCal">加载中...</div></div><div class="card"><div style="display:flex;align-items:center;gap:10px;margin-bottom:12px"><span class="card-title" style="margin:0">📋 历史</span><button class="btn btn-primary btn-sm" onclick="showAddPeriod()">+ 记录</button></div><div id="pdList">加载中...</div></div></div>`;loadPeriod()}
+async function loadPeriod(){
+  const r=await fetch(API+'/api/period');const d=await r.json();
+  const se=document.getElementById('pdStats');if(se)se.innerHTML=`<div style="display:flex;gap:16px;flex-wrap:wrap"><div style="text-align:center;flex:1"><div style="font-size:24px;font-weight:700;color:var(--primary-dark)">${d.avgCycle}</div><div style="font-size:11px;color:var(--text-muted)">周期(天)</div></div><div style="text-align:center;flex:1"><div style="font-size:24px;font-weight:700;color:var(--primary-dark)">${d.avgDuration}</div><div style="font-size:11px;color:var(--text-muted)">持续(天)</div></div>${d.prediction?`<div style="text-align:center;flex:1"><div style="font-size:18px;font-weight:700;color:var(--warning)">📅 ${d.prediction.next_start}</div><div style="font-size:11px;color:var(--text-muted)">预测下次</div></div><div style="text-align:center;flex:1"><div style="font-size:18px;font-weight:700;color:var(--info)">🥚 ${d.prediction.ovulation_date}</div><div style="font-size:11px;color:var(--text-muted)">排卵期</div></div>`:'<div style="text-align:center;flex:1">暂无数据</div>'}</div>`;
+  const ce=document.getElementById('pdCal');if(ce){const n=new Date(),y=n.getFullYear(),m=n.getMonth(),fd=new Date(y,m,1).getDay(),dim=new Date(y,m+1,0).getDate();const ps=new Set(),preS=new Set();let ov=null;d.records.forEach(r=>{if(r.start_date){const s=new Date(r.start_date),e=r.end_date?new Date(r.end_date):new Date(s);e.setDate(e.getDate()+d.avgDuration-1);for(let dd=new Date(s);dd<=e;dd.setDate(dd.getDate()+1))if(dd.getMonth()===m&&dd.getFullYear()===y)ps.add(dd.getDate())}});if(d.prediction){const ns=new Date(d.prediction.next_start);for(let i=0;i<d.avgDuration;i++){const pd=new Date(ns);pd.setDate(pd.getDate()+i);if(pd.getMonth()===m&&pd.getFullYear()===y)preS.add(pd.getDate())}const od=new Date(d.prediction.ovulation_date);if(od.getMonth()===m&&od.getFullYear()===y)ov=od.getDate()}let h='<div style="display:grid;grid-template-columns:repeat(7,1fr);text-align:center;margin-bottom:8px">';['日','一','二','三','四','五','六'].forEach(dd=>h+=`<div style="font-size:11px;color:var(--text-muted);padding:4px">${dd}</div>`);h+='</div><div class="period-grid">';for(let i=0;i<fd;i++)h+='<div></div>';for(let dd=1;dd<=dim;dd++){let c='period-day normal';if(dd===n.getDate())c+=' today';if(ps.has(dd))c='period-day period';else if(preS.has(dd))c='period-day predicted';else if(ov===dd)c='period-day ovulation';h+=`<div class="${c}">${dd}</div>`}h+='</div>';ce.innerHTML=h}
+  const le=document.getElementById('pdList');if(le){if(d.records.length===0)le.innerHTML='<div class="empty-state"><div class="icon">📅</div><p>暂无记录</p></div>';else le.innerHTML='<table><tr><th>开始</th><th>结束</th><th>持续</th><th>症状</th><th>操作</th></tr>'+d.records.map(r=>{const dur=r.end_date?Math.round((new Date(r.end_date)-new Date(r.start_date))/86400000)+1:'-';return`<tr><td>${r.start_date}</td><td>${r.end_date||'进行中'}</td><td>${dur}天</td><td>${r.symptoms||'-'}</td><td><button class="btn btn-sm btn-outline" onclick="editPeriod(${r.id})">编辑</button> <button class="btn btn-sm btn-danger" onclick="delPeriod(${r.id})">删除</button></td></tr>`}).join('')+'</table>'}}
+function showAddPeriod(){const o=document.createElement('div');o.className='modal-overlay';o.innerHTML=`<div class="modal"><div class="modal-title">记录经期</div><div class="form-row"><div class="form-group"><label>开始</label><input class="input" type="date" id="pStart" value="${today()}"></div><div class="form-group"><label>结束</label><input class="input" type="date" id="pEnd"></div></div><div class="form-group"><label>症状</label><input class="input" id="pSym"></div><div class="form-group"><label>心情</label><select class="select" id="pMood"><option value="">--</option><option value="😊 愉快">😊 愉快</option><option value="😐 一般">😐 一般</option><option value="😢 低落">😢 低落</option><option value="😡 烦躁">😡 烦躁</option></select></div><div style="display:flex;gap:10px;justify-content:flex-end"><button class="btn btn-outline btn-sm" onclick="this.closest('.modal-overlay').remove()">取消</button><button class="btn btn-primary btn-sm" onclick="savePeriod()">保存</button></div></div>`;o.addEventListener('click',e=>{if(e.target===o)o.remove()});document.body.appendChild(o)}
+async function savePeriod(){const d={start_date:document.getElementById('pStart').value,end_date:document.getElementById('pEnd').value,symptoms:document.getElementById('pSym').value,mood:document.getElementById('pMood').value};if(!d.start_date)return toast('请选择日期');await fetch(API+'/api/period',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(d)});document.querySelector('.modal-overlay')?.remove();loadPeriod()}
+async function editPeriod(id){const r=await fetch(API+'/api/period');const d=await r.json();const rec=d.records.find(x=>x.id===id);if(!rec)return;const o=document.createElement('div');o.className='modal-overlay';o.innerHTML=`<div class="modal"><div class="modal-title">编辑记录</div><div class="form-row"><div class="form-group"><label>开始</label><input class="input" type="date" id="pStart" value="${rec.start_date}"></div><div class="form-group"><label>结束</label><input class="input" type="date" id="pEnd" value="${rec.end_date||''}"></div></div><div class="form-group"><label>症状</label><input class="input" id="pSym" value="${rec.symptoms||''}"></div><div class="form-group"><label>心情</label><select class="select" id="pMood"><option value="">--</option>${['😊 愉快','😐 一般','😢 低落','😡 烦躁'].map(m=>`<option value="${m}" ${rec.mood===m?'selected':''}>${m}</option>`).join('')}</select></div><div style="display:flex;gap:10px;justify-content:flex-end"><button class="btn btn-outline btn-sm" onclick="this.closest('.modal-overlay').remove()">取消</button><button class="btn btn-primary btn-sm" onclick="saveEditPeriod(${id})">保存</button></div></div>`;o.addEventListener('click',e=>{if(e.target===o)o.remove()});document.body.appendChild(o)}
+async function saveEditPeriod(id){const d={start_date:document.getElementById('pStart').value,end_date:document.getElementById('pEnd').value,symptoms:document.getElementById('pSym').value,mood:document.getElementById('pMood').value};await fetch(API+'/api/period/'+id,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(d)});document.querySelector('.modal-overlay')?.remove();loadPeriod()}
+async function delPeriod(id){showConfirm('确定删除这条经期记录吗？',async()=>{await fetch(API+'/api/period/'+id,{method:'DELETE'});loadPeriod()})}
+
+// ========== MOOD ==========
+async function renderMood(){
+  document.getElementById('mainContent').innerHTML=`<div class="fade-in"><div class="page-title">💝 心情日记</div><div class="card"><div class="card-title">📝 今日心情</div><div style="display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap" id="mdEmojis">${['😊','😄','😐','😢','😡','😴','🥰','😎','🤔','😰'].map(e=>`<button class="btn btn-outline btn-sm" style="font-size:20px;padding:8px 12px" onclick="selMood('${e}')">${e}</button>`).join('')}</div><div style="display:flex;gap:8px"><input class="input" id="mdNote" placeholder="写几句..."><button class="btn btn-primary" onclick="saveMood()">💾</button></div></div><div class="card"><div class="card-title">📅 心情月历</div><input type="month" class="input" style="width:auto;max-width:160px;margin-bottom:12px" id="mdMonth" value="${today().substring(0,7)}" onchange="loadMdCal()"><div id="mdCal">加载中...</div></div></div>`;loadMdCal()}
+let sMood='😊';
+function selMood(e){sMood=e;document.querySelectorAll('#mdEmojis button').forEach(b=>{b.classList.toggle('btn-primary',b.textContent===e);b.classList.toggle('btn-outline',b.textContent!==e)})}
+async function saveMood(){await fetch(API+'/api/mood',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({date:today(),mood:sMood,note:document.getElementById('mdNote').value})});toast('已记录~');catAct('talk');loadMdCal()}
+async function loadMdCal(){const mo=document.getElementById('mdMonth')?.value||today().substring(0,7);const r=await fetch(API+'/api/mood?month='+mo);const rs=await r.json();const mm={};rs.forEach(r=>{mm[r.date]=r});const el=document.getElementById('mdCal');if(!el)return;const[y,m]=mo.split('-').map(Number),fd=new Date(y,m-1,1).getDay(),dim=new Date(y,m,0).getDate();let h='<div style="display:grid;grid-template-columns:repeat(7,1fr);text-align:center;margin-bottom:8px">';['日','一','二','三','四','五','六'].forEach(d=>h+=`<div style="font-size:11px;color:var(--text-muted);padding:4px">${d}</div>`);h+='</div><div class="mood-grid">';for(let i=0;i<fd;i++)h+='<div></div>';for(let dd=1;dd<=dim;dd++){const dt=`${mo}-${String(dd).padStart(2,'0')}`,rec=mm[dt];h+=`<div class="mood-cell${dt===today()?' today':''}" title="${rec?rec.note||'':''}">${rec?rec.mood:''}</div>`}h+='</div>';el.innerHTML=h}
+
+// ========== POMODORO ==========
+let pInt,pSec=25*60,pRun=false,pBreak=false;
+async function renderPomodoro(){
+  const m=Math.floor(pSec/60),s=pSec%60;let td={sessions:0,total_minutes:0};
+  try{const r=await fetch(API+'/api/pomodoro?date='+today());td=await r.json()}catch(e){}
+  document.getElementById('mainContent').innerHTML=`<div class="fade-in"><div class="page-title">🍅 番茄专注</div><div class="card" style="text-align:center"><div class="timer-circle" style="border-color:${pBreak?'var(--success)':'var(--primary-light)'}"><div><div class="timer-display" id="pDisp">${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}</div><div style="font-size:13px;color:var(--text-light)">${pBreak?'☕ 休息':'🍅 专注'}</div></div></div><div style="display:flex;gap:10px;justify-content:center;margin-bottom:16px"><button class="btn btn-primary" id="pBtn" onclick="togglePomo()">${pRun?'⏸ 暂停':'▶ 开始'}</button><button class="btn btn-outline" onclick="resetPomo()">↺ 重置</button></div><div style="font-size:13px;color:var(--text-light)">今日: <b>${td.sessions}</b> 番茄 | <b>${td.total_minutes}</b> 分钟</div></div><div class="card"><div class="card-title">🎵 白噪音</div><div class="sound-grid">${['🔇 无','🌧 雨声','🔥 壁炉','🌊 海浪','🍃 森林','☕ 咖啡馆','🎹 钢琴'].map(s=>`<button class="sound-btn" onclick="selSound(this,'${s}')">${s}</button>`).join('')}</div></div></div>`}
+function selSound(btn,s){document.querySelectorAll('.sound-btn').forEach(b=>b.classList.remove('active'));btn.classList.add('active')}
+function togglePomo(){if(pRun){clearInterval(pInt);pRun=false;document.getElementById('pBtn').textContent='▶ 继续';return}pRun=true;document.getElementById('pBtn').textContent='⏸ 暂停';pInt=setInterval(()=>{pSec--;const m=Math.floor(pSec/60),s=pSec%60,d=document.getElementById('pDisp');if(d)d.textContent=String(m).padStart(2,'0')+':'+String(s).padStart(2,'0');if(pSec<=0){clearInterval(pInt);pRun=false;if(!pBreak){savePS();catAct('happy');spawnConfetti();toast('专注完成！🎉');pBreak=true;pSec=5*60}else{pBreak=false;pSec=25*60}renderPomodoro()}},1000)}
+async function savePS(){await fetch(API+'/api/pomodoro',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({date:today(),sessions:1,total_minutes:25})})}
+function resetPomo(){clearInterval(pInt);pRun=false;pBreak=false;pSec=25*60;renderPomodoro()}
+
+// ========== NOTE ==========
+function toggleNoteFloat(){document.getElementById('noteFloatPanel').classList.toggle('show');document.getElementById('quickNote')?.focus()}
+async function saveQuickNote(){const c=document.getElementById('quickNote').value.trim();if(!c)return toast('写点什么~');await fetch(API+'/api/notes',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({content:c})});document.getElementById('quickNote').value='';document.getElementById('noteFloatPanel').classList.remove('show');toast('已保存！')}
+// Note button drag
+(function(){
+  var btn=document.getElementById('noteFloatBtn'),dragging=false,sx,sy,ox,oy;
+  btn.addEventListener('mousedown',function(e){
+    if(e.button!==0)return;dragging=true;
+    var r=btn.getBoundingClientRect();sx=e.clientX;sy=e.clientY;ox=r.left;oy=r.top;
+    e.preventDefault();
+  });
+  document.addEventListener('mousemove',function(e){
+    if(!dragging)return;btn.style.left=(ox+e.clientX-sx)+'px';btn.style.top=(oy+e.clientY-sy)+'px';btn.style.right='auto';btn.style.bottom='auto';
+  });
+  document.addEventListener('mouseup',function(e){
+    if(!dragging)return;dragging=false;
+    if(Math.abs(e.clientX-sx)<5&&Math.abs(e.clientY-sy)<5)toggleNoteFloat();
+  });
+  btn.addEventListener('touchstart',function(e){dragging=true;var t=e.touches[0],r=btn.getBoundingClientRect();sx=t.clientX;sy=t.clientY;ox=r.left;oy=r.top});
+  document.addEventListener('touchmove',function(e){if(!dragging)return;var t=e.touches[0];btn.style.left=(ox+t.clientX-sx)+'px';btn.style.top=(oy+t.clientY-sy)+'px';btn.style.right='auto';btn.style.bottom='auto'});
+  document.addEventListener('touchend',function(){dragging=false});
+})();
+
+// ========== MATCH3 GAME ==========
+const M3_ICONS=['🐱','🐾','🧶','🐟','🎀','🔔','🥛'];
+const M3_SIZE=8,M3_STEPS=25;
+const M3_LEVELS=[200,400,700,1100,1600,2200,2900,3700,4600,5600];
+let m3State={};
+
+async function loadM3Progress(){
+  try{var r=await fetch(API+'/api/match3/progress');var d=await r.json();return d.match3||{unlocked:1,stars:{},bestScore:{}}}catch(e){return{unlocked:1,stars:{},bestScore:{}}}
+}
+async function saveM3Progress(p){await fetch(API+'/api/match3/progress',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({key:'match3',value:p})})}
+
+async function renderGames(){
+  var p=await loadM3Progress();
+  var h='<div class="fade-in"><div class="page-title">🎮 开心消消乐</div>'+
+    '<div class="card"><div class="card-title">🗺 选择关卡</div><div class="m3-level-select">';
+  for(var i=1;i<=M3_LEVELS.length;i++){
+    var cls='m3-lv-btn',stars='';
+    if(i<p.unlocked)cls+=' completed';else if(i===p.unlocked)cls+=' unlocked';else cls+=' locked';
+    if(p.stars[i]){for(var s=0;s<p.stars[i];s++)stars+='⭐'}
+    h+='<button class="'+cls+'" '+(i<=p.unlocked?'onclick="startMatch3('+i+')"':'disabled')+'>'+i+'<span class="stars">'+stars+'</span></button>'
+  }
+  h+='</div></div></div>';
+  document.getElementById('mainContent').innerHTML=h
+}
+
+function startMatch3(lv){
+  m3State={level:lv,target:M3_LEVELS[lv-1],grid:[],score:0,steps:M3_STEPS,selected:null,animating:false};
+  initGrid();if(!hasMatch())initGrid();renderM3Full()
+}
+
+function initGrid(){
+  m3State.grid=[];for(var i=0;i<M3_SIZE;i++){m3State.grid[i]=[];for(var j=0;j<M3_SIZE;j++){var v;do{v=Math.floor(Math.random()*M3_ICONS.length);m3State.grid[i][j]=v}while((j>=2&&m3State.grid[i][j-1]===v&&m3State.grid[i][j-2]===v)||(i>=2&&m3State.grid[i-1][j]===v&&m3State.grid[i-2][j]===v))}}
+}
+function hasMatch(){
+  for(var i=0;i<M3_SIZE;i++)for(var j=0;j<M3_SIZE;j++){
+    if(j<M3_SIZE-2&&m3State.grid[i][j]===m3State.grid[i][j+1]&&m3State.grid[i][j]===m3State.grid[i][j+2])return true;
+    if(i<M3_SIZE-2&&m3State.grid[i][j]===m3State.grid[i+1][j]&&m3State.grid[i][j]===m3State.grid[i+2][j])return true
+  }return false
+}
+
+// Full render (only on level start)
+function renderM3Full(){
+  var m=document.getElementById('mainContent'),gs=m3State,pct=Math.min(100,Math.round(gs.score/gs.target*100));
+  m.innerHTML='<div class="fade-in"><div class="game-bar"><span class="back-btn" onclick="if(m3State._timer)clearInterval(m3State._timer);renderGames()">← 选关</span><span style="font-size:13px;color:var(--text-light)">第'+gs.level+'关 | 🎯'+gs.target+'分</span></div>'+
+    '<div class="match3-wrap"><div class="match3-header"><div class="match3-info"><div class="val" id="m3Score">'+gs.score+'</div><div class="lbl">得分</div></div><div class="match3-info"><div class="val" id="m3Steps" style="color:'+(gs.steps<=5?'var(--danger)':'var(--text)')+'">'+gs.steps+'</div><div class="lbl">剩余步数</div></div><div class="match3-info"><div class="val" style="font-size:16px">🎯'+gs.target+'</div><div class="lbl">目标</div></div></div>'+
+    '<div class="m3-bar-wrap"><div class="m3-bar-fill" id="m3Bar" style="width:'+pct+'%"></div></div>'+
+    '<div class="m3-grid" id="m3Grid" style="grid-template-columns:repeat('+M3_SIZE+',1fr);width:100%;max-width:400px">'+
+    gs.grid.map(function(row,i){return row.map(function(v,j){var cls='m3-cell';if(gs.selected&&gs.selected.r===i&&gs.selected.c===j)cls+=' selected';return '<div class="'+cls+'" data-r="'+i+'" data-c="'+j+'" onmousedown="m3Down(event,'+i+','+j+')" ontouchstart="m3TouchStart(event,'+i+','+j+')">'+M3_ICONS[v]+'</div>'}).join('')}).join('')+
+    '</div></div></div>';
+  attachM3Drag()
+}
+
+// Fast update: only update HUD + redraw grid cells via DOM
+function refreshM3(){
+  var gs=m3State,pct=Math.min(100,Math.round(gs.score/gs.target*100));
+  var se=document.getElementById('m3Score');if(se)se.textContent=gs.score;
+  var st=document.getElementById('m3Steps');if(st){st.textContent=gs.steps;st.style.color=gs.steps<=5?'var(--danger)':'var(--text)'}
+  var ba=document.getElementById('m3Bar');if(ba)ba.style.width=pct+'%';
+  updateGrid()
+}
+function updateGrid(){
+  var container=document.getElementById('m3Grid');if(!container)return;
+  var gs=m3State;
+  container.innerHTML=gs.grid.map(function(row,i){return row.map(function(v,j){var cls='m3-cell';if(gs.selected&&gs.selected.r===i&&gs.selected.c===j)cls+=' selected';return '<div class="'+cls+'" data-r="'+i+'" data-c="'+j+'" onmousedown="m3Down(event,'+i+','+j+')" ontouchstart="m3TouchStart(event,'+i+','+j+')">'+M3_ICONS[v]+'</div>'}).join('')}).join('')
+}
+
+var m3DragStart=null;
+function attachM3Drag(){
+  var grid=document.getElementById('m3Grid');if(!grid)return;
+  grid.addEventListener('touchmove',function(e){e.preventDefault()},{passive:false});
+  grid.addEventListener('touchend',function(e){if(!m3DragStart)return;var t=e.changedTouches[0];var el=document.elementFromPoint(t.clientX,t.clientY);if(el&&el.dataset.r){var r2=parseInt(el.dataset.r),c2=parseInt(el.dataset.c);if(m3DragStart.r!==r2||m3DragStart.c!==c2)trySwap(m3DragStart.r,m3DragStart.c,r2,c2)}m3DragStart=null})
+}
+function m3Down(e,r,c){e.preventDefault();if(m3State.animating)return;if(m3State.selected&&(m3State.selected.r!==r||m3State.selected.c!==c)){trySwap(m3State.selected.r,m3State.selected.c,r,c)}else{m3State.selected={r:r,c:c};m3DragStart={r:r,c:c};refreshM3()}}
+function m3TouchStart(e,r,c){e.preventDefault();if(m3State.animating)return;m3State.selected={r:r,c:c};m3DragStart={r:r,c:c};refreshM3()}
+function trySwap(r1,c1,r2,c2){
+  if(m3State.animating)return;if(Math.abs(r1-r2)+Math.abs(c1-c2)!==1){m3State.selected=null;refreshM3();return}
+  m3State.animating=true;swap(r1,c1,r2,c2);
+  var matches=findMatches();
+  if(matches.length===0){swap(r1,c1,r2,c2);m3State.animating=false;m3State.selected=null;refreshM3();return}
+  m3State.steps--;m3State.selected=null;processMatches(matches)
+}
+function swap(r1,c1,r2,c2){var t=m3State.grid[r1][c1];m3State.grid[r1][c1]=m3State.grid[r2][c2];m3State.grid[r2][c2]=t}
+function findMatches(){
+  var matched=new Set();
+  for(var i=0;i<M3_SIZE;i++)for(var j=0;j<M3_SIZE;j++){
+    if(j<M3_SIZE-2&&m3State.grid[i][j]===m3State.grid[i][j+1]&&m3State.grid[i][j]===m3State.grid[i][j+2]){matched.add(i+','+j);matched.add(i+','+(j+1));matched.add(i+','+(j+2))}
+    if(i<M3_SIZE-2&&m3State.grid[i][j]===m3State.grid[i+1][j]&&m3State.grid[i][j]===m3State.grid[i+2][j]){matched.add(i+','+j);matched.add((i+1)+','+j);matched.add((i+2)+','+j)}
+  }return Array.from(matched).map(function(s){var p=s.split(',');return{row:parseInt(p[0]),col:parseInt(p[1])}})
+}
+function processMatches(matches){
+  var count=matches.length,baseScore=count*10,bonus=count>=7?3:count>=5?2:1;
+  m3State.score+=baseScore*bonus;
+  if(count>=5)catAct('talk');if(count>=7){catAct('happy');spawnConfetti()}
+  var matchSet=new Set();matches.forEach(function(m){m3State.grid[m.row][m.col]=-1;matchSet.add(m.row+','+m.col)});
+  refreshM3();
+  var cells=document.querySelectorAll('#m3Grid .m3-cell');
+  cells.forEach(function(c){var r=c.dataset.r,c2=c.dataset.c;if(r!==undefined&&matchSet.has(r+','+c2))c.classList.add('matched')});
+  setTimeout(function(){
+    dropTiles();fillTiles();refreshM3();
+    var newMatches=findMatches();
+    if(newMatches.length>0){setTimeout(function(){processMatches(newMatches)},300)}
+    else{m3State.animating=false;checkGameEnd()}
+  },300)
+}
+function dropTiles(){
+  for(var j=0;j<M3_SIZE;j++){var writeRow=M3_SIZE-1;for(var i=M3_SIZE-1;i>=0;i--){if(m3State.grid[i][j]!==-1){m3State.grid[writeRow][j]=m3State.grid[i][j];writeRow--}}for(var k=writeRow;k>=0;k--){m3State.grid[k][j]=-1}}
+}
+function fillTiles(){for(var i=0;i<M3_SIZE;i++)for(var j=0;j<M3_SIZE;j++){if(m3State.grid[i][j]===-1)m3State.grid[i][j]=Math.floor(Math.random()*M3_ICONS.length)}}
+async function checkGameEnd(){
+  if(m3State.score>=m3State.target){
+    var stars=m3State.score>=m3State.target*2?3:m3State.score>=m3State.target*1.5?2:1;
+    var p=await loadM3Progress();
+    if(!p.stars[m3State.level]||stars>p.stars[m3State.level])p.stars[m3State.level]=stars;
+    if(m3State.level===p.unlocked&&m3State.level<M3_LEVELS.length)p.unlocked=m3State.level+1;
+    if(!p.bestScore[m3State.level]||m3State.score>p.bestScore[m3State.level])p.bestScore[m3State.level]=m3State.score;
+    await saveM3Progress(p);catAct('happy');spawnConfetti();
+    setTimeout(function(){alert('🎉 过关啦！\n'+'⭐'.repeat(stars)+'\n得分：'+m3State.score);renderGames()},600)
+  }else if(m3State.steps<=0){
+    refreshM3();
+    setTimeout(function(){alert('😿 步数用完啦\n得分：'+m3State.score+'/'+m3State.target+'\n再试一次吧！');renderGames()},300)
+  }
+}
+
+// ========== INIT ==========
+document.addEventListener('DOMContentLoaded',()=>{renderNav();navigate('dashboard')});
+// Period calendar click delegation
+document.addEventListener('click',e=>{
+  const pd=e.target.closest('.period-day');
+  if(pd){const d=pd.textContent.trim();if(d&&/^\d+$/.test(d)){const n=new Date();const m=String(n.getMonth()+1).padStart(2,'0');const date=n.getFullYear()+'-'+m+'-'+String(parseInt(d)).padStart(2,'0');showQuickPeriod(date)}}
+});
+function showQuickPeriod(date){
+  document.getElementById('pStart')||(function(){
+    const o=document.createElement('div');o.className='modal-overlay';o.id='quickPeriodModal';
+    o.innerHTML='<div class="modal"><div class="modal-title">记录经期</div><div class="form-row"><div class="form-group"><label>开始</label><input class="input" type="date" id="pStart" value="'+date+'"></div><div class="form-group"><label>结束</label><input class="input" type="date" id="pEnd"></div></div><div class="form-group"><label>症状</label><input class="input" id="pSym"></div><div class="form-group"><label>心情</label><select class="select" id="pMood"><option value="">--</option><option value="😊 愉快">😊 愉快</option><option value="😐 一般">😐 一般</option><option value="😢 低落">😢 低落</option><option value="😡 烦躁">😡 烦躁</option></select></div><div style="display:flex;gap:10px;justify-content:flex-end"><button class="btn btn-outline btn-sm" onclick="this.closest(\'.modal-overlay\').remove()">取消</button><button class="btn btn-primary btn-sm" onclick="savePeriod()">保存</button></div></div>';
+    o.addEventListener('click',e=>{if(e.target===o)o.remove()});document.body.appendChild(o);
+  })();
+}
+document.addEventListener('click',e=>{if(window.innerWidth<=768&&sidebarOpen&&!e.target.closest('.sidebar')&&!e.target.closest('.menu-toggle'))toggleSidebar(false)});
+if('Notification' in window){Notification.requestPermission().then(p=>{if(p==='granted'){setInterval(()=>{new Notification('小七提醒💧',{body:'该喝水啦！起来活动一下吧~',icon:'🐱'})},45*60*1000)}})}
+console.log('🐱 钟雁羚的工作台 已就绪！');
+
+// ===== PWA 安装提示 =====
+let deferredPrompt=null;
+window.addEventListener('beforeinstallprompt',function(e){e.preventDefault();deferredPrompt=e;
+  var el=document.getElementById('pwaInstall');if(el)el.style.display='block'});
+function installPWA(){if(!deferredPrompt)return toast('请通过浏览器菜单安装');
+  deferredPrompt.prompt();deferredPrompt.userChoice.then(function(r){deferredPrompt=null;
+    var el=document.getElementById('pwaInstall');if(el)el.style.display='none';
+    if(r.outcome==='accepted')toast('安装成功！📱')})}
+// 如果已安装则隐藏按钮
+if(window.matchMedia('(display-mode:standalone)').matches){
+  var el=document.getElementById('pwaInstall');if(el)el.style.display='none'}
+
+// ===== 同步状态监听 =====
+window.addEventListener('wb-sync',function(e){
+  catAct('talk');var b=document.getElementById('catBubble');
+  var msg='刚刚和'+((e.detail||{}).device||'其他设备')+'同步啦～';
+  positionBubble(msg,3000)
+});
+// 离线检测
+window.addEventListener('online',function(){SyncDB.sync();toast('📶 网络已恢复，正在同步...')});
+window.addEventListener('offline',function(){toast('📴 已离线，数据保存在本地')});
+
+// 同步状态指示器
+setInterval(function(){
+  SyncDB.pendingCount().then(function(c){
+    var el=document.getElementById('syncBadge');
+    if(el)el.textContent=c>0?c:'';if(el)el.style.display=c>0?'inline':'none'
+  })
+},10000);
+
+// ===== Service Worker 注册 =====
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/sw.js').then(function(reg){
+    console.log('📱 SW registered');
+  }).catch(function(){});
+}
+</script>
+<script src="/sync.js"></script>
+</body>
+</html>
