@@ -987,7 +987,7 @@ app.post('/api/recipes/reload', (req, res) => {
     if (require.cache[require.resolve('./public/recipes-data')]) {
       delete require.cache[require.resolve('./public/recipes-data')];
     }
-    const recipes = require('./recipes-data');
+    const recipes = require('./public/recipes-data');
     const delCount = db.prepare("DELETE FROM recipes WHERE category = '' OR category IS NULL").run().changes;
     const insertRecipe = db.prepare(
       'INSERT INTO recipes (name, category, ingredients, steps, flavor_tags, difficulty, cook_time) VALUES (?,?,?,?,?,?,?)'
