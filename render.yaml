@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: workbuddy
+    runtime: docker
+    plan: free
+    healthCheckPath: /api/dashboard
+    envVars:
+      - key: DATA_DIR
+        value: /data
+      - key: PORT
+        value: "3000"
+    disk:
+      name: data
+      mountPath: /data
+      sizeGB: 1
