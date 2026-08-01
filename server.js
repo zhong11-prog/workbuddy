@@ -394,24 +394,20 @@ function seedData() {
   const rc = db.prepare("SELECT COUNT(*) as c FROM recipes WHERE category IS NOT NULL AND category != ''").get();
   if (rc.c < 200) {
     try {
-      const seedPath = path.join(__dirname, 'seed-recipes.json');
-      if (fs.existsSync(seedPath)) {
-        const recipes = JSON.parse(fs.readFileSync(seedPath, 'utf8'));
-        db.prepare("DELETE FROM recipes WHERE category = '' OR category IS NULL").run();
-        const insertRecipe = db.prepare(
-          'INSERT INTO recipes (name, category, ingredients, steps, flavor_tags, difficulty, cook_time) VALUES (?,?,?,?,?,?,?)'
-        );
-        const importAll = db.transaction((rows) => {
-          let count = 0;
-          for (const r of rows) {
-            insertRecipe.run(r.name, r.category, r.ingredients, r.steps, r.flavor_tags, r.difficulty, r.cook_time);
-            count++;
-          }
-          return count;
-        });
-        const imported = importAll(recipes);
-        console.log(`👩‍🍳 已导入 ${imported} 道菜谱！`);
-      }
+      const recipes = require('./recipes-data');
+      db.prepare("DELETE FROM recipes WHERE category = '' OR category IS NULL").run();
+      const insertRecipe = db.prepare(
+        'INSERT INTO recipes (name, category, ingredients, steps, flavor_tags, difficulty, cook_time) VALUES (?,?,?,?,?,?,?)'
+      );
+      const importAll = db.transaction((rows) => {
+        let count = 0;
+        for (const r of rows) count += insertRecipe.run(r.name, r.category, r.ingredients, r.steps, r.flavor_tags, r.difficulty, r.cook_time).changes;
+        return count;
+      });
+      const imported = importAll(recipes);
+      console.log(`👩‍🍳 已导入 ${imported} 道菜谱！`);
+      // 清除旧的模块缓存以便后续 reload
+      delete require.cache[require.resolve('./recipes-data')];
     } catch (e) { console.log('⚠️ 菜谱导入失败:', e.message); }
   }
 
@@ -986,27 +982,24 @@ app.delete('/api/recipes/:id', (req, res) => {
 // 手动触发种子菜谱重新导入（用于 Railway 等环境部署后初始化数据）
 app.post('/api/recipes/reload', (req, res) => {
   try {
-    const seedPath = path.join(__dirname, 'seed-recipes.json');
-    if (!fs.existsSync(seedPath)) {
-      return res.status(500).json({ error: 'seed-recipes.json 未找到，路径: ' + seedPath });
+    // 清除缓存以确保获取最新版本
+    const cachePath = path.join(__dirname, 'recipes-data.js');
+    if (require.cache[require.resolve('./recipes-data')]) {
+      delete require.cache[require.resolve('./recipes-data')];
     }
-    const recipes = JSON.parse(fs.readFileSync(seedPath, 'utf8'));
-    // 删除旧的没有分类的菜谱
+    const recipes = require('./recipes-data');
     const delCount = db.prepare("DELETE FROM recipes WHERE category = '' OR category IS NULL").run().changes;
     const insertRecipe = db.prepare(
       'INSERT INTO recipes (name, category, ingredients, steps, flavor_tags, difficulty, cook_time) VALUES (?,?,?,?,?,?,?)'
     );
     const importAll = db.transaction((rows) => {
       let count = 0;
-      for (const r of rows) {
-        insertRecipe.run(r.name, r.category, r.ingredients, r.steps, r.flavor_tags, r.difficulty, r.cook_time);
-        count++;
-      }
+      for (const r of rows) count += insertRecipe.run(r.name, r.category, r.ingredients, r.steps, r.flavor_tags, r.difficulty, r.cook_time).changes;
       return count;
     });
     const imported = importAll(recipes);
     // 同步菜单项
-    const mic = db.prepare("DELETE FROM menu_items WHERE recipe_id IS NULL OR recipe_id NOT IN (SELECT id FROM recipes)").run();
+    db.prepare("DELETE FROM menu_items WHERE recipe_id IS NULL OR recipe_id NOT IN (SELECT id FROM recipes)").run();
     const sampleRecipes = db.prepare('SELECT id, name FROM recipes ORDER BY RANDOM() LIMIT 30').all();
     const insertMenu = db.prepare('INSERT INTO menu_items (name, meal_type, category, recipe_id) VALUES (?,?,?,?)');
     const meals = ['breakfast', 'lunch', 'dinner', 'snack'];
