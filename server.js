@@ -983,6 +983,40 @@ app.delete('/api/recipes/:id', (req, res) => {
   res.json({ success: true });
 });
 
+// 手动触发种子菜谱重新导入（用于 Railway 等环境部署后初始化数据）
+app.post('/api/recipes/reload', (req, res) => {
+  try {
+    const seedPath = path.join(__dirname, 'seed-recipes.json');
+    if (!fs.existsSync(seedPath)) {
+      return res.status(500).json({ error: 'seed-recipes.json 未找到，路径: ' + seedPath });
+    }
+    const recipes = JSON.parse(fs.readFileSync(seedPath, 'utf8'));
+    // 删除旧的没有分类的菜谱
+    const delCount = db.prepare("DELETE FROM recipes WHERE category = '' OR category IS NULL").run().changes;
+    const insertRecipe = db.prepare(
+      'INSERT INTO recipes (name, category, ingredients, steps, flavor_tags, difficulty, cook_time) VALUES (?,?,?,?,?,?,?)'
+    );
+    const importAll = db.transaction((rows) => {
+      let count = 0;
+      for (const r of rows) {
+        insertRecipe.run(r.name, r.category, r.ingredients, r.steps, r.flavor_tags, r.difficulty, r.cook_time);
+        count++;
+      }
+      return count;
+    });
+    const imported = importAll(recipes);
+    // 同步菜单项
+    const mic = db.prepare("DELETE FROM menu_items WHERE recipe_id IS NULL OR recipe_id NOT IN (SELECT id FROM recipes)").run();
+    const sampleRecipes = db.prepare('SELECT id, name FROM recipes ORDER BY RANDOM() LIMIT 30').all();
+    const insertMenu = db.prepare('INSERT INTO menu_items (name, meal_type, category, recipe_id) VALUES (?,?,?,?)');
+    const meals = ['breakfast', 'lunch', 'dinner', 'snack'];
+    sampleRecipes.forEach((r, i) => { insertMenu.run(r.name, meals[i % 4], 'home', r.id); });
+    res.json({ success: true, deleted: delCount, imported: imported, menuItems: sampleRecipes.length });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
 // --- 待购清单 ---
 app.get('/api/shopping', (req, res) => {
   const { show_purchased } = req.query;
