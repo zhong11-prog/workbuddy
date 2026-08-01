@@ -1,0 +1,9 @@
+node_modules
+data.db
+backups/
+data/books/
+*.log
+logs/
+.git
+.gitignore
+.DS_Store
