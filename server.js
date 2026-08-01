@@ -394,7 +394,7 @@ function seedData() {
   const rc = db.prepare("SELECT COUNT(*) as c FROM recipes WHERE category IS NOT NULL AND category != ''").get();
   if (rc.c < 200) {
     try {
-      const recipes = require('./recipes-data');
+      const recipes = require('./public/recipes-data');
       db.prepare("DELETE FROM recipes WHERE category = '' OR category IS NULL").run();
       const insertRecipe = db.prepare(
         'INSERT INTO recipes (name, category, ingredients, steps, flavor_tags, difficulty, cook_time) VALUES (?,?,?,?,?,?,?)'
@@ -407,7 +407,7 @@ function seedData() {
       const imported = importAll(recipes);
       console.log(`👩‍🍳 已导入 ${imported} 道菜谱！`);
       // 清除旧的模块缓存以便后续 reload
-      delete require.cache[require.resolve('./recipes-data')];
+      delete require.cache[require.resolve('./public/recipes-data')];
     } catch (e) { console.log('⚠️ 菜谱导入失败:', e.message); }
   }
 
@@ -984,8 +984,8 @@ app.post('/api/recipes/reload', (req, res) => {
   try {
     // 清除缓存以确保获取最新版本
     const cachePath = path.join(__dirname, 'recipes-data.js');
-    if (require.cache[require.resolve('./recipes-data')]) {
-      delete require.cache[require.resolve('./recipes-data')];
+    if (require.cache[require.resolve('./public/recipes-data')]) {
+      delete require.cache[require.resolve('./public/recipes-data')];
     }
     const recipes = require('./recipes-data');
     const delCount = db.prepare("DELETE FROM recipes WHERE category = '' OR category IS NULL").run().changes;
