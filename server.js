@@ -129,6 +129,7 @@ function initDatabase() {
       flavor_tags TEXT DEFAULT '',
       difficulty TEXT DEFAULT 'medium' CHECK(difficulty IN ('easy','medium','hard')),
       cook_time INTEGER DEFAULT 30,
+      category TEXT DEFAULT '',
       created_at TEXT DEFAULT (datetime('now','localtime'))
     );
 
@@ -389,53 +390,72 @@ function seedData() {
     insertManyH(habits);
   }
 
-  // 默认菜单项
-  const mc = db.prepare('SELECT COUNT(*) as c FROM menu_items').get();
-  if (mc.c === 0) {
-    const menus = [
-      ['煎饼果子','breakfast','takeout'], ['小米粥','breakfast','home'], ['吐司煎蛋','breakfast','home'],
-      ['红烧排骨','lunch','home'], ['宫保鸡丁','lunch','home'], ['麻辣烫','lunch','takeout'],
-      ['番茄炒蛋','dinner','home'], ['清蒸鱼','dinner','home'], ['寿司','dinner','takeout'],
-      ['三明治','snack','home'], ['水果沙拉','snack','home'], ['酸辣粉','snack','takeout']
-    ];
-    const insertMenu = db.prepare('INSERT INTO menu_items (name,meal_type,category) VALUES (?,?,?)');
-    const insertManyM = db.transaction((rows) => { for (const r of rows) insertMenu.run(...r); });
-    insertManyM(menus);
+  // 家常菜谱种子数据 — 从 JSON 文件导入 200+ 道
+  const rc = db.prepare("SELECT COUNT(*) as c FROM recipes WHERE category IS NOT NULL AND category != ''").get();
+  if (rc.c < 200) {
+    try {
+      const seedPath = path.join(__dirname, 'seed-recipes.json');
+      if (fs.existsSync(seedPath)) {
+        const recipes = JSON.parse(fs.readFileSync(seedPath, 'utf8'));
+        db.prepare("DELETE FROM recipes WHERE category = '' OR category IS NULL").run();
+        const insertRecipe = db.prepare(
+          'INSERT INTO recipes (name, category, ingredients, steps, flavor_tags, difficulty, cook_time) VALUES (?,?,?,?,?,?,?)'
+        );
+        const importAll = db.transaction((rows) => {
+          let count = 0;
+          for (const r of rows) {
+            insertRecipe.run(r.name, r.category, r.ingredients, r.steps, r.flavor_tags, r.difficulty, r.cook_time);
+            count++;
+          }
+          return count;
+        });
+        const imported = importAll(recipes);
+        console.log(`👩‍🍳 已导入 ${imported} 道菜谱！`);
+      }
+    } catch (e) { console.log('⚠️ 菜谱导入失败:', e.message); }
   }
 
-  // 家常菜谱种子数据
-  const rc = db.prepare('SELECT COUNT(*) as c FROM recipes').get();
-  if (rc.c === 0) {
-    const recipes = [
-      ['番茄炒蛋','番茄 2个\n鸡蛋 3个\n葱花 适量\n盐 适量\n糖 少许\n食用油','1. 番茄切块，鸡蛋打散加盐\n2. 热油炒蛋凝固盛出\n3. 再加油炒番茄出汁，加少许糖\n4. 倒入鸡蛋翻炒均匀，加盐撒葱花出锅','家常,酸甜,下饭,快手','easy',15],
-      ['红烧排骨','排骨 500g\n生抽 2勺\n老抽 1勺\n料酒 1勺\n冰糖 15g\n姜片 3片\n八角 2个\n桂皮 1段\n盐','1. 排骨冷水焯水去血沫\n2. 少许油加冰糖小火炒糖色\n3. 下排骨翻炒上色\n4. 加姜八角桂皮炒香\n5. 加生抽老抽料酒，热水没过排骨\n6. 小火炖40分钟，大火收汁','咸甜,红烧,硬菜,下饭','medium',60],
-      ['宫保鸡丁','鸡胸肉 300g\n花生米 50g\n干辣椒 5个\n花椒 少许\n葱段\n姜蒜\n生抽 1勺\n醋 1勺\n糖 1勺\n淀粉','1. 鸡肉切丁加盐淀粉料酒腌15分钟\n2. 生抽+醋+糖+淀粉调碗汁\n3. 冷油炸花生至金黄捞出\n4. 爆香花椒干辣椒\n5. 滑炒鸡丁变色\n6. 倒碗汁翻炒，加花生葱段出锅','麻辣,咸鲜,下饭,川菜','medium',25],
-      ['清蒸鲈鱼','鲈鱼 1条约500g\n姜丝\n葱丝\n蒸鱼豉油 2勺\n料酒 1勺\n盐\n食用油','1. 鱼洗净两面划刀，抹盐料酒腌10分钟\n2. 盘底铺姜丝，放鱼再放姜丝\n3. 水开蒸8-10分钟\n4. 倒掉汤汁，撒葱丝淋豉油\n5. 烧热油浇在葱丝上','清淡,鲜美,粤菜','easy',20],
-      ['麻婆豆腐','嫩豆腐 1盒\n猪肉末 100g\n豆瓣酱 1勺\n花椒粉\n葱花\n姜蒜末\n生抽 1勺\n淀粉','1. 豆腐切块焯水1分钟\n2. 热油炒肉末变色\n3. 加豆瓣酱姜蒜炒红油\n4. 加水烧开放豆腐煮3分钟\n5. 水淀粉勾芡撒花椒粉葱花','麻辣,下饭,川菜','easy',20],
-      ['糖醋里脊','猪里脊 300g\n番茄酱 3勺\n白糖 2勺\n白醋 1勺\n鸡蛋 1个\n淀粉\n盐','1. 里脊切条加盐鸡蛋淀粉抓匀\n2. 番茄酱+糖+醋+水调汁\n3. 六成热油炸里脊至金黄捞出\n4. 升高油温复炸更酥脆\n5. 锅中留底油倒汁煮浓稠\n6. 放里脊快速翻匀出锅','酸甜,酥脆,硬菜','medium',30],
-      ['可乐鸡翅','鸡翅中 10个\n可乐 1罐\n生抽 2勺\n老抽 1勺\n姜片\n料酒','1. 鸡翅两面划刀加料酒姜腌10分钟\n2. 热油煎鸡翅至两面金黄\n3. 倒可乐生抽老抽\n4. 大火烧开转中火煮15分钟\n5. 收汁至浓稠出锅','咸甜,下饭,快手菜','easy',25],
-      ['鱼香肉丝','猪里脊 200g\n木耳\n胡萝卜 半根\n青椒 1个\n泡椒 2个\n姜蒜末\n生抽 1勺\n醋 2勺\n糖 1勺\n豆瓣酱\n淀粉','1. 肉切丝加淀粉盐腌制\n2. 木耳胡萝卜青椒切丝\n3. 生抽+醋+糖+淀粉调鱼香汁\n4. 热油滑炒肉丝盛出\n5. 豆瓣酱泡椒姜蒜炒香\n6. 加蔬菜丝肉丝倒鱼香汁翻匀','酸甜,微辣,下饭,川菜','medium',25],
-      ['蛋炒饭','米饭 1碗（隔夜最好）\n鸡蛋 2个\n火腿肠 1根\n葱花\n盐\n食用油','1. 鸡蛋打散火腿切丁\n2. 热油炒蛋盛出\n3. 再加油炒散米饭\n4. 加火腿鸡蛋翻炒\n5. 加盐撒葱花出锅','家常,快手,主食','easy',10],
-      ['葱油拌面','面条 200g\n小葱 5根\n生抽 2勺\n老抽 1勺\n白糖 1勺','1. 面条煮熟过凉水\n2. 小葱切段\n3. 中火油炸葱段至焦黄\n4. 捞出葱段油中加生抽老抽糖\n5. 浇在面条上拌匀','咸甜,快手,主食','easy',15],
-      ['手撕包菜','包菜 半颗\n干辣椒 4个\n蒜片\n生抽 1勺\n醋 1勺\n盐','1. 包菜手撕块洗净沥干\n2. 热油爆香干辣椒蒜片\n3. 大火放包菜快速翻炒\n4. 加生抽醋盐调味\n5. 炒至断生出锅','酸辣,素食,快手','easy',10],
-      ['蚝油生菜','生菜 2颗\n蒜末\n蚝油 2勺\n生抽 1勺','1. 生菜焯水5秒捞出摆盘\n2. 热油爆香蒜末\n3. 加蚝油生抽少许水煮开\n4. 浇在生菜上','清淡,素食,快手','easy',8],
-      ['拍黄瓜','黄瓜 2根\n蒜末\n醋 2勺\n生抽 1勺\n辣椒油 1勺\n盐\n糖\n香油','1. 黄瓜拍碎切段\n2. 蒜捣泥加盐\n3. 所有调料混合成酱汁\n4. 浇在黄瓜上拌匀','酸辣,凉菜,快手','easy',5],
-      ['青椒肉丝','猪里脊 200g\n青椒 2个\n姜丝\n生抽 1勺\n料酒 1勺\n淀粉\n盐','1. 肉切丝加料酒淀粉盐腌10分钟\n2. 青椒切丝\n3. 热油滑炒肉丝变色盛出\n4. 姜丝青椒翻炒\n5. 倒肉丝加生抽盐翻匀','家常,咸鲜,下饭','easy',15],
-      ['酸辣土豆丝','土豆 2个\n干辣椒 3个\n花椒\n醋 2勺\n盐\n葱花','1. 土豆切细丝冷水浸泡去淀粉\n2. 捞出沥干\n3. 热油爆香花椒干辣椒\n4. 大火放土豆丝快速翻炒\n5. 加盐醋炒至断生撒葱花','酸辣,素食,下饭','easy',10],
-      ['水煮肉片','猪里脊 300g\n豆芽 200g\n干辣椒 10个\n花椒\n豆瓣酱 2勺\n姜蒜末\n生抽\n淀粉','1. 肉切薄片加淀粉盐抓匀\n2. 豆芽焯水铺碗底\n3. 热油爆香豆瓣酱姜蒜\n4. 加水烧开加生抽\n5. 逐片放肉滑熟倒入碗中\n6. 撒干辣椒花椒浇热油','麻辣,下饭,川菜','hard',35],
-      ['西红柿牛腩','牛腩 500g\n西红柿 3个\n洋葱 半个\n姜片\n番茄酱 2勺\n盐\n料酒','1. 牛腩焯水捞出\n2. 西红柿切块洋葱切丝\n3. 热油洋葱姜片炒香\n4. 加西红柿炒出汁放牛腩\n5. 加料酒番茄酱水炖1.5小时\n6. 加盐调味','酸甜,滋补,硬菜','medium',120],
-      ['红烧鸡块','鸡腿 3个\n土豆 2个\n生抽 2勺\n老抽 1勺\n冰糖 10g\n姜片\n八角\n盐','1. 鸡腿剁块焯水\n2. 土豆切块\n3. 少许油冰糖炒糖色\n4. 下鸡块翻炒上色\n5. 加姜八角生抽老抽\n6. 加热水炖20分钟\n7. 加土豆再炖15分钟收汁','咸甜,下饭,硬菜','medium',45],
-      ['皮蛋瘦肉粥','大米 100g\n皮蛋 2个\n瘦肉 100g\n姜丝\n葱花\n盐\n白胡椒粉','1. 大米浸泡30分钟\n2. 瘦肉切丝加盐腌\n3. 皮蛋切块\n4. 水烧开放米小火煮20分钟\n5. 加瘦肉姜丝煮5分钟\n6. 加皮蛋煮3分钟\n7. 加盐胡椒粉撒葱花','清淡,养胃,早餐','easy',40],
-      ['干煸四季豆','四季豆 300g\n猪肉末 100g\n干辣椒 5个\n花椒\n姜蒜末\n生抽 1勺\n盐','1. 四季豆去筋掰段\n2. 多油中火煸四季豆至起皱捞出\n3. 留底油炒肉末变色\n4. 加干辣椒花椒姜蒜炒香\n5. 倒四季豆加生抽盐翻匀','麻辣,下饭,川菜','medium',20],
-    ];
-    const insertRecipe = db.prepare('INSERT INTO recipes (name,ingredients,steps,flavor_tags,difficulty,cook_time) VALUES (?,?,?,?,?,?)');
-    const insertManyR = db.transaction((rows) => { for (const r of rows) insertRecipe.run(...r); });
-    insertManyR(recipes);
+  // 同步菜单项 — 按菜谱随机创建
+  const mic = db.prepare('SELECT COUNT(*) as c FROM menu_items WHERE recipe_id IS NOT NULL').get();
+  if (mic.c < 20) {
+    const sampleRecipes = db.prepare('SELECT id, name FROM recipes ORDER BY RANDOM() LIMIT 30').all();
+    if (sampleRecipes.length > 0) {
+      const insertMenu = db.prepare('INSERT INTO menu_items (name, meal_type, category, recipe_id) VALUES (?,?,?,?)');
+      const meals = ['breakfast', 'lunch', 'dinner', 'snack'];
+      sampleRecipes.forEach((r, i) => { insertMenu.run(r.name, meals[i % 4], 'home', r.id); });
+      console.log(`🍽️ 同步创建了 ${sampleRecipes.length} 个菜单项`);
+    }
   }
 }
 
 // ==================== Initialize ====================
 initDatabase();
+
+// 数据库迁移：确保 recipes 表有 category 列（必须在 seedData 之前执行）
+try {
+  const cols = db.prepare("PRAGMA table_info(recipes)").all();
+  if (!cols.some(c => c.name === 'category')) {
+    db.exec("ALTER TABLE recipes ADD COLUMN category TEXT DEFAULT ''");
+    console.log('✅ 数据库迁移：recipes 表已添加 category 列');
+  }
+} catch (e) {
+  console.log('⚠️ 数据库迁移跳过:', e.message);
+}
+
+// 数据库迁移：确保 menu_items 表有 recipe_id 列
+try {
+  const miCols = db.prepare("PRAGMA table_info(menu_items)").all();
+  if (!miCols.some(c => c.name === 'recipe_id')) {
+    db.exec("ALTER TABLE menu_items ADD COLUMN recipe_id INTEGER DEFAULT NULL");
+    console.log('✅ 数据库迁移：menu_items 表已添加 recipe_id 列');
+  }
+  if (!miCols.some(c => c.name === 'flavor_tag')) {
+    db.exec("ALTER TABLE menu_items ADD COLUMN flavor_tag TEXT DEFAULT ''");
+  }
+} catch (e) {
+  console.log('⚠️ 菜单表迁移跳过:', e.message);
+}
+
 seedData();
 
 // ==================== Middleware ====================
@@ -906,48 +926,55 @@ app.delete('/api/menu/:id', (req, res) => {
 });
 
 app.get('/api/menu/random', (req, res) => {
-  const { meal_type } = req.query;
-  let sql = 'SELECT * FROM menu_items';
+  const { meal_type, category, flavor } = req.query;
+  // 从菜谱池中随机抽取
+  let sql = 'SELECT * FROM recipes WHERE 1=1';
   const params = [];
-  if (meal_type && meal_type !== 'any') { sql += ' WHERE meal_type=? OR meal_type=?'; params.push(meal_type, 'any'); }
+  if (category && category !== '全部') { sql += ' AND category=?'; params.push(category); }
+  if (flavor && flavor !== '全部口味') { sql += ' AND flavor_tags LIKE ?'; params.push(`%${flavor}%`); }
   sql += ' ORDER BY RANDOM() LIMIT 1';
-  const item = db.prepare(sql).get(...params);
-  if (!item) return res.json(null);
-  // 如果关联了菜谱
-  if (item.recipe_id) {
-    const recipe = db.prepare('SELECT * FROM recipes WHERE id=?').get(item.recipe_id);
-    item.recipe = recipe || null;
-  }
-  res.json(item);
+  const recipe = db.prepare(sql).get(...params);
+  if (!recipe) return res.json(null);
+  res.json(recipe);
 });
 
 // --- 家常菜谱 ---
 app.get('/api/recipes', (req, res) => {
-  const { search } = req.query;
-  const sql = search
-    ? "SELECT * FROM recipes WHERE name LIKE ? OR flavor_tags LIKE ? OR ingredients LIKE ? ORDER BY id DESC"
-    : 'SELECT * FROM recipes ORDER BY id DESC';
-  const recipes = search
-    ? db.prepare(sql).all(`%${search}%`, `%${search}%`, `%${search}%`)
-    : db.prepare(sql).all();
+  const { search, category, flavor } = req.query;
+  let sql = 'SELECT * FROM recipes WHERE 1=1';
+  const params = [];
+  if (search) { sql += ' AND (name LIKE ? OR flavor_tags LIKE ? OR ingredients LIKE ?)'; params.push(`%${search}%`, `%${search}%`, `%${search}%`); }
+  if (category && category !== '全部') { sql += ' AND category=?'; params.push(category); }
+  if (flavor && flavor !== '全部口味') { sql += ' AND flavor_tags LIKE ?'; params.push(`%${flavor}%`); }
+  sql += ' ORDER BY id DESC';
+  const recipes = db.prepare(sql).all(...params);
   res.json(recipes);
 });
 
+// 获取所有菜谱类别
+app.get('/api/recipes/categories', (req, res) => {
+  const cats = db.prepare("SELECT DISTINCT category FROM recipes WHERE category != '' ORDER BY category").all();
+  const tags = db.prepare("SELECT DISTINCT flavor_tags FROM recipes WHERE flavor_tags != ''").all();
+  const allTags = new Set();
+  tags.forEach(t => { t.flavor_tags.split(',').forEach(f => { const ft = f.trim(); if (ft) allTags.add(ft); }); });
+  res.json({ categories: cats.map(c => c.category), flavors: Array.from(allTags) });
+});
+
 app.post('/api/recipes', (req, res) => {
-  const { name, ingredients, steps, flavor_tags, difficulty, cook_time } = req.body;
-  const result = db.prepare('INSERT INTO recipes (name,ingredients,steps,flavor_tags,difficulty,cook_time) VALUES (?,?,?,?,?,?)')
-    .run(name, ingredients || '', steps || '', flavor_tags || '', difficulty || 'medium', cook_time || 30);
+  const { name, ingredients, steps, flavor_tags, difficulty, cook_time, category } = req.body;
+  const result = db.prepare('INSERT INTO recipes (name,ingredients,steps,flavor_tags,difficulty,cook_time,category) VALUES (?,?,?,?,?,?,?)')
+    .run(name, ingredients || '', steps || '', flavor_tags || '', difficulty || 'medium', cook_time || 30, category || '');
   res.json(db.prepare('SELECT * FROM recipes WHERE id=?').get(result.lastInsertRowid));
 });
 
 app.put('/api/recipes/:id', (req, res) => {
-  const { name, ingredients, steps, flavor_tags, difficulty, cook_time } = req.body;
+  const { name, ingredients, steps, flavor_tags, difficulty, cook_time, category } = req.body;
   const rec = db.prepare('SELECT * FROM recipes WHERE id=?').get(req.params.id);
   if (!rec) return res.status(404).json({ error: 'Not found' });
   db.prepare(`UPDATE recipes SET name=COALESCE(?,name), ingredients=COALESCE(?,ingredients),
     steps=COALESCE(?,steps), flavor_tags=COALESCE(?,flavor_tags), difficulty=COALESCE(?,difficulty),
-    cook_time=COALESCE(?,cook_time) WHERE id=?`)
-    .run(name, ingredients, steps, flavor_tags, difficulty, cook_time, req.params.id);
+    cook_time=COALESCE(?,cook_time), category=COALESCE(?,category) WHERE id=?`)
+    .run(name, ingredients, steps, flavor_tags, difficulty, cook_time, category, req.params.id);
   res.json(db.prepare('SELECT * FROM recipes WHERE id=?').get(req.params.id));
 });
 
@@ -1191,9 +1218,11 @@ app.post('/api/games/scores', (req, res) => {
 
 // --- 消消乐进度 ---
 app.get('/api/match3/progress', (req, res) => {
-  const rows = db.prepare('SELECT * FROM match3_progress').all();
+  const rows = db.prepare("SELECT * FROM match3_progress WHERE key NOT LIKE 'daily_menu_%' AND key != 'last_reset_date'").all();
   const progress = {};
-  rows.forEach(r => { progress[r.key] = JSON.parse(r.value); });
+  rows.forEach(r => {
+    try { progress[r.key] = JSON.parse(r.value); } catch(e) { progress[r.key] = r.value; }
+  });
   res.json(progress);
 });
 
@@ -1204,7 +1233,55 @@ app.post('/api/match3/progress', (req, res) => {
   res.json({ success: true });
 });
 
-// --- 网络信息 ---
+// --- 历史/日历查询 ---
+
+// 健康打卡日历热力图
+app.get('/api/health/calendar', (req, res) => {
+  const month = req.query.month || today().substring(0, 7);
+  const start = month + '-01';
+  const end = month + '-31';
+  const checkins = db.prepare('SELECT date, habit_id FROM health_checkins WHERE date>=? AND date<=?').all(start, end);
+  const habits = db.prepare('SELECT * FROM health_habits').all();
+  const map = {};
+  checkins.forEach(c => { if (!map[c.date]) map[c.date] = []; map[c.date].push(c.habit_id); });
+  res.json({ month, habits, checkins: map, totalHabits: habits.length });
+});
+
+// 心情日历
+app.get('/api/mood/calendar', (req, res) => {
+  const month = req.query.month || today().substring(0, 7);
+  const moods = db.prepare('SELECT date, mood, emoji, note FROM mood_diary WHERE date>=? AND date<=?').all(month + '-01', month + '-31');
+  const map = {};
+  moods.forEach(m => { map[m.date] = { mood: m.mood, emoji: m.emoji, note: m.note }; });
+  res.json({ month, moods: map });
+});
+
+// 番茄历史统计
+app.get('/api/pomodoro/history', (req, res) => {
+  const start = req.query.start || today().substring(0, 7) + '-01';
+  const end = req.query.end || today();
+  const records = db.prepare('SELECT date, SUM(sessions) as sessions, SUM(total_minutes) as minutes FROM pomodoro WHERE date>=? AND date<=? GROUP BY date ORDER BY date DESC').all(start, end);
+  const total = db.prepare('SELECT SUM(sessions) as s, SUM(total_minutes) as m FROM pomodoro WHERE date>=? AND date<=?').get(start, end);
+  res.json({ records, total: total || { s: 0, m: 0 }, start, end });
+});
+
+// 韩语学习日历
+app.get('/api/korean/calendar', (req, res) => {
+  const month = req.query.month || today().substring(0, 7);
+  const records = db.prepare('SELECT date, SUM(vocab_learned) as vocab, SUM(grammar_learned) as grammar, SUM(study_minutes) as minutes FROM korean_progress WHERE date>=? AND date<=? GROUP BY date ORDER BY date').all(month + '-01', month + '-31');
+  const map = {};
+  records.forEach(r => { map[r.date] = { vocab: r.vocab || 0, grammar: r.grammar || 0, minutes: r.minutes || 0 }; });
+  res.json({ month, records: map });
+});
+
+// 历史任务（按日期）
+app.get('/api/tasks/history', (req, res) => {
+  const date = req.query.date || today();
+  const tasks = db.prepare('SELECT * FROM tasks WHERE date=? ORDER BY id').all(date);
+  res.json(tasks);
+});
+
+// 网络信息
 app.get('/api/network', (req, res) => {
   const os = require('os');
   const interfaces = os.networkInterfaces();
@@ -1271,6 +1348,33 @@ app.get('/api/backup/list', (req, res) => {
   res.json(files);
 });
 
+// --- 每日重置 & 每日菜单 ---
+app.post('/api/daily-reset', (req, res) => {
+  const result = dailyReset();
+  const t = today();
+  db.prepare("INSERT OR REPLACE INTO match3_progress (key, value) VALUES (?, ?)").run('last_reset_date', t);
+  res.json(result);
+});
+
+app.get('/api/daily-menu', (req, res) => {
+  const t = today();
+  const row = db.prepare("SELECT value FROM match3_progress WHERE key=?").get('daily_menu_' + t);
+  if (row) {
+    res.json(JSON.parse(row.value));
+  } else {
+    // 如果没有，即时从菜谱中生成
+    const meals = ['breakfast', 'lunch', 'dinner'];
+    const dailyMenu = {};
+    for (const meal of meals) {
+      const recipe = db.prepare('SELECT * FROM recipes ORDER BY RANDOM() LIMIT 1').get();
+      dailyMenu[meal] = recipe || null;
+    }
+    db.prepare('INSERT OR REPLACE INTO match3_progress (key, value) VALUES (?, ?)')
+      .run('daily_menu_' + t, JSON.stringify(dailyMenu));
+    res.json(dailyMenu);
+  }
+});
+
 // ==================== SPA Fallback ====================
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
@@ -1313,4 +1417,98 @@ cron.schedule('0 3 * * *', () => {
   }
 });
 
+// ==================== 每日重置逻辑 ====================
+function dailyReset() {
+  const t = today();
+  const yesterday = new Date();
+  yesterday.setDate(yesterday.getDate() - 1);
+  const yd = yesterday.toISOString().split('T')[0];
+
+  console.log(`🔄 [每日重置] 开始处理 ${t} ...`);
+
+  try {
+    // 1. 结转昨日未完成任务到今日
+    const undoneTasks = db.prepare('SELECT * FROM tasks WHERE date=? AND completed=0').all(yd);
+    if (undoneTasks.length > 0) {
+      const carryOver = db.prepare('INSERT INTO tasks (title,description,priority,time_slot,date) VALUES (?,?,?,?,?)');
+      const carryAll = db.transaction((rows) => {
+        for (const r of rows) carryOver.run(r.title, r.description, r.priority, r.time_slot, t);
+      });
+      carryAll(undoneTasks);
+      console.log(`  📋 结转 ${undoneTasks.length} 个未完成任务到今日`);
+    }
+
+    // 2. 标记昨日已完成任务为历史（不删除，保留记录）
+    const doneCount = db.prepare('SELECT COUNT(*) as c FROM tasks WHERE date=? AND completed=1').get(yd);
+    if (doneCount.c > 0) {
+      console.log(`  ✅ 昨日完成 ${doneCount.c} 个任务`);
+    }
+
+    // 3. 清理已购购物清单超过30天的记录（保留近期）
+    const oldShop = db.prepare("SELECT COUNT(*) as c FROM shopping WHERE purchased=1 AND created_at < datetime('now','-30 days')").get();
+    if (oldShop.c > 0) {
+      db.prepare("DELETE FROM shopping WHERE purchased=1 AND created_at < datetime('now','-30 days')").run();
+      console.log(`  🛒 清理 ${oldShop.c} 条已购购物记录（>30天）`);
+    }
+
+    // 4. 生成每日推荐菜单（三餐，从菜谱中随机选）
+    const meals = ['breakfast', 'lunch', 'dinner'];
+    const dailyMenu = {};
+    for (const meal of meals) {
+      const recipe = db.prepare('SELECT * FROM recipes ORDER BY RANDOM() LIMIT 1').get();
+      dailyMenu[meal] = recipe || null;
+    }
+
+    // 5. 保存每日菜单到 match3_progress 表（复用为 KV 存储）
+    db.prepare('INSERT OR REPLACE INTO match3_progress (key, value) VALUES (?, ?)')
+      .run('daily_menu_' + t, JSON.stringify(dailyMenu));
+
+    // 6. 更新仪表盘缓存（刷新连续打卡天数等）
+    console.log(`  🍽️ 已生成每日推荐菜单`);
+
+    // 7. 检查经期预测提醒
+    const lastPeriod = db.prepare('SELECT * FROM period_records ORDER BY start_date DESC LIMIT 1').get();
+    if (lastPeriod) {
+      const lastStart = new Date(lastPeriod.start_date);
+      const nextStart = new Date(lastStart);
+      nextStart.setDate(nextStart.getDate() + 28);
+      const daysUntil = Math.ceil((nextStart - new Date(t)) / (1000 * 60 * 60 * 24));
+      if (daysUntil >= 0 && daysUntil <= 3) {
+        console.log(`  📅 经期预测：距下次约 ${daysUntil} 天`);
+      }
+    }
+
+    console.log(`✅ [每日重置] 完成！`);
+    return { success: true, date: t, carriedTasks: undoneTasks.length, dailyMenu };
+  } catch (e) {
+    console.error(`❌ [每日重置] 失败:`, e.message);
+    return { success: false, error: e.message };
+  }
+}
+
+// 每天凌晨0点执行每日重置
+cron.schedule('0 0 * * *', () => {
+  dailyReset();
+});
+
+// 服务器启动时检查是否需要执行每日重置
+function checkDailyResetOnStartup() {
+  const t = today();
+  const lastReset = db.prepare("SELECT value FROM match3_progress WHERE key=?").get('last_reset_date');
+  if (!lastReset || lastReset.value !== t) {
+    console.log('🌅 检测到需要执行每日重置（首次启动或跨天）');
+    dailyReset();
+    db.prepare("INSERT OR REPLACE INTO match3_progress (key, value) VALUES (?, ?)").run('last_reset_date', t);
+  } else {
+    console.log('✅ 今日每日重置已执行过，跳过');
+  }
+}
+
+// 手动触发每日重置 API - 已移至 SPA Fallback 之前
+// 获取每日推荐菜单 - 已移至 SPA Fallback 之前
+
+// 启动时检查每日重置
+checkDailyResetOnStartup();
+
 console.log('📅 自动备份已设置（每天凌晨3:00，保留最近7天）');
+console.log('🔄 每日重置已设置（每天凌晨0:00，任务结转+菜单生成）');
