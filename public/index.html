@@ -79,10 +79,11 @@ td{padding:10px 12px;border-bottom:1px solid var(--border)}
 .grammar-card .g-title{font-size:18px;font-weight:700;color:var(--primary-dark)}
 .grammar-card .g-explain{font-size:14px;color:var(--text);margin:8px 0}
 .grammar-card .g-example{background:var(--bg);padding:10px 14px;border-radius:var(--radius-sm);margin:6px 0;font-size:14px}
-.book-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px}
-.book-card{background:var(--card-bg);border-radius:var(--radius);padding:16px;border:1px solid var(--border);transition:all var(--transition);cursor:pointer}
-.book-card:hover{transform:translateY(-2px);box-shadow:var(--shadow-lg)}
-.book-cover{height:100px;border-radius:var(--radius-sm);background:linear-gradient(135deg,var(--primary-light),#E8D5F0);display:flex;align-items:center;justify-content:center;font-size:28px;margin-bottom:10px}
+.book-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:16px}
+.book-card{background:var(--card-bg);border-radius:var(--radius);padding:12px;border:1px solid var(--border);transition:all var(--transition);cursor:pointer;text-align:center}
+.book-card:hover{transform:translateY(-3px);box-shadow:var(--shadow-lg)}
+.book-cover-img{width:100%;margin-bottom:10px;border-radius:var(--radius-sm);overflow:hidden}
+.book-cover-img svg{width:100%;height:auto;display:block;min-height:140px}
 .book-status{display:inline-block;padding:2px 10px;border-radius:10px;font-size:10px;font-weight:600;margin-bottom:6px}
 .book-status.want{background:#FFF3CD;color:#856404}.book-status.reading{background:#D6EAF8;color:#1A5276}.book-status.done{background:#D4EDDA;color:#155724}
 .timer-circle{width:180px;height:180px;border-radius:50%;border:6px solid var(--primary-light);display:flex;align-items:center;justify-content:center;margin:0 auto 20px;background:var(--card-bg);box-shadow:0 0 40px rgba(255,154,175,.15)}
@@ -279,8 +280,7 @@ const PAGES=[
   {id:'menu',icon:'🍜',label:'随机菜单'},{id:'recipes',icon:'👩‍🍳',label:'家常菜谱'},
   {id:'shopping',icon:'🛒',label:'待购清单'},{id:'health',icon:'💪',label:'健康打卡'},
   {id:'period',icon:'📅',label:'经期记录'},{id:'mood',icon:'💝',label:'心情日记'},
-  {id:'pomodoro',icon:'🍅',label:'番茄专注'},
-  {id:'games',icon:'🎮',label:'开心消消乐'},
+  {id:'pomodoro',icon:'🍅',label:'番茄专注'},{id:'notes',icon:'💡',label:'灵感便签'},
 ];
 let currentPage='dashboard',sidebarOpen=false;
 
@@ -372,7 +372,7 @@ setTimeout(()=>catAct('greet'),2000);resetCatTimer();
 
 function loadPage(id){
   document.getElementById('mainContent').innerHTML=`<div style="text-align:center;padding:60px;color:var(--text-muted)"><div style="font-size:40px">🐱</div><p>加载中...</p></div>`;
-  setTimeout(()=>{const fns={dashboard:renderDashboard,tasks:renderTasks,finance:renderFinance,fitness:renderFitness,korean:renderKorean,reading:renderReading,menu:renderMenu,recipes:renderRecipes,shopping:renderShopping,health:renderHealth,period:renderPeriod,mood:renderMood,pomodoro:renderPomodoro,games:renderGames};if(fns[id])fns[id]();else renderDashboard()},100)
+  setTimeout(()=>{const fns={dashboard:renderDashboard,tasks:renderTasks,finance:renderFinance,fitness:renderFitness,korean:renderKorean,reading:renderReading,menu:renderMenu,recipes:renderRecipes,shopping:renderShopping,health:renderHealth,period:renderPeriod,mood:renderMood,pomodoro:renderPomodoro,notes:renderNotes};if(fns[id])fns[id]();else renderDashboard()},100)
 }
 
 // ========== DASHBOARD ==========
@@ -752,11 +752,12 @@ async function loadBooks(){
   // Check which books have files
   var hasFiles={};try{var fr=await fetch(API+'/api/books/1/read');hasFiles['1']=true}catch(e){}
   el.innerHTML=bs.map(function(b){var pct=b.total_pages>0?Math.round(b.current_page/b.total_pages*100):0;
-    return'<div class="book-card" onclick="openReader('+b.id+')"><div class="book-cover">'+['📕','📗','📘','📙','📓'][b.id%5]+'</div>'+
+    var cover=b.cover||'<svg viewBox="0 0 120 160" xmlns="http://www.w3.org/2000/svg"><rect width="120" height="160" rx="8" fill="'+(['#FFD6E0','#FFF0F5','#FDE8EE','#FFE0E8','#F5E6F0'][b.id%5])+'"/><text x="60" y="50" text-anchor="middle" font-size="32" fill="#FF9AAF">🐱</text><text x="60" y="85" text-anchor="middle" font-size="11" fill="#5D4E5D" font-weight="600">'+(b.title.length>6?b.title.substring(0,6)+'…':b.title)+'</text><text x="60" y="102" text-anchor="middle" font-size="9" fill="#9B8E9B">'+(b.author||'未知作者')+'</text><line x1="30" y1="118" x2="90" y2="118" stroke="#E0D0E4" stroke-width="1"/><text x="60" y="138" text-anchor="middle" font-size="8" fill="#C4B8C4">📖 点击阅读</text></svg>';
+    return'<div class="book-card" onclick="openReader('+b.id+')"><div class="book-cover-img">'+cover+'</div>'+
     '<span class="book-status '+b.status+'">'+(b.status==='want'?'想读':b.status==='reading'?'在读':'已读')+'</span>'+
-    '<div style="font-weight:600;font-size:14px">'+b.title+'</div><div style="font-size:12px;color:var(--text-light)">'+(b.author||'未知')+'</div>'+
+    '<div style="font-weight:600;font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+b.title+'</div><div style="font-size:12px;color:var(--text-light)">'+(b.author||'未知')+'</div>'+
     (pct>0?'<div class="progress-bar" style="margin-top:8px"><div class="progress-fill" style="width:'+pct+'%"></div></div><div style="font-size:11px;color:var(--text-muted);margin-top:4px">'+b.current_page+'/'+b.total_pages+'页 ('+pct+'%)</div>':'')+
-    '<div style="margin-top:6px;display:flex;gap:6px"><button class="btn btn-sm btn-outline" onclick="event.stopPropagation();editBookMeta('+b.id+')">编辑</button><button class="btn btn-sm btn-danger" onclick="event.stopPropagation();delBook('+b.id+')">删除</button></div></div>'
+    '<div style="margin-top:6px;display:flex;gap:6px"><button class="btn btn-sm btn-outline" onclick="event.stopPropagation();editBookMeta('+b.id+')">编辑</button><button class="btn btn-sm btn-danger" onclick="event.stopPropagation();delBook('+b.id+')">删除</button></div></div>';
   }).join('')
 }
 function showAddBook(){
@@ -822,10 +823,10 @@ function renderReader(book){
     '<button class="btn btn-sm btn-outline" onclick="changeFS(2)">A+</button>'+
     '<button class="btn btn-sm btn-outline" onclick="showNotes()">📝笔记</button>'+
     '</div></div>'+
-    '<div class="card" id="readerContent" style="'+(rs.darkMode?'background:#2D2430;color:#E8DCE8;':'')+'min-height:60vh;font-size:'+rs.fontSize+'px;line-height:1.8;padding:24px;white-space:pre-wrap;user-select:text;cursor:text"'+
+    '<div class="card" id="readerContent" style="'+(rs.darkMode?'background:#2D2430;color:#E8DCE8;':'')+'min-height:60vh;font-size:'+rs.fontSize+'px;line-height:2.0;letter-spacing:0.5px;padding:32px 24px;white-space:pre-wrap;user-select:text;cursor:text"'+
     ' onmouseup="onTextSelect()">'+
     '<div style="text-align:center;font-weight:700;font-size:'+(rs.fontSize+4)+'px;margin-bottom:16px">'+ch.title+'</div>'+
-    '<div id="chapterText">'+(ch.text||'')+'</div>'+
+    '<div id="chapterText">'+(ch.text||'').replace(/\\n\\n+/g,'</p><p style="margin-bottom:1em;text-indent:2em">')+'</div>'+
     '</div>'+
     '<div style="display:flex;gap:10px;justify-content:center;margin-top:12px">'+
     '<button class="btn btn-outline" '+(rs.chIdx===0?'disabled':'')+' onclick="prevChapter()">⬅️ 上一章</button>'+
@@ -906,11 +907,12 @@ async function viewRecipe(id){const r=await fetch(API+'/api/recipes');const rs=a
 
 // ========== SHOPPING ==========
 async function renderShopping(){
-  document.getElementById('mainContent').innerHTML=`<div class="fade-in"><div class="page-title">🛒 待购清单</div><div class="card"><div style="display:flex;gap:10px;align-items:center;margin-bottom:12px"><button class="btn btn-primary btn-sm" onclick="showAddShop()">+ 添加</button><label style="font-size:12px;cursor:pointer"><input type="checkbox" id="shPurchased" onchange="loadShop()">显示已购</label></div><div id="shList">加载中...</div></div></div>`;loadShop()}
-async function loadShop(){const sp=document.getElementById('shPurchased')?.checked;const r=await fetch(API+'/api/shopping?show_purchased='+(sp?'true':'false'));const is=await r.json();const el=document.getElementById('shList');if(!el)return;if(is.length===0){el.innerHTML='<div class="empty-state"><div class="icon">🛒</div><p>清单为空</p></div>';return}el.innerHTML=is.map(i=>`<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border)"><label class="checkbox-wrap" style="flex:1"><input type="checkbox" ${i.purchased?'checked':''} onchange="toggleShop(${i.id},this.checked)"><span style="${i.purchased?'text-decoration:line-through;color:var(--text-muted)':''}">${i.name}</span></label><span class="tag ${i.priority==='high'?'tag-red':i.priority==='low'?'tag-green':'tag-yellow'}">${i.priority==='high'?'高':i.priority==='low'?'低':'中'}</span><span class="tag tag-blue">${i.category}</span><button class="btn btn-sm btn-danger" onclick="delShop(${i.id})">删除</button></div>`).join('')}
+  document.getElementById('mainContent').innerHTML=`<div class="fade-in"><div class="page-title">🛒 待购清单</div><div class="card"><div style="display:flex;gap:10px;align-items:center;margin-bottom:12px"><button class="btn btn-primary btn-sm" onclick="showAddShop()">+ 添加</button><label style="font-size:12px;cursor:pointer"><input type="checkbox" id="shPurchased" onchange="loadShop()">显示已购</label></div><div id="shCats" style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px"></div><div id="shList">加载中...</div></div></div>`;loadShop();loadShopCats()}
+async function loadShop(){const sp=document.getElementById('shPurchased')?.checked,cat=shCatSel||'';let u=API+'/api/shopping';const p=[];if(sp)p.push('show_purchased=true');if(cat&&cat!=='全部')p.push('category='+encodeURIComponent(cat));if(p.length)u+='?'+p.join('&');const r=await fetch(u);const is=await r.json();const el=document.getElementById('shList');if(!el)return;if(is.length===0){el.innerHTML='<div class="empty-state"><div class="icon">🛒</div><p>清单为空</p></div>';return}el.innerHTML=is.map(i=>`<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border)"><label class="checkbox-wrap" style="flex:1"><input type="checkbox" ${i.purchased?'checked':''} onchange="toggleShop(${i.id},this.checked)"><span style="${i.purchased?'text-decoration:line-through;color:var(--text-muted)':''}">${i.name}</span></label><span class="tag ${i.priority==='high'?'tag-red':i.priority==='low'?'tag-green':'tag-yellow'}">${i.priority==='high'?'高':i.priority==='low'?'低':'中'}</span><span class="tag tag-blue">${i.category}</span><button class="btn btn-sm btn-danger" onclick="delShop(${i.id})">删除</button></div>`).join('')}
 async function toggleShop(id,c){await fetch(API+'/api/shopping/'+id,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({purchased:c?1:0})});if(c){catAct('happy');toast('买到啦！')}loadShop()}
-function showAddShop(){const o=document.createElement('div');o.className='modal-overlay';o.innerHTML=`<div class="modal"><div class="modal-title">添加物品</div><div class="form-group"><label>名称</label><input class="input" id="shName"></div><div class="form-row"><div class="form-group"><label>分类</label><input class="input" id="shCat"></div><div class="form-group"><label>优先级</label><select class="select" id="shPri"><option value="high">高</option><option value="medium" selected>中</option><option value="low">低</option></select></div></div><div style="display:flex;gap:10px;justify-content:flex-end"><button class="btn btn-outline btn-sm" onclick="this.closest('.modal-overlay').remove()">取消</button><button class="btn btn-primary btn-sm" onclick="saveShop()">添加</button></div></div>`;o.addEventListener('click',e=>{if(e.target===o)o.remove()});document.body.appendChild(o)}
-async function saveShop(){const n=document.getElementById('shName').value.trim();if(!n)return toast('请输入名称');await fetch(API+'/api/shopping',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name:n,category:document.getElementById('shCat').value||'其他',priority:document.getElementById('shPri').value})});document.querySelector('.modal-overlay')?.remove();loadShop()}
+function loadShopCats(){fetch(API+'/api/shopping/categories').then(r=>r.json()).then(d=>{var el=document.getElementById('shCats'),cat=shCatSel||'全部';if(!el)return;var all=d.defaults.concat(d.custom);el.innerHTML='<button class="btn btn-sm '+(cat==='全部'?'btn-primary':'btn-outline')+'" style="font-size:11px;padding:4px 10px" onclick="shCatSel=\'全部\';loadShop();loadShopCats()">全部</button>'+all.map(c=>'<button class="btn btn-sm '+(cat===c?'btn-primary':'btn-outline')+'" style="font-size:11px;padding:4px 10px" onclick="shCatSel=\''+c+'\';loadShop();loadShopCats()">'+c+'</button>').join('')})}
+function showAddShop(){const o=document.createElement('div');o.className='modal-overlay';fetch(API+'/api/shopping/categories').then(r=>r.json()).then(d=>{var cats=d.defaults.concat(d.custom);o.innerHTML=`<div class="modal"><div class="modal-title">添加物品</div><div class="form-group"><label>名称</label><input class="input" id="shName"></div><div class="form-row"><div class="form-group"><label>分类</label><select class="select" id="shCat"><option value="">选择分类</option>${cats.map(c=>`<option value="${c}">${c}</option>`).join('')}</select><input class="input" id="shCatNew" placeholder="或输入新分类" style="font-size:11px;margin-top:6px"></div><div class="form-group"><label>优先级</label><select class="select" id="shPri"><option value="high">高</option><option value="medium" selected>中</option><option value="low">低</option></select></div></div><div style="display:flex;gap:10px;justify-content:flex-end"><button class="btn btn-outline btn-sm" onclick="this.closest('.modal-overlay').remove()">取消</button><button class="btn btn-primary btn-sm" onclick="saveShop()">添加</button></div></div>`;o.addEventListener('click',e=>{if(e.target===o)o.remove()});document.body.appendChild(o)})}
+async function saveShop(){const n=document.getElementById('shName').value.trim();if(!n)return toast('请输入名称');const cat=document.getElementById('shCatNew')?.value?.trim()||document.getElementById('shCat')?.value||'其他';await fetch(API+'/api/shopping',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name:n,category:cat,priority:document.getElementById('shPri').value})});document.querySelector('.modal-overlay')?.remove();loadShop();loadShopCats()}
 async function delShop(id){showConfirm('确定删除这个物品吗？',async()=>{await fetch(API+'/api/shopping/'+id,{method:'DELETE'});loadShop()})}
 
 // ========== HEALTH ==========
@@ -953,18 +955,27 @@ async function delPeriod(id){showConfirm('确定删除这条经期记录吗？',
 // ========== MOOD ==========
 async function renderMood(){
   document.getElementById('mainContent').innerHTML=`<div class="fade-in"><div class="page-title">💝 心情日记</div><div class="card"><div class="card-title">📝 今日心情</div><div style="display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap" id="mdEmojis">${['😊','😄','😐','😢','😡','😴','🥰','😎','🤔','😰'].map(e=>`<button class="btn btn-outline btn-sm" style="font-size:20px;padding:8px 12px" onclick="selMood('${e}')">${e}</button>`).join('')}</div><div style="display:flex;gap:8px"><input class="input" id="mdNote" placeholder="写几句..."><button class="btn btn-primary" onclick="saveMood()">💾</button></div></div><div class="card"><div class="card-title">📅 心情月历</div><input type="month" class="input" style="width:auto;max-width:160px;margin-bottom:12px" id="mdMonth" value="${today().substring(0,7)}" onchange="loadMdCal()"><div id="mdCal">加载中...</div></div></div>`;loadMdCal()}
-let sMood='😊';
+let sMood='😊';let shCatSel='全部';
 function selMood(e){sMood=e;document.querySelectorAll('#mdEmojis button').forEach(b=>{b.classList.toggle('btn-primary',b.textContent===e);b.classList.toggle('btn-outline',b.textContent!==e)})}
 async function saveMood(){await fetch(API+'/api/mood',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({date:today(),mood:sMood,note:document.getElementById('mdNote').value})});toast('已记录~');catAct('talk');loadMdCal()}
 async function loadMdCal(){const mo=document.getElementById('mdMonth')?.value||today().substring(0,7);const r=await fetch(API+'/api/mood?month='+mo);const rs=await r.json();const mm={};rs.forEach(r=>{mm[r.date]=r});const el=document.getElementById('mdCal');if(!el)return;const[y,m]=mo.split('-').map(Number),fd=new Date(y,m-1,1).getDay(),dim=new Date(y,m,0).getDate();let h='<div style="display:grid;grid-template-columns:repeat(7,1fr);text-align:center;margin-bottom:8px">';['日','一','二','三','四','五','六'].forEach(d=>h+=`<div style="font-size:11px;color:var(--text-muted);padding:4px">${d}</div>`);h+='</div><div class="mood-grid">';for(let i=0;i<fd;i++)h+='<div></div>';for(let dd=1;dd<=dim;dd++){const dt=`${mo}-${String(dd).padStart(2,'0')}`,rec=mm[dt];h+=`<div class="mood-cell${dt===today()?' today':''}" title="${rec?rec.note||'':''}">${rec?rec.mood:''}</div>`}h+='</div>';el.innerHTML=h}
 
 // ========== POMODORO ==========
-let pInt,pSec=25*60,pRun=false,pBreak=false;
+let pInt,pSec=25*60,pRun=false,pBreak=false,pStartTime=0,pElapsed=0,pDuration=25*60;
+function getPomoRemaining(){
+  if(!pRun)return pSec;
+  var now=Date.now(),remaining=Math.max(0,pDuration-pElapsed-Math.floor((now-pStartTime)/1000));
+  return remaining
+}
+function updatePomoDisplay(s){
+  var m=Math.floor(s/60),sec=s%60,d=document.getElementById('pDisp');
+  if(d)d.textContent=String(m).padStart(2,'0')+':'+String(sec).padStart(2,'0')
+}
 async function renderPomodoro(){
-  const m=Math.floor(pSec/60),s=pSec%60;let td={sessions:0,total_minutes:0};
+  var s=getPomoRemaining(),m=Math.floor(s/60),sec=s%60;let td={sessions:0,total_minutes:0};
   try{const r=await fetch(API+'/api/pomodoro?date='+today());td=await r.json()}catch(e){}
-  document.getElementById('mainContent').innerHTML=`<div class="fade-in"><div class="page-title">🍅 番茄专注</div><div class="card" style="text-align:center"><div class="timer-circle" style="border-color:${pBreak?'var(--success)':'var(--primary-light)'}"><div><div class="timer-display" id="pDisp">${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}</div><div style="font-size:13px;color:var(--text-light)">${pBreak?'☕ 休息':'🍅 专注'}</div></div></div><div style="display:flex;gap:10px;justify-content:center;margin-bottom:16px"><button class="btn btn-primary" id="pBtn" onclick="togglePomo()">${pRun?'⏸ 暂停':'▶ 开始'}</button><button class="btn btn-outline" onclick="resetPomo()">↺ 重置</button></div><div style="font-size:13px;color:var(--text-light)">今日: <b>${td.sessions}</b> 番茄 | <b>${td.total_minutes}</b> 分钟</div></div><div class="card"><div class="card-title">📊 历史统计</div><div id="pomoHist">加载中...</div></div><div class="card"><div class="card-title">🎵 白噪音</div><div class="sound-grid">${['🔇 无','🌧 雨声','🔥 壁炉','🌊 海浪','🍃 森林','☕ 咖啡馆','🎹 钢琴'].map(s=>`<button class="sound-btn" onclick="selSound(this,'${s}')">${s}</button>`).join('')}</div></div></div>`;
-  loadPomoHist()
+  document.getElementById('mainContent').innerHTML='<div class="fade-in"><div class="page-title">🍅 番茄专注</div><div class="card" style="text-align:center"><div class="timer-circle" style="border-color:'+(pBreak?'var(--success)':'var(--primary-light)')+'"><div><div class="timer-display" id="pDisp">'+String(m).padStart(2,'0')+':'+String(sec).padStart(2,'0')+'</div><div style="font-size:13px;color:var(--text-light)">'+(pBreak?'☕ 休息':'🍅 专注')+'</div></div></div><div style="display:flex;gap:10px;justify-content:center;margin-bottom:16px"><button class="btn btn-primary" id="pBtn" onclick="togglePomo()">'+(pRun?'⏸ 暂停':'▶ 开始')+'</button><button class="btn btn-outline" onclick="resetPomo()">↺ 重置</button></div><div style="font-size:13px;color:var(--text-light)">今日: <b>'+td.sessions+'</b> 番茄 | <b>'+td.total_minutes+'</b> 分钟</div></div><div class="card"><div class="card-title">📊 历史统计</div><div id="pomoHist">加载中...</div></div><div class="card"><div class="card-title">🎵 白噪音</div><div class="sound-grid">'+["🔇 无","🌧 雨声","🔥 壁炉","🌊 海浪","🍃 森林","☕ 咖啡馆","🎹 钢琴"].map(s=>'<button class="sound-btn" onclick="selSound(this,\''+s+'\')">'+s+'</button>').join('')+'</div></div></div>';
+  loadPomoHist();if(pRun){clearInterval(pInt);pInt=setInterval(pomoTick,500)}
 }
 function loadPomoHist(){
   var start=new Date();start.setDate(start.getDate()-30);var s=start.toISOString().split('T')[0];
@@ -978,9 +989,10 @@ function loadPomoHist(){
   })
 }
 function selSound(btn,s){document.querySelectorAll('.sound-btn').forEach(b=>b.classList.remove('active'));btn.classList.add('active')}
-function togglePomo(){if(pRun){clearInterval(pInt);pRun=false;document.getElementById('pBtn').textContent='▶ 继续';return}pRun=true;document.getElementById('pBtn').textContent='⏸ 暂停';pInt=setInterval(()=>{pSec--;const m=Math.floor(pSec/60),s=pSec%60,d=document.getElementById('pDisp');if(d)d.textContent=String(m).padStart(2,'0')+':'+String(s).padStart(2,'0');if(pSec<=0){clearInterval(pInt);pRun=false;if(!pBreak){savePS();catAct('happy');spawnConfetti();toast('专注完成！🎉');pBreak=true;pSec=5*60}else{pBreak=false;pSec=25*60}renderPomodoro()}},1000)}
+function pomoTick(){var s=getPomoRemaining();pSec=s;updatePomoDisplay(s);if(s<=0){clearInterval(pInt);pRun=false;if(!pBreak){savePS();catAct('happy');spawnConfetti();toast('专注完成！🎉');pBreak=true;pDuration=5*60;pElapsed=0}else{pBreak=false;pDuration=25*60;pElapsed=0}pSec=pDuration;renderPomodoro()}}
+function togglePomo(){if(pRun){clearInterval(pInt);pRun=false;pElapsed+=Math.floor((Date.now()-pStartTime)/1000);pSec=getPomoRemaining();document.getElementById('pBtn').textContent='▶ 继续';updatePomoDisplay(pSec);return}pRun=true;pStartTime=Date.now();pSec=pDuration-pElapsed;document.getElementById('pBtn').textContent='⏸ 暂停';updatePomoDisplay(pSec);pInt=setInterval(pomoTick,500)}
 async function savePS(){await fetch(API+'/api/pomodoro',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({date:today(),sessions:1,total_minutes:25})})}
-function resetPomo(){clearInterval(pInt);pRun=false;pBreak=false;pSec=25*60;renderPomodoro()}
+function resetPomo(){clearInterval(pInt);pRun=false;pBreak=false;pSec=25*60;pDuration=25*60;pElapsed=0;pStartTime=0;renderPomodoro()}
 
 // ========== NOTE ==========
 function toggleNoteFloat(){document.getElementById('noteFloatPanel').classList.toggle('show');document.getElementById('quickNote')?.focus()}
@@ -1005,128 +1017,57 @@ async function saveQuickNote(){const c=document.getElementById('quickNote').valu
   document.addEventListener('touchend',function(){dragging=false});
 })();
 
-// ========== MATCH3 GAME ==========
-const M3_ICONS=['🐱','🐾','🧶','🐟','🎀','🔔','🥛'];
-const M3_SIZE=8,M3_STEPS=25;
-const M3_LEVELS=[200,400,700,1100,1600,2200,2900,3700,4600,5600];
-let m3State={};
+// ========== INSPO NOTES ==========
 
-async function loadM3Progress(){
-  try{var r=await fetch(API+'/api/match3/progress');var d=await r.json();return d.match3||{unlocked:1,stars:{},bestScore:{}}}catch(e){return{unlocked:1,stars:{},bestScore:{}}}
+async function renderNotes(){
+  document.getElementById('mainContent').innerHTML='<div class="fade-in"><div class="page-title">💡 灵感便签</div>'+
+    '<div class="card"><div style="display:flex;gap:8px;align-items:center;margin-bottom:12px;flex-wrap:wrap">'+
+    '<input class="input" id="nsSearch" placeholder="🔍 搜索灵感..." style="flex:1;max-width:240px" oninput="loadNotes()">'+
+    '<button class="btn btn-primary btn-sm" onclick="showNoteFloat()">+ 记录灵感</button>'+
+    '</div><div id="nsList">加载中...</div></div></div>';
+  loadNotes()
 }
-async function saveM3Progress(p){await fetch(API+'/api/match3/progress',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({key:'match3',value:p})})}
-
-async function renderGames(){
-  var p=await loadM3Progress();
-  var h='<div class="fade-in"><div class="page-title">🎮 开心消消乐</div>'+
-    '<div class="card"><div class="card-title">🗺 选择关卡</div><div class="m3-level-select">';
-  for(var i=1;i<=M3_LEVELS.length;i++){
-    var cls='m3-lv-btn',stars='';
-    if(i<p.unlocked)cls+=' completed';else if(i===p.unlocked)cls+=' unlocked';else cls+=' locked';
-    if(p.stars[i]){for(var s=0;s<p.stars[i];s++)stars+='⭐'}
-    h+='<button class="'+cls+'" '+(i<=p.unlocked?'onclick="startMatch3('+i+')"':'disabled')+'>'+i+'<span class="stars">'+stars+'</span></button>'
-  }
-  h+='</div></div></div>';
-  document.getElementById('mainContent').innerHTML=h
+var nsEditId=null;
+async function loadNotes(){
+  var r=await fetch(API+'/api/notes'),ns=await r.json(),search=(document.getElementById('nsSearch')?.value||'').trim();
+  if(search){ns=ns.filter(function(n){return n.content.includes(search)})}
+  var el=document.getElementById('nsList');if(!el)return;
+  if(ns.length===0){el.innerHTML='<div class="empty-state"><div class="icon">💡</div><p>'+(search?'没有匹配的灵感':'还没有灵感，点击上方按钮记录吧~')+'</p></div>';return}
+  el.innerHTML=ns.map(function(n){var dt=n.updated_at||n.created_at||'',txt=dt.substring(0,16).replace('T',' ');
+    return'<div class="card" style="padding:16px;position:relative;background:'+n.color+'22;border-left:4px solid '+n.color+'">'+
+    (n.pinned?'<span style="position:absolute;top:8px;right:8px;font-size:12px">📌</span>':'')+
+    '<div style="white-space:pre-wrap;font-size:14px;color:var(--text);margin-bottom:8px;line-height:1.6">'+n.content+'</div>'+
+    '<div style="display:flex;justify-content:space-between;align-items:center;font-size:11px;color:var(--text-muted)">'+
+    '<span>'+txt+'</span>'+
+    '<div style="display:flex;gap:6px">'+
+    '<button class="btn btn-sm btn-outline" onclick="pinNote('+n.id+','+(n.pinned?0:1)+')">'+(n.pinned?'📌取消置顶':'📌置顶')+'</button>'+
+    '<button class="btn btn-sm btn-outline" onclick="editNote('+n.id+',''+n.content.replace(/'/g,"\\'")+'',''+(n.color||'#FFF9C4')+'')">编辑</button>'+
+    '<button class="btn btn-sm btn-danger" onclick="delNote('+n.id+')">删除</button>'+
+    '</div></div></div>'
+  }).join('')
 }
-
-function startMatch3(lv){
-  m3State={level:lv,target:M3_LEVELS[lv-1],grid:[],score:0,steps:M3_STEPS,selected:null,animating:false};
-  initGrid();if(!hasMatch())initGrid();renderM3Full()
+function showNoteFloat(){
+  document.getElementById('noteFloatPanel').classList.add('show');
+  document.getElementById('quickNote')?.focus()
 }
-
-function initGrid(){
-  m3State.grid=[];for(var i=0;i<M3_SIZE;i++){m3State.grid[i]=[];for(var j=0;j<M3_SIZE;j++){var v;do{v=Math.floor(Math.random()*M3_ICONS.length);m3State.grid[i][j]=v}while((j>=2&&m3State.grid[i][j-1]===v&&m3State.grid[i][j-2]===v)||(i>=2&&m3State.grid[i-1][j]===v&&m3State.grid[i-2][j]===v))}}
+async function pinNote(id,pinned){
+  await fetch(API+'/api/notes/'+id,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({pinned:!!pinned})});
+  loadNotes()
 }
-function hasMatch(){
-  for(var i=0;i<M3_SIZE;i++)for(var j=0;j<M3_SIZE;j++){
-    if(j<M3_SIZE-2&&m3State.grid[i][j]===m3State.grid[i][j+1]&&m3State.grid[i][j]===m3State.grid[i][j+2])return true;
-    if(i<M3_SIZE-2&&m3State.grid[i][j]===m3State.grid[i+1][j]&&m3State.grid[i][j]===m3State.grid[i+2][j])return true
-  }return false
+function editNote(id,content,color){
+  var o=document.createElement('div');o.className='modal-overlay';
+  o.innerHTML='<div class="modal"><div class="modal-title">编辑灵感</div><div class="form-group"><label>内容</label><textarea class="textarea" id="nsContent" rows="4">'+content+'</textarea></div><div class="form-group"><label>颜色</label><select class="select" id="nsColor"><option value="#FFF9C4"'+(color==='#FFF9C4'?' selected':'')+'>💛 黄</option><option value="#FFE0E8"'+(color==='#FFE0E8'?' selected':'')+'>🌸 粉</option><option value="#E0F0FF"'+(color==='#E0F0FF'?' selected':'')+'>💙 蓝</option><option value="#E0FFE0"'+(color==='#E0FFE0'?' selected':'')+'>💚 绿</option><option value="#FFE8D0"'+(color==='#FFE8D0'?' selected':'')+'>🧡 橙</option></select></div><div style="display:flex;gap:10px;justify-content:flex-end"><button class="btn btn-outline btn-sm" onclick="this.closest('.modal-overlay').remove()">取消</button><button class="btn btn-primary btn-sm" onclick="saveEditNote('+id+')">保存</button></div></div>';
+  o.addEventListener('click',function(e){if(e.target===o)o.remove()});document.body.appendChild(o)
 }
-
-// Full render (only on level start)
-function renderM3Full(){
-  var m=document.getElementById('mainContent'),gs=m3State,pct=Math.min(100,Math.round(gs.score/gs.target*100));
-  m.innerHTML='<div class="fade-in"><div class="game-bar"><span class="back-btn" onclick="if(m3State._timer)clearInterval(m3State._timer);renderGames()">← 选关</span><span style="font-size:13px;color:var(--text-light)">第'+gs.level+'关 | 🎯'+gs.target+'分</span></div>'+
-    '<div class="match3-wrap"><div class="match3-header"><div class="match3-info"><div class="val" id="m3Score">'+gs.score+'</div><div class="lbl">得分</div></div><div class="match3-info"><div class="val" id="m3Steps" style="color:'+(gs.steps<=5?'var(--danger)':'var(--text)')+'">'+gs.steps+'</div><div class="lbl">剩余步数</div></div><div class="match3-info"><div class="val" style="font-size:16px">🎯'+gs.target+'</div><div class="lbl">目标</div></div></div>'+
-    '<div class="m3-bar-wrap"><div class="m3-bar-fill" id="m3Bar" style="width:'+pct+'%"></div></div>'+
-    '<div class="m3-grid" id="m3Grid" style="grid-template-columns:repeat('+M3_SIZE+',1fr);width:100%;max-width:400px">'+
-    gs.grid.map(function(row,i){return row.map(function(v,j){var cls='m3-cell';if(gs.selected&&gs.selected.r===i&&gs.selected.c===j)cls+=' selected';return '<div class="'+cls+'" data-r="'+i+'" data-c="'+j+'" onmousedown="m3Down(event,'+i+','+j+')" ontouchstart="m3TouchStart(event,'+i+','+j+')">'+M3_ICONS[v]+'</div>'}).join('')}).join('')+
-    '</div></div></div>';
-  attachM3Drag()
+async function saveEditNote(id){
+  var c=document.getElementById('nsContent').value.trim();if(!c)return toast('内容不能为空');
+  await fetch(API+'/api/notes/'+id,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({content:c,color:document.getElementById('nsColor').value})});
+  document.querySelector('.modal-overlay')?.remove();loadNotes();toast('已更新！')
 }
-
-// Fast update: only update HUD + redraw grid cells via DOM
-function refreshM3(){
-  var gs=m3State,pct=Math.min(100,Math.round(gs.score/gs.target*100));
-  var se=document.getElementById('m3Score');if(se)se.textContent=gs.score;
-  var st=document.getElementById('m3Steps');if(st){st.textContent=gs.steps;st.style.color=gs.steps<=5?'var(--danger)':'var(--text)'}
-  var ba=document.getElementById('m3Bar');if(ba)ba.style.width=pct+'%';
-  updateGrid()
-}
-function updateGrid(){
-  var container=document.getElementById('m3Grid');if(!container)return;
-  var gs=m3State;
-  container.innerHTML=gs.grid.map(function(row,i){return row.map(function(v,j){var cls='m3-cell';if(gs.selected&&gs.selected.r===i&&gs.selected.c===j)cls+=' selected';return '<div class="'+cls+'" data-r="'+i+'" data-c="'+j+'" onmousedown="m3Down(event,'+i+','+j+')" ontouchstart="m3TouchStart(event,'+i+','+j+')">'+M3_ICONS[v]+'</div>'}).join('')}).join('')
+async function delNote(id){
+  showConfirm('确定删除这条灵感吗？',async function(){await fetch(API+'/api/notes/'+id,{method:'DELETE'});loadNotes();toast('已删除')})
 }
 
-var m3DragStart=null;
-function attachM3Drag(){
-  var grid=document.getElementById('m3Grid');if(!grid)return;
-  grid.addEventListener('touchmove',function(e){e.preventDefault()},{passive:false});
-  grid.addEventListener('touchend',function(e){if(!m3DragStart)return;var t=e.changedTouches[0];var el=document.elementFromPoint(t.clientX,t.clientY);if(el&&el.dataset.r){var r2=parseInt(el.dataset.r),c2=parseInt(el.dataset.c);if(m3DragStart.r!==r2||m3DragStart.c!==c2)trySwap(m3DragStart.r,m3DragStart.c,r2,c2)}m3DragStart=null})
-}
-function m3Down(e,r,c){e.preventDefault();if(m3State.animating)return;if(m3State.selected&&(m3State.selected.r!==r||m3State.selected.c!==c)){trySwap(m3State.selected.r,m3State.selected.c,r,c)}else{m3State.selected={r:r,c:c};m3DragStart={r:r,c:c};refreshM3()}}
-function m3TouchStart(e,r,c){e.preventDefault();if(m3State.animating)return;m3State.selected={r:r,c:c};m3DragStart={r:r,c:c};refreshM3()}
-function trySwap(r1,c1,r2,c2){
-  if(m3State.animating)return;if(Math.abs(r1-r2)+Math.abs(c1-c2)!==1){m3State.selected=null;refreshM3();return}
-  m3State.animating=true;swap(r1,c1,r2,c2);
-  var matches=findMatches();
-  if(matches.length===0){swap(r1,c1,r2,c2);m3State.animating=false;m3State.selected=null;refreshM3();return}
-  m3State.steps--;m3State.selected=null;processMatches(matches)
-}
-function swap(r1,c1,r2,c2){var t=m3State.grid[r1][c1];m3State.grid[r1][c1]=m3State.grid[r2][c2];m3State.grid[r2][c2]=t}
-function findMatches(){
-  var matched=new Set();
-  for(var i=0;i<M3_SIZE;i++)for(var j=0;j<M3_SIZE;j++){
-    if(j<M3_SIZE-2&&m3State.grid[i][j]===m3State.grid[i][j+1]&&m3State.grid[i][j]===m3State.grid[i][j+2]){matched.add(i+','+j);matched.add(i+','+(j+1));matched.add(i+','+(j+2))}
-    if(i<M3_SIZE-2&&m3State.grid[i][j]===m3State.grid[i+1][j]&&m3State.grid[i][j]===m3State.grid[i+2][j]){matched.add(i+','+j);matched.add((i+1)+','+j);matched.add((i+2)+','+j)}
-  }return Array.from(matched).map(function(s){var p=s.split(',');return{row:parseInt(p[0]),col:parseInt(p[1])}})
-}
-function processMatches(matches){
-  var count=matches.length,baseScore=count*10,bonus=count>=7?3:count>=5?2:1;
-  m3State.score+=baseScore*bonus;
-  if(count>=5)catAct('talk');if(count>=7){catAct('happy');spawnConfetti()}
-  var matchSet=new Set();matches.forEach(function(m){m3State.grid[m.row][m.col]=-1;matchSet.add(m.row+','+m.col)});
-  refreshM3();
-  var cells=document.querySelectorAll('#m3Grid .m3-cell');
-  cells.forEach(function(c){var r=c.dataset.r,c2=c.dataset.c;if(r!==undefined&&matchSet.has(r+','+c2))c.classList.add('matched')});
-  setTimeout(function(){
-    dropTiles();fillTiles();refreshM3();
-    var newMatches=findMatches();
-    if(newMatches.length>0){setTimeout(function(){processMatches(newMatches)},300)}
-    else{m3State.animating=false;checkGameEnd()}
-  },300)
-}
-function dropTiles(){
-  for(var j=0;j<M3_SIZE;j++){var writeRow=M3_SIZE-1;for(var i=M3_SIZE-1;i>=0;i--){if(m3State.grid[i][j]!==-1){m3State.grid[writeRow][j]=m3State.grid[i][j];writeRow--}}for(var k=writeRow;k>=0;k--){m3State.grid[k][j]=-1}}
-}
-function fillTiles(){for(var i=0;i<M3_SIZE;i++)for(var j=0;j<M3_SIZE;j++){if(m3State.grid[i][j]===-1)m3State.grid[i][j]=Math.floor(Math.random()*M3_ICONS.length)}}
-async function checkGameEnd(){
-  if(m3State.score>=m3State.target){
-    var stars=m3State.score>=m3State.target*2?3:m3State.score>=m3State.target*1.5?2:1;
-    var p=await loadM3Progress();
-    if(!p.stars[m3State.level]||stars>p.stars[m3State.level])p.stars[m3State.level]=stars;
-    if(m3State.level===p.unlocked&&m3State.level<M3_LEVELS.length)p.unlocked=m3State.level+1;
-    if(!p.bestScore[m3State.level]||m3State.score>p.bestScore[m3State.level])p.bestScore[m3State.level]=m3State.score;
-    await saveM3Progress(p);catAct('happy');spawnConfetti();
-    setTimeout(function(){alert('🎉 过关啦！\n'+'⭐'.repeat(stars)+'\n得分：'+m3State.score);renderGames()},600)
-  }else if(m3State.steps<=0){
-    refreshM3();
-    setTimeout(function(){alert('😿 步数用完啦\n得分：'+m3State.score+'/'+m3State.target+'\n再试一次吧！');renderGames()},300)
-  }
-}
 
 // ========== INIT ==========
 document.addEventListener('DOMContentLoaded',()=>{renderNav();navigate('dashboard')});
