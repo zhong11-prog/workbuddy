@@ -101,6 +101,7 @@ function initDatabase() {
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       title TEXT NOT NULL,
       author TEXT DEFAULT '',
+      cover TEXT DEFAULT '',
       status TEXT DEFAULT 'want' CHECK(status IN ('want','reading','done')),
       total_pages INTEGER DEFAULT 0,
       current_page INTEGER DEFAULT 0,
@@ -220,8 +221,8 @@ function initDatabase() {
 
     CREATE INDEX IF NOT EXISTS idx_game_scores_game ON game_scores(game_name);
 
-    -- 消消乐进度
-    CREATE TABLE IF NOT EXISTS match3_progress (
+    -- 键值存储（每日菜单等）
+    CREATE TABLE IF NOT EXISTS kv_store (
       key TEXT PRIMARY KEY,
       value TEXT NOT NULL
     );
@@ -262,6 +263,15 @@ function initDatabase() {
     CREATE INDEX IF NOT EXISTS idx_pomodoro_date ON pomodoro(date);
     CREATE INDEX IF NOT EXISTS idx_period_records_date ON period_records(start_date);
   `);
+  // 迁移旧 match3_progress 数据到 kv_store
+  try {
+    const hasOld = db.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name='match3_progress'").get();
+    if (hasOld) {
+      db.exec('INSERT OR IGNORE INTO kv_store SELECT * FROM match3_progress');
+      db.exec('DROP TABLE IF EXISTS match3_progress');
+      console.log('✅ 数据迁移：match3_progress → kv_store');
+    }
+  } catch(e) { /* ignore */ }
 }
 
 // ==================== Seed Data ====================
@@ -452,6 +462,17 @@ try {
   console.log('⚠️ 菜单表迁移跳过:', e.message);
 }
 
+// 数据库迁移：确保 books 表有 cover 列
+try {
+  const bkCols = db.prepare("PRAGMA table_info(books)").all();
+  if (!bkCols.some(c => c.name === 'cover')) {
+    db.exec("ALTER TABLE books ADD COLUMN cover TEXT DEFAULT ''");
+    console.log('✅ 数据库迁移：books 表已添加 cover 列');
+  }
+} catch (e) {
+  console.log('⚠️ 书籍表迁移跳过:', e.message);
+}
+
 seedData();
 
 // ==================== Middleware ====================
@@ -572,8 +593,8 @@ app.get('/api/dashboard', (req, res) => {
     SELECT 
       COALESCE(SUM(CASE WHEN type='income' THEN amount ELSE 0 END),0) as income,
       COALESCE(SUM(CASE WHEN type='expense' THEN amount ELSE 0 END),0) as expense
-    FROM finances WHERE strftime('%Y-%m', date) = ?
-  `).get(t.substring(0, 7));
+    FROM finances WHERE date = ?
+  `).get(t);
 
   // 连续打卡天数
   let streak = 0;
@@ -788,14 +809,14 @@ app.post('/api/books', (req, res) => {
 });
 
 app.put('/api/books/:id', (req, res) => {
-  const { title, author, status, total_pages, current_page, note, start_date, end_date } = req.body;
+  const { title, author, cover, status, total_pages, current_page, note, start_date, end_date } = req.body;
   const book = db.prepare('SELECT * FROM books WHERE id=?').get(req.params.id);
   if (!book) return res.status(404).json({ error: 'Not found' });
   db.prepare(`UPDATE books SET 
-    title=COALESCE(?,title), author=COALESCE(?,author), status=COALESCE(?,status),
+    title=COALESCE(?,title), author=COALESCE(?,author), cover=COALESCE(?,cover), status=COALESCE(?,status),
     total_pages=COALESCE(?,total_pages), current_page=COALESCE(?,current_page),
     note=COALESCE(?,note), start_date=COALESCE(?,start_date), end_date=COALESCE(?,end_date)
-    WHERE id=?`).run(title, author, status, total_pages, current_page, note, start_date, end_date, req.params.id);
+    WHERE id=?`).run(title, author, cover, status, total_pages, current_page, note, start_date, end_date, req.params.id);
   res.json(db.prepare('SELECT * FROM books WHERE id=?').get(req.params.id));
 });
 
@@ -1011,12 +1032,22 @@ app.post('/api/recipes/reload', (req, res) => {
 });
 
 // --- 待购清单 ---
+// 待购清单分类
+const SHOP_DEFAULT_CATS = ['食品饮料','生鲜果蔬','日用品','服饰美妆','数码电器','学习用品','其他'];
+
+app.get('/api/shopping/categories', (req, res) => {
+  const existing = db.prepare("SELECT DISTINCT category FROM shopping WHERE category != '' AND category NOT IN (" + SHOP_DEFAULT_CATS.map(() => '?').join(',') + ")").all(...SHOP_DEFAULT_CATS);
+  res.json({ defaults: SHOP_DEFAULT_CATS, custom: existing.map(r => r.category) });
+});
+
 app.get('/api/shopping', (req, res) => {
-  const { show_purchased } = req.query;
-  const sql = show_purchased === 'true'
-    ? 'SELECT * FROM shopping ORDER BY purchased ASC, priority DESC, id DESC'
-    : 'SELECT * FROM shopping WHERE purchased=0 ORDER BY priority DESC, id DESC';
-  res.json(db.prepare(sql).all());
+  const { show_purchased, category } = req.query;
+  let sql = 'SELECT * FROM shopping WHERE 1=1';
+  const params = [];
+  if (show_purchased !== 'true') { sql += ' AND purchased=0'; }
+  if (category && category !== '全部') { sql += ' AND category=?'; params.push(category); }
+  sql += ' ORDER BY purchased ASC, priority DESC, id DESC';
+  res.json(db.prepare(sql).all(...params));
 });
 
 app.post('/api/shopping', (req, res) => {
@@ -1160,7 +1191,7 @@ app.get('/api/mood', (req, res) => {
 app.post('/api/mood', (req, res) => {
   const { date, mood, note } = req.body;
   const d = date || today();
-  db.prepare('INSERT OR REPLACE INTO mood_diary (date,mood,note,updated_at) VALUES (?,?,?,datetime(?,?))')
+  db.prepare('INSERT OR REPLACE INTO mood_diary (date,mood,note,created_at) VALUES (?,?,?,datetime(?,?))')
     .run(d, mood, note || '', 'now', 'localtime');
   res.json(db.prepare('SELECT * FROM mood_diary WHERE date=?').get(d));
 });
@@ -1243,23 +1274,6 @@ app.post('/api/games/scores', (req, res) => {
   res.json(db.prepare('SELECT * FROM game_scores WHERE id=?').get(result.lastInsertRowid));
 });
 
-// --- 消消乐进度 ---
-app.get('/api/match3/progress', (req, res) => {
-  const rows = db.prepare("SELECT * FROM match3_progress WHERE key NOT LIKE 'daily_menu_%' AND key != 'last_reset_date'").all();
-  const progress = {};
-  rows.forEach(r => {
-    try { progress[r.key] = JSON.parse(r.value); } catch(e) { progress[r.key] = r.value; }
-  });
-  res.json(progress);
-});
-
-app.post('/api/match3/progress', (req, res) => {
-  const { key, value } = req.body;
-  db.prepare('INSERT OR REPLACE INTO match3_progress (key, value) VALUES (?, ?)')
-    .run(key, JSON.stringify(value));
-  res.json({ success: true });
-});
-
 // --- 历史/日历查询 ---
 
 // 健康打卡日历热力图
@@ -1277,9 +1291,9 @@ app.get('/api/health/calendar', (req, res) => {
 // 心情日历
 app.get('/api/mood/calendar', (req, res) => {
   const month = req.query.month || today().substring(0, 7);
-  const moods = db.prepare('SELECT date, mood, emoji, note FROM mood_diary WHERE date>=? AND date<=?').all(month + '-01', month + '-31');
+  const moods = db.prepare('SELECT date, mood, note FROM mood_diary WHERE date>=? AND date<=?').all(month + '-01', month + '-31');
   const map = {};
-  moods.forEach(m => { map[m.date] = { mood: m.mood, emoji: m.emoji, note: m.note }; });
+  moods.forEach(m => { map[m.date] = { mood: m.mood, note: m.note }; });
   res.json({ month, moods: map });
 });
 
@@ -1379,13 +1393,13 @@ app.get('/api/backup/list', (req, res) => {
 app.post('/api/daily-reset', (req, res) => {
   const result = dailyReset();
   const t = today();
-  db.prepare("INSERT OR REPLACE INTO match3_progress (key, value) VALUES (?, ?)").run('last_reset_date', t);
+  db.prepare("INSERT OR REPLACE INTO kv_store (key, value) VALUES (?, ?)").run('last_reset_date', t);
   res.json(result);
 });
 
 app.get('/api/daily-menu', (req, res) => {
   const t = today();
-  const row = db.prepare("SELECT value FROM match3_progress WHERE key=?").get('daily_menu_' + t);
+  const row = db.prepare("SELECT value FROM kv_store WHERE key=?").get('daily_menu_' + t);
   if (row) {
     res.json(JSON.parse(row.value));
   } else {
@@ -1396,7 +1410,7 @@ app.get('/api/daily-menu', (req, res) => {
       const recipe = db.prepare('SELECT * FROM recipes ORDER BY RANDOM() LIMIT 1').get();
       dailyMenu[meal] = recipe || null;
     }
-    db.prepare('INSERT OR REPLACE INTO match3_progress (key, value) VALUES (?, ?)')
+    db.prepare('INSERT OR REPLACE INTO kv_store (key, value) VALUES (?, ?)')
       .run('daily_menu_' + t, JSON.stringify(dailyMenu));
     res.json(dailyMenu);
   }
@@ -1486,8 +1500,8 @@ function dailyReset() {
       dailyMenu[meal] = recipe || null;
     }
 
-    // 5. 保存每日菜单到 match3_progress 表（复用为 KV 存储）
-    db.prepare('INSERT OR REPLACE INTO match3_progress (key, value) VALUES (?, ?)')
+    // 5. 保存每日菜单到 kv_store 表（复用为 KV 存储）
+    db.prepare('INSERT OR REPLACE INTO kv_store (key, value) VALUES (?, ?)')
       .run('daily_menu_' + t, JSON.stringify(dailyMenu));
 
     // 6. 更新仪表盘缓存（刷新连续打卡天数等）
@@ -1521,11 +1535,11 @@ cron.schedule('0 0 * * *', () => {
 // 服务器启动时检查是否需要执行每日重置
 function checkDailyResetOnStartup() {
   const t = today();
-  const lastReset = db.prepare("SELECT value FROM match3_progress WHERE key=?").get('last_reset_date');
+  const lastReset = db.prepare("SELECT value FROM kv_store WHERE key=?").get('last_reset_date');
   if (!lastReset || lastReset.value !== t) {
     console.log('🌅 检测到需要执行每日重置（首次启动或跨天）');
     dailyReset();
-    db.prepare("INSERT OR REPLACE INTO match3_progress (key, value) VALUES (?, ?)").run('last_reset_date', t);
+    db.prepare("INSERT OR REPLACE INTO kv_store (key, value) VALUES (?, ?)").run('last_reset_date', t);
   } else {
     console.log('✅ 今日每日重置已执行过，跳过');
   }
