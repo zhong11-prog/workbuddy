@@ -7,6 +7,15 @@ const cron = require('node-cron');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+
+// CORS - 允许跨域访问
+app.use((req, res, next) => {
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Methods', 'GET,POST,PUT,DELETE,OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Content-Type,Authorization');
+  if (req.method === 'OPTIONS') return res.sendStatus(200);
+  next();
+});
 const DATA_DIR = process.env.DATA_DIR || __dirname;
 const DB_PATH = path.join(DATA_DIR, 'data.db');
 const BACKUP_DIR = path.join(DATA_DIR, 'backups');
