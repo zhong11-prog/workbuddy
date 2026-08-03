@@ -272,7 +272,8 @@ td{padding:10px 12px;border-bottom:1px solid var(--border)}
 </div>
 
 <script>
-const isLocal=window.location.hostname==='localhost'||window.location.hostname==='127.0.0.1';
+const API='',today=()=>new Date().toISOString().split('T')[0];const AB='https://workbuddy-production-706a.up.railway.app';if(!isLocal){(function(){var _f=window.fetch;window.fetch=function(u,o){if(typeof u==='string'&&u.startsWith('/api/'))return _f('https://corsproxy.io/?'+encodeURIComponent(AB+u),o);return _f(u,o)}})()}
+
 const API=isLocal?'':'https://workbuddy-production-706a.up.railway.app',today=()=>new Date().toISOString().split('T')[0];
 const PAGES=[
   {id:'dashboard',icon:'🏠',label:'首页仪表盘'},{id:'tasks',icon:'📋',label:'今日计划'},
