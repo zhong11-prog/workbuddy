@@ -1,2 +1,2 @@
-// Custom domain fix - loaded by index.html when needed
-(function(){if(window.location.hostname.includes('localhost'))return;var API_BASE='https://zhongyanling.xyz';var _f=window.fetch;window.fetch=function(u,o){if(typeof u==='string'&&u.startsWith('/api/'))return _f(API_BASE+u,o);return _f(u,o)}})();
+// API proxy for GitHub Pages - Railway may be blocked in China
+(function(){if(window.location.hostname.includes('localhost'))return;var API='https://workbuddy-production-706a.up.railway.app';var P='https://corsproxy.io/?';var _f=window.fetch;window.fetch=function(u,o){if(typeof u==='string'&&u.startsWith('/api/'))return _f(API+u,o).catch(function(){return _f(P+encodeURIComponent(API+u),o)});return _f(u,o)}})();
