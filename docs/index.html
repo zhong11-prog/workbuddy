@@ -272,12 +272,9 @@ td{padding:10px 12px;border-bottom:1px solid var(--border)}
 </div>
 
 <script>
-<script src="fix.js"></script>
 const isLocal=window.location.hostname==='localhost'||window.location.hostname==='127.0.0.1';
 const API='',today=()=>new Date().toISOString().split('T')[0];
-const API_BASE='https://workbuddy-production-706a.up.railway.app';
-// 非本地环境通过corsproxy中转（绕过国内网络限制，支持全部HTTP方法）
-if(!isLocal){(function(){var _f=window.fetch;window.fetch=function(u,o){if(typeof u==='string'&&u.startsWith('/api/')){var nu='https://corsproxy.io/?'+encodeURIComponent(API_BASE+u);if(o){var b='';if(o.body)b=o.body;return _f(nu,Object.assign({},o,{body:b}))}return _f(nu)}return _f(u,o)}})()}
+const API_BASE='https://zhongyanling.xyz';
 const PAGES=[
   {id:'dashboard',icon:'🏠',label:'首页仪表盘'},{id:'tasks',icon:'📋',label:'今日计划'},
   {id:'finance',icon:'💰',label:'智能记账'},{id:'fitness',icon:'🏃',label:'健身'},
