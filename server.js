@@ -16,7 +16,7 @@ app.use((req, res, next) => {
   if (req.method === 'OPTIONS') return res.sendStatus(200);
   next();
 });
-const DATA_DIR = process.env.DATA_DIR || __dirname;
+const DATA_DIR = process.env.DATA_DIR || (fs.existsSync('/data') ? '/data' : __dirname);
 const DB_PATH = path.join(DATA_DIR, 'data.db');
 const BACKUP_DIR = path.join(DATA_DIR, 'backups');
 const BOOKS_DIR = path.join(DATA_DIR, 'data', 'books');
