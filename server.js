@@ -66,6 +66,38 @@ function initDatabase() {
       created_at TEXT DEFAULT (datetime('now','localtime'))
     );
 
+    -- 训练打卡记录
+    CREATE TABLE IF NOT EXISTS fitness_checkins (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      date TEXT NOT NULL,
+      training_day TEXT NOT NULL,
+      completed INTEGER DEFAULT 0,
+      note TEXT DEFAULT '',
+      created_at TEXT DEFAULT (datetime('now','localtime'))
+    );
+
+    -- 饮食打卡记录
+    CREATE TABLE IF NOT EXISTS diet_logs (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      date TEXT NOT NULL,
+      meal_type TEXT NOT NULL,
+      followed INTEGER DEFAULT 0,
+      note TEXT DEFAULT '',
+      created_at TEXT DEFAULT (datetime('now','localtime'))
+    );
+
+    -- 健身里程碑
+    CREATE TABLE IF NOT EXISTS fitness_milestones (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      milestone_week INTEGER NOT NULL,
+      title TEXT NOT NULL,
+      description TEXT DEFAULT '',
+      status TEXT DEFAULT 'pending',
+      note TEXT DEFAULT '',
+      checked_at TEXT,
+      created_at TEXT DEFAULT (datetime('now','localtime'))
+    );
+
     -- 韩语词汇库 (种子数据)
     CREATE TABLE IF NOT EXISTS korean_vocab (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -266,6 +298,8 @@ function initDatabase() {
     CREATE INDEX IF NOT EXISTS idx_tasks_date ON tasks(date);
     CREATE INDEX IF NOT EXISTS idx_finances_date ON finances(date);
     CREATE INDEX IF NOT EXISTS idx_fitness_date ON fitness(date);
+    CREATE INDEX IF NOT EXISTS idx_fc_date ON fitness_checkins(date);
+    CREATE INDEX IF NOT EXISTS idx_dl_date ON diet_logs(date);
     CREATE INDEX IF NOT EXISTS idx_korean_progress_date ON korean_progress(date);
     CREATE INDEX IF NOT EXISTS idx_mood_diary_date ON mood_diary(date);
     CREATE INDEX IF NOT EXISTS idx_health_checkins_date ON health_checkins(date);
@@ -749,6 +783,79 @@ app.post('/api/fitness', (req, res) => {
 app.delete('/api/fitness/:id', (req, res) => {
   db.prepare('DELETE FROM fitness WHERE id=?').run(req.params.id);
   res.json({ success: true });
+});
+
+// --- 训练打卡 ---
+app.get('/api/fitness/checkins', (req, res) => {
+  const { date, view } = req.query;
+  let records;
+  if (view === 'month') {
+    const month = (date || today()).substring(0, 7);
+    records = db.prepare("SELECT * FROM fitness_checkins WHERE strftime('%Y-%m', date) = ? ORDER BY date DESC").all(month);
+  } else if (date) {
+    records = db.prepare('SELECT * FROM fitness_checkins WHERE date=?').all(date);
+  } else {
+    records = db.prepare('SELECT * FROM fitness_checkins WHERE date=?').all(today());
+  }
+  res.json(records);
+});
+
+app.post('/api/fitness/checkins', (req, res) => {
+  const { date, training_day, completed, note } = req.body;
+  const existing = db.prepare('SELECT id FROM fitness_checkins WHERE date=? AND training_day=?').get(date || today(), training_day);
+  if (existing) {
+    db.prepare('UPDATE fitness_checkins SET completed=?, note=? WHERE id=?').run(completed || 0, note || '', existing.id);
+    res.json(db.prepare('SELECT * FROM fitness_checkins WHERE id=?').get(existing.id));
+  } else {
+    const result = db.prepare('INSERT INTO fitness_checkins (date,training_day,completed,note) VALUES (?,?,?,?)')
+      .run(date || today(), training_day, completed || 0, note || '');
+    res.json(db.prepare('SELECT * FROM fitness_checkins WHERE id=?').get(result.lastInsertRowid));
+  }
+});
+
+// --- 饮食打卡 ---
+app.get('/api/diet', (req, res) => {
+  const { date } = req.query;
+  const records = db.prepare('SELECT * FROM diet_logs WHERE date=? ORDER BY meal_type').all(date || today());
+  res.json(records);
+});
+
+app.post('/api/diet', (req, res) => {
+  const { date, meal_type, followed, note } = req.body;
+  const existing = db.prepare('SELECT id FROM diet_logs WHERE date=? AND meal_type=?').get(date || today(), meal_type);
+  if (existing) {
+    db.prepare('UPDATE diet_logs SET followed=?, note=? WHERE id=?').run(followed || 0, note || '', existing.id);
+    res.json(db.prepare('SELECT * FROM diet_logs WHERE id=?').get(existing.id));
+  } else {
+    const result = db.prepare('INSERT INTO diet_logs (date,meal_type,followed,note) VALUES (?,?,?,?)')
+      .run(date || today(), meal_type, followed || 0, note || '');
+    res.json(db.prepare('SELECT * FROM diet_logs WHERE id=?').get(result.lastInsertRowid));
+  }
+});
+
+// --- 健身里程碑 ---
+app.get('/api/fitness/milestones', (req, res) => {
+  const rows = db.prepare('SELECT * FROM fitness_milestones ORDER BY milestone_week').all();
+  if (rows.length === 0) {
+    const defaults = [
+      [4, '动作标准化', '所有动作能不晃不抖完成规定组数'],
+      [8, '左腿力量追平', '左腿能追上右腿的组数和重量'],
+      [12, '复测Inbody', '重点关注左腿肌肉量追平右腿、体脂率升至16.5%-17.5%']
+    ];
+    const insert = db.prepare('INSERT INTO fitness_milestones (milestone_week,title,description,status) VALUES (?,?,?,?)');
+    defaults.forEach(d => insert.run(d[0], d[1], d[2], 'pending'));
+    res.json(db.prepare('SELECT * FROM fitness_milestones ORDER BY milestone_week').all());
+  } else {
+    res.json(rows);
+  }
+});
+
+app.put('/api/fitness/milestones/:id', (req, res) => {
+  const { status, note } = req.body;
+  const checkedAt = status === 'completed' ? new Date().toISOString() : null;
+  db.prepare('UPDATE fitness_milestones SET status=?, note=?, checked_at=? WHERE id=?')
+    .run(status || 'pending', note || '', checkedAt, req.params.id);
+  res.json(db.prepare('SELECT * FROM fitness_milestones WHERE id=?').get(req.params.id));
 });
 
 // --- 韩语陪考 ---
