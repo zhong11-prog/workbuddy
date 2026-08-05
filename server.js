@@ -98,6 +98,33 @@ function initDatabase() {
       created_at TEXT DEFAULT (datetime('now','localtime'))
     );
 
+    -- 游泳打卡记录
+    CREATE TABLE IF NOT EXISTS swim_checkins (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      date TEXT NOT NULL,
+      duration INTEGER DEFAULT 0,
+      note TEXT DEFAULT '',
+      created_at TEXT DEFAULT (datetime('now','localtime'))
+    );
+
+    -- 游泳事前注意事项
+    CREATE TABLE IF NOT EXISTS swim_pre_tips (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      title TEXT NOT NULL,
+      icon TEXT DEFAULT '💡',
+      content TEXT DEFAULT '',
+      sort_order INTEGER DEFAULT 0
+    );
+
+    -- 游泳事后注意事项
+    CREATE TABLE IF NOT EXISTS swim_post_tips (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      title TEXT NOT NULL,
+      icon TEXT DEFAULT '💡',
+      content TEXT DEFAULT '',
+      sort_order INTEGER DEFAULT 0
+    );
+
     -- 韩语词汇库 (种子数据)
     CREATE TABLE IF NOT EXISTS korean_vocab (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -474,6 +501,48 @@ function seedData() {
       sampleRecipes.forEach((r, i) => { insertMenu.run(r.name, meals[i % 4], 'home', r.id); });
       console.log(`🍽️ 同步创建了 ${sampleRecipes.length} 个菜单项`);
     }
+  }
+
+  // 游泳模块种子数据
+  seedSwimData();
+}
+
+function seedSwimData() {
+  // 事前注意事项
+  const preCount = db.prepare('SELECT COUNT(*) as c FROM swim_pre_tips').get();
+  if (preCount.c === 0) {
+    const insert = db.prepare('INSERT INTO swim_pre_tips (title,icon,content,sort_order) VALUES (?,?,?,?)');
+    const tips = [
+      ['热身运动','🤸','<p><strong>1. 颈部拉伸：</strong>缓慢顺时针/逆时针转动头部各5圈；头向左肩靠、右肩靠各保持10秒。</p><p><strong>2. 肩部拉伸：</strong>双手抱肘上举过头，保持15秒；双手背后交叉向上抬，保持15秒。</p><p><strong>3. 腰部拉伸：</strong>双脚与肩同宽，向左/右侧弯腰，各保持10秒；体前屈，手指尽量触地。</p><p><strong>4. 腿部拉伸：</strong>弓步压腿，前后腿各保持15秒；站立单腿后拉脚跟靠臀，保持15秒。</p>',1],
+      ['装备检查','🎒','<p><strong>泳镜防雾：</strong>用防雾剂或少量沐浴露涂抹镜片内面后清水冲洗，确保视野清晰。</p><p><strong>泳帽佩戴：</strong>长发先扎好再戴泳帽，帽檐对齐眉毛上方，确保头发不散落。</p><p><strong>泳衣合身：</strong>选择贴身不勒的泳衣，试跳几下确认不滑落不跑位。</p><p><strong>浮具准备：</strong>初学者带好浮板/背漂/袖漂，下水前检查是否完好。</p>',2],
+      ['身体状况自查','🏥','<p><strong>⏰ 不宜游泳时机：</strong>饭前饭后1小时内、感冒发烧、耳部感染/中耳炎、皮肤破损或有传染性皮肤病、女性月经期（无防护措施时）。</p><p><strong>✅ 最佳状态：</strong>饭后1-2小时、睡眠充足、精神状态良好、热身充分。</p>',3],
+      ['泳池安全须知','⚠️','<p><strong>认清深浅：</strong>下水前看清深浅水区标志，初学者绝不进入深水区。</p><p><strong>不奔跑：</strong>泳池边地面湿滑，绝对不跑跳嬉戏。</p><p><strong>不独游：</strong>初学者一定在有救生员或同伴的陪同下游泳。</p><p><strong>不逞强：</strong>感到累、冷、头晕时立即上岸休息，不硬撑。</p>',4],
+      ['克服怕水心理','🧠','<p><strong>循序渐进：</strong>先在浅水区扶壁行走，感受水的浮力和阻力，建立安全感。</p><p><strong>吐泡泡练习：</strong>手扶池壁，口鼻没入水中缓慢吐气吹泡泡，习惯水中呼吸节奏。</p><p><strong>漂浮信任练习：</strong>手扶池壁，深吸气后俯身漂起，感受水的浮力托举自己，逐步放手漂浮。</p><p><strong>正面心理暗示：</strong>告诉自己「水是朋友」「我很安全」，不要和他人比较进度。</p>',5]
+    ];
+    const importTips = db.transaction((rows) => {
+      for (const r of rows) insert.run(r[0], r[1], r[2], r[3]);
+    });
+    importTips(tips);
+    console.log('🏊 已导入 5 条游泳事前注意事项');
+  }
+
+  // 事后注意事项
+  const postCount = db.prepare('SELECT COUNT(*) as c FROM swim_post_tips').get();
+  if (postCount.c === 0) {
+    const insert = db.prepare('INSERT INTO swim_post_tips (title,icon,content,sort_order) VALUES (?,?,?,?)');
+    const tips = [
+      ['冲洗身体','🚿','<p>泳后立即用温水（非热水）彻底冲洗全身。泳池中的氯气会刺激皮肤，必须尽快洗掉。特别注意清洗腋下、腹股沟等皮肤褶皱处。</p><p><strong>重点清洁：</strong>用流动清水冲洗眼睛、耳朵周围，去除残余泳池水。</p>',1],
+      ['滴眼药水','👁️','<p>泳池中的氯气和细菌易引发结膜炎（红眼病）。游泳后可使用人工泪液或抗生素眼药水滴眼，预防眼部感染。</p><p><strong>推荐：</strong>氧氟沙星滴眼液或氯霉素滴眼液（遵医嘱）。</p>',2],
+      ['清洁耳道','👂','<p><strong>排水：</strong>头向一侧倾斜，用同侧脚单脚跳跃，让耳内积水流出。两侧交替进行。</p><p><strong>棉签轻擦：</strong>用棉签轻轻擦拭外耳道（不要深入），吸干残余水分，预防外耳道炎。</p>',3],
+      ['补水保湿','💧','<p>游泳会大量出汗（虽然感觉不到），游后及时补充温水。皮肤接触氯气后容易干燥，清洗后涂抹润肤乳或身体乳保湿。</p>',4],
+      ['拉伸放松','🧘','<p><strong>大腿后侧：</strong>坐姿体前屈，双腿伸直，身体前倾保持30秒。</p><p><strong>肩部：</strong>右手横过胸前，左手拉右肘向胸靠拢，保持20秒后换边。</p><p><strong>背部：</strong>猫式伸展——四肢着地，吸气凹背抬头，呼气弓背低头，重复5-10次。</p>',5],
+      ['及时补充营养','🍽️','<p>游泳消耗极大热量，结束后30分钟内为「营养窗口」，最适合补充蛋白质+碳水。</p><p><strong>推荐：</strong>一杯牛奶+一根香蕉、酸奶+全麦面包、鸡蛋+红薯。避免游泳后暴饮暴食或饿着不吃的极端行为。</p>',6]
+    ];
+    const importTips = db.transaction((rows) => {
+      for (const r of rows) insert.run(r[0], r[1], r[2], r[3]);
+    });
+    importTips(tips);
+    console.log('🏊 已导入 6 条游泳事后注意事项');
   }
 }
 
@@ -1479,6 +1548,83 @@ app.post('/api/sync', (req, res) => {
     applied++;
   }
   res.json({ applied });
+});
+
+// ==================== 游泳模块 API ====================
+// 游泳打卡
+app.get('/api/swim/checkins', (req, res) => {
+  const { month } = req.query;
+  let rows;
+  if (month) {
+    rows = db.prepare("SELECT * FROM swim_checkins WHERE date LIKE ? ORDER BY date DESC").all(month + '%');
+  } else {
+    rows = db.prepare("SELECT * FROM swim_checkins ORDER BY date DESC LIMIT 50").all();
+  }
+  res.json(rows);
+});
+
+app.post('/api/swim/checkins', (req, res) => {
+  const { date, duration, note } = req.body;
+  if (!date) return res.status(400).json({ error: '日期不能为空' });
+  const existing = db.prepare("SELECT id FROM swim_checkins WHERE date=?").get(date);
+  if (existing) {
+    db.prepare("UPDATE swim_checkins SET duration=?, note=?, created_at=datetime('now','localtime') WHERE id=?")
+      .run(duration || 0, note || '', existing.id);
+  } else {
+    db.prepare("INSERT INTO swim_checkins (date, duration, note) VALUES (?,?,?)")
+      .run(date, duration || 0, note || '');
+  }
+  res.json({ success: true });
+});
+
+// 事前注意事项
+app.get('/api/swim/pre-tips', (req, res) => {
+  res.json(db.prepare("SELECT * FROM swim_pre_tips ORDER BY sort_order").all());
+});
+
+app.post('/api/swim/pre-tips', (req, res) => {
+  const { title, icon, content } = req.body;
+  const maxOrder = db.prepare("SELECT MAX(sort_order) as m FROM swim_pre_tips").get();
+  db.prepare("INSERT INTO swim_pre_tips (title, icon, content, sort_order) VALUES (?,?,?,?)")
+    .run(title || '', icon || '💡', content || '', (maxOrder.m || 0) + 1);
+  res.json({ success: true });
+});
+
+app.put('/api/swim/pre-tips/:id', (req, res) => {
+  const { title, icon, content, sort_order } = req.body;
+  db.prepare("UPDATE swim_pre_tips SET title=COALESCE(?,title), icon=COALESCE(?,icon), content=COALESCE(?,content), sort_order=COALESCE(?,sort_order) WHERE id=?")
+    .run(title || null, icon || null, content || null, sort_order || null, req.params.id);
+  res.json({ success: true });
+});
+
+app.delete('/api/swim/pre-tips/:id', (req, res) => {
+  db.prepare("DELETE FROM swim_pre_tips WHERE id=?").run(req.params.id);
+  res.json({ success: true });
+});
+
+// 事后注意事项
+app.get('/api/swim/post-tips', (req, res) => {
+  res.json(db.prepare("SELECT * FROM swim_post_tips ORDER BY sort_order").all());
+});
+
+app.post('/api/swim/post-tips', (req, res) => {
+  const { title, icon, content } = req.body;
+  const maxOrder = db.prepare("SELECT MAX(sort_order) as m FROM swim_post_tips").get();
+  db.prepare("INSERT INTO swim_post_tips (title, icon, content, sort_order) VALUES (?,?,?,?)")
+    .run(title || '', icon || '💡', content || '', (maxOrder.m || 0) + 1);
+  res.json({ success: true });
+});
+
+app.put('/api/swim/post-tips/:id', (req, res) => {
+  const { title, icon, content, sort_order } = req.body;
+  db.prepare("UPDATE swim_post_tips SET title=COALESCE(?,title), icon=COALESCE(?,icon), content=COALESCE(?,content), sort_order=COALESCE(?,sort_order) WHERE id=?")
+    .run(title || null, icon || null, content || null, sort_order || null, req.params.id);
+  res.json({ success: true });
+});
+
+app.delete('/api/swim/post-tips/:id', (req, res) => {
+  db.prepare("DELETE FROM swim_post_tips WHERE id=?").run(req.params.id);
+  res.json({ success: true });
 });
 
 app.get('/api/sync', (req, res) => {
