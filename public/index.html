@@ -5,12 +5,12 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="工作台">
-<meta name="theme-color" content="#FF9AAF">
+<meta name="theme-color" content="#FFB6C1">
 <link rel="manifest" href="/manifest.json">
 <link rel="apple-touch-icon" href="/icons/icon-192.png">
 <title>钟雁羚的工作台</title>
 <style>
-:root{--bg:#f5f6f8;--card-bg:#fff;--primary:#3b82f6;--primary-light:#dbeafe;--primary-dark:#1d4ed8;--text:#1e293b;--text-light:#64748b;--text-muted:#94a3b8;--border:#e2e8f0;--shadow:0 1px 3px rgba(0,0,0,.06);--shadow-lg:0 4px 16px rgba(0,0,0,.1);--radius:12px;--radius-sm:8px;--sidebar-w:220px;--success:#22c55e;--warning:#f59e0b;--danger:#ef4444;--info:#3b82f6;--transition:.2s ease}
+:root{--bg:#FFF0F5;--card-bg:#FFFFFF;--primary:#FFB6C1;--primary-light:#FFF0F5;--primary-dark:#FF85A2;--text:#4A4A4A;--text-light:#7A7A7A;--text-muted:#A0A0A0;--border:#FFD6E0;--shadow:0 2px 8px rgba(255,182,193,.15);--shadow-lg:0 6px 24px rgba(255,182,193,.25);--radius:16px;--radius-sm:10px;--sidebar-w:220px;--success:#7ECB9A;--warning:#FFB84D;--danger:#FF7B8A;--info:#FFB6C1;--transition:.2s ease}
 *{margin:0;padding:0;box-sizing:border-box}
 body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Hiragino Sans GB','Microsoft YaHei',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden}
 a{color:var(--primary-dark);text-decoration:none}
@@ -32,7 +32,8 @@ a{color:var(--primary-dark);text-decoration:none}
 .card:hover{box-shadow:var(--shadow-lg)}
 .card-title{font-size:15px;font-weight:600;color:var(--text);margin-bottom:12px;display:flex;align-items:center;gap:8px}
 .btn{display:inline-flex;align-items:center;gap:6px;padding:8px 18px;border-radius:20px;font-size:13px;font-weight:500;cursor:pointer;border:none;transition:all var(--transition);font-family:inherit}
-.btn-primary{background:var(--primary);color:#fff}.btn-primary:hover{background:var(--primary-dark);transform:translateY(-1px)}
+.btn-primary{background:linear-gradient(135deg,#FFB6C1,#FF85A2);color:#fff}.btn-primary:hover{background:linear-gradient(135deg,#FF85A2,#FF6B8A);transform:translateY(-1px)}
+.btn-primary:active{transform:scale(.96)}
 .btn-outline{background:transparent;border:1.5px solid var(--primary);color:var(--primary)}.btn-outline:hover{background:var(--primary-light)}
 .btn-sm{padding:5px 12px;font-size:12px;border-radius:14px}
 .btn-danger{background:var(--danger);color:#fff}.btn-success{background:var(--success);color:#fff}
@@ -43,8 +44,8 @@ a{color:var(--primary-dark);text-decoration:none}
 .input:focus,.select:focus,.textarea:focus{outline:none;border-color:var(--primary)}
 .textarea{resize:vertical;min-height:60px}
 .tag{display:inline-block;padding:3px 10px;border-radius:12px;font-size:11px;font-weight:500}
-.tag-primary{background:var(--primary-light);color:var(--primary-dark)}.tag-yellow{background:#fef3c7;color:#92400e}
-.tag-green{background:#D4EDDA;color:#155724}.tag-blue{background:#D6EAF8;color:#1A5276}.tag-red{background:#FADBD8;color:#922B21}
+.tag-primary{background:var(--primary-light);color:var(--primary-dark)}.tag-yellow{background:#FFF3E0;color:#E65100}
+.tag-green{background:#E8F5E9;color:#2E7D32}.tag-pink{background:#FFF0F5;color:#D6336C}.tag-red{background:#FFEBEE;color:#C62828}
 .form-group{margin-bottom:14px}.form-group label{display:block;font-size:12px;font-weight:600;color:var(--text-light);margin-bottom:5px}
 .form-row{display:flex;gap:10px}.form-row>*{flex:1}
 .toast{position:fixed;top:20px;right:20px;z-index:9999;background:var(--card-bg);padding:12px 20px;border-radius:var(--radius-sm);box-shadow:var(--shadow-lg);font-size:13px;animation:slideIn .3s ease;border-left:3px solid var(--primary)}
@@ -58,7 +59,7 @@ a{color:var(--primary-dark);text-decoration:none}
 .stat-value{font-size:32px;font-weight:700;color:var(--primary-dark)}
 .stat-label{font-size:12px;color:var(--text-muted);margin-top:4px}
 .progress-bar{height:8px;background:var(--primary-light);border-radius:4px;overflow:hidden;margin-top:8px}
-.progress-fill{height:100%;background:linear-gradient(90deg,var(--primary),var(--primary-dark));border-radius:4px;transition:width .5s}
+.progress-fill{height:100%;background:linear-gradient(90deg,#FFB6C1,#FF85A2);border-radius:4px;transition:width .5s}
 .table-wrap{overflow-x:auto}
 table{width:100%;border-collapse:collapse;font-size:13px}
 th{text-align:left;padding:10px 12px;font-weight:600;color:var(--text-light);border-bottom:2px solid var(--border);font-size:11px}
@@ -85,15 +86,15 @@ td{padding:10px 12px;border-bottom:1px solid var(--border)}
 .book-cover-img{width:100%;margin-bottom:10px;border-radius:var(--radius-sm);overflow:hidden}
 .book-cover-img svg{width:100%;height:auto;display:block;min-height:140px}
 .book-status{display:inline-block;padding:2px 10px;border-radius:10px;font-size:10px;font-weight:600;margin-bottom:6px}
-.book-status.want{background:#FFF3CD;color:#856404}.book-status.reading{background:#D6EAF8;color:#1A5276}.book-status.done{background:#D4EDDA;color:#155724}
-.timer-circle{width:180px;height:180px;border-radius:50%;border:6px solid var(--primary-light);display:flex;align-items:center;justify-content:center;margin:0 auto 20px;background:var(--card-bg);box-shadow:0 0 40px rgba(255,154,175,.15)}
+.book-status.want{background:#FFF0F5;color:#D6336C}.book-status.reading{background:#FFF3E0;color:#E65100}.book-status.done{background:#E8F5E9;color:#2E7D32}
+.timer-circle{width:180px;height:180px;border-radius:50%;border:6px solid var(--primary-light);display:flex;align-items:center;justify-content:center;margin:0 auto 20px;background:var(--card-bg);box-shadow:0 0 40px rgba(255,182,193,.2)}
 .timer-display{font-size:42px;font-weight:700;color:var(--primary-dark);font-variant-numeric:tabular-nums}
-.note-float-btn{position:fixed;bottom:190px;right:24px;z-index:999;width:44px;height:44px;border-radius:50%;background:var(--primary);color:#fff;font-size:20px;border:none;cursor:pointer;box-shadow:var(--shadow-lg);display:flex;align-items:center;justify-content:center;transition:all var(--transition)}
+.note-float-btn{position:fixed;bottom:190px;right:24px;z-index:999;width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,#FFB6C1,#FF85A2);color:#fff;font-size:20px;border:none;cursor:pointer;box-shadow:var(--shadow-lg);display:flex;align-items:center;justify-content:center;transition:all var(--transition)}
 .note-float-btn:hover{transform:scale(1.1)}
 .note-float-panel{position:fixed;bottom:180px;right:80px;z-index:999;width:280px;background:var(--card-bg);border-radius:var(--radius);box-shadow:var(--shadow-lg);padding:16px;display:none}
 .note-float-panel.show{display:block;animation:slideIn .3s ease}
 /* Cat SVG */
-.cat-container{position:fixed;bottom:20px;right:20px;z-index:1000;cursor:pointer;transition:transform .3s;filter:drop-shadow(0 4px 12px rgba(180,160,190,.25))}
+.cat-container{position:fixed;bottom:20px;right:20px;z-index:1000;cursor:pointer;transition:transform .3s;filter:drop-shadow(0 4px 16px rgba(255,182,193,.3))}
 .cat-container:hover{transform:scale(1.08)}
 .cat-container svg{width:130px;height:140px}
 .cat-bubble{position:fixed;background:var(--card-bg);padding:8px 14px;border-radius:16px;font-size:12px;white-space:nowrap;box-shadow:var(--shadow);opacity:0;transition:opacity .3s;pointer-events:none;border:1px solid var(--border);z-index:1001;max-width:200px}
@@ -122,7 +123,7 @@ td{padding:10px 12px;border-bottom:1px solid var(--border)}
 .mood-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
 .mood-cell{aspect-ratio:1;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:14px;cursor:pointer;background:var(--bg)}.mood-cell.today{border:2px solid var(--primary)}
 .period-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px}
-.period-day{padding:8px 2px;border-radius:50%;font-size:12px;text-align:center}.period-day.normal{background:var(--bg)}.period-day.period{background:#fee2e2;color:#991b1b;font-weight:600}.period-day.ovulation{background:#dbeafe;color:#1e40af;font-weight:600}.period-day.predicted{background:#fef3c7;color:#92400e;border:1px dashed #f59e0b}.period-day.today{border:2px solid var(--primary)}
+.period-day{padding:8px 2px;border-radius:50%;font-size:12px;text-align:center}.period-day.normal{background:var(--bg)}.period-day.period{background:#fee2e2;color:#991b1b;font-weight:600}.period-day.ovulation{background:#FFF0F5;color:#D6336C;font-weight:600}.period-day.predicted{background:#fef3c7;color:#92400e;border:1px dashed #f59e0b}.period-day.today{border:2px solid var(--primary)}
 .sound-grid{display:flex;gap:8px;flex-wrap:wrap}
 .sound-btn{padding:8px 14px;border-radius:20px;border:1.5px solid var(--border);background:var(--card-bg);cursor:pointer;font-size:12px;font-family:inherit}.sound-btn.active{background:var(--primary);color:#fff;border-color:var(--primary)}
 .task-detail-row{cursor:pointer;padding:8px 12px;margin:4px 0;border-radius:8px;transition:background .2s;display:flex;align-items:center;gap:8px;font-size:13px}
@@ -160,7 +161,7 @@ td{padding:10px 12px;border-bottom:1px solid var(--border)}
 .m3-grid{display:grid;gap:3px;background:var(--border);padding:4px;border-radius:var(--radius);margin:0 auto;touch-action:none}
 .m3-cell{aspect-ratio:1;display:flex;align-items:center;justify-content:center;background:var(--card-bg);border-radius:6px;cursor:pointer;font-size:28px;transition:all .15s;user-select:none;position:relative}
 .m3-cell:hover{transform:scale(1.05)}
-.m3-cell.selected{transform:scale(1.12);box-shadow:0 0 12px rgba(255,154,175,.5);z-index:1}
+.m3-cell.selected{transform:scale(1.12);box-shadow:0 0 12px rgba(255,182,193,.5);z-index:1}
 .m3-cell.matched{animation:m3Pop .3s ease-out}
 @keyframes m3Pop{0%{transform:scale(1)}50%{transform:scale(1.3);opacity:.7}100%{transform:scale(0);opacity:0}}
 .m3-cell.drop{animation:m3Drop .3s ease-out}
@@ -188,12 +189,14 @@ td{padding:10px 12px;border-bottom:1px solid var(--border)}
 .cal-nav button{background:none;border:1px solid var(--border);border-radius:var(--radius-sm);padding:4px 10px;cursor:pointer;font-size:14px;font-family:inherit}
 .heatmap-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px}
 .heatmap-cell{aspect-ratio:1;border-radius:4px;background:var(--bg);transition:all .2s}
-.heatmap-cell.l1{background:#FFE0E6}.heatmap-cell.l2{background:#FFB3C1}.heatmap-cell.l3{background:#FF7B9B}.heatmap-cell.l4{background:#FF4D78}
+.heatmap-cell.l1{background:#FFE0E6}.heatmap-cell.l2{background:#FFC8D5}.heatmap-cell.l3{background:#FFB3C1}.heatmap-cell.l4{background:#FF85A2}
 .history-bar{display:flex;gap:8px;align-items:center;margin-bottom:12px;flex-wrap:wrap}
 .history-bar input,.history-bar select{padding:6px 10px;border-radius:var(--radius-sm);border:1px solid var(--border);font-size:13px;font-family:inherit;background:var(--card-bg)}
 .game-bar{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:16px;padding:10px 16px;background:var(--card-bg);border-radius:var(--radius);border:1px solid var(--border);box-shadow:var(--shadow);flex-wrap:wrap}
 .game-bar .back-btn{cursor:pointer;color:var(--primary-dark);font-size:14px;font-weight:600;padding:4px 10px;border-radius:var(--radius-sm);transition:background .2s}
 .game-bar .back-btn:hover{background:var(--primary-light)}
+/* Swim expanded */
+.card.expanded .swim-detail{display:block!important}
 </style>
 </head>
 <body>
@@ -287,6 +290,7 @@ const PAGES=[
   {id:'shopping',icon:'🛒',label:'待购清单'},{id:'health',icon:'💪',label:'健康打卡'},
   {id:'period',icon:'📅',label:'经期记录'},{id:'mood',icon:'💝',label:'心情日记'},
   {id:'pomodoro',icon:'🍅',label:'番茄专注'},{id:'notes',icon:'💡',label:'灵感便签'},
+  {id:'swim',icon:'🏊',label:'游泳'},
 ];
 let currentPage='dashboard',sidebarOpen=false;
 
@@ -378,7 +382,7 @@ setTimeout(()=>catAct('greet'),2000);resetCatTimer();
 
 function loadPage(id){
   document.getElementById('mainContent').innerHTML=`<div style="text-align:center;padding:60px;color:var(--text-muted)"><div style="font-size:40px">🐱</div><p>加载中...</p></div>`;
-  setTimeout(()=>{const fns={dashboard:renderDashboard,tasks:renderTasks,finance:renderFinance,fitness:renderFitness,korean:renderKorean,reading:renderReading,menu:renderMenu,recipes:renderRecipes,shopping:renderShopping,health:renderHealth,period:renderPeriod,mood:renderMood,pomodoro:renderPomodoro,notes:renderNotes};if(fns[id])fns[id]();else renderDashboard()},100)
+  setTimeout(()=>{const fns={dashboard:renderDashboard,tasks:renderTasks,finance:renderFinance,fitness:renderFitness,korean:renderKorean,reading:renderReading,menu:renderMenu,recipes:renderRecipes,shopping:renderShopping,health:renderHealth,period:renderPeriod,mood:renderMood,pomodoro:renderPomodoro,notes:renderNotes,swim:renderSwim};if(fns[id])fns[id]();else renderDashboard()},100)
 }
 
 // ========== DASHBOARD ==========
@@ -484,7 +488,7 @@ async function renderDashboard(){
       var el=document.getElementById('networkInfo');if(el)el.innerHTML=h;
     }).catch(function(){});
     try{const tr=await fetch(API+'/api/tasks?date='+today());const ts=await tr.json();const el=document.getElementById('dashTasks');if(el){if(ts.length===0)el.innerHTML='<p style="color:var(--text-muted);text-align:center;padding:10px">今天还没有待办~</p>';
-    else el.innerHTML=ts.slice(0,5).map(t=>`<div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--border);font-size:13px"><span>${t.completed?'✅':'⭕'}</span><span style="${t.completed?'text-decoration:line-through;color:var(--text-muted)':''}">${t.title}</span>${t.priority==='high'?'<span class="tag tag-red">高优</span>':''}${t.time_slot?`<span class="tag tag-blue">${t.time_slot==='morning'?'上午':t.time_slot==='afternoon'?'下午':t.time_slot==='evening'?'傍晚':'晚上'}</span>`:''}</div>`).join('');if(ts.length>5)el.innerHTML+=`<p style="text-align:center;margin-top:8px;font-size:12px;color:var(--text-muted)">还有 ${ts.length-5} 项，点击查看全部</p>`}}catch(e){}
+    else el.innerHTML=ts.slice(0,5).map(t=>`<div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--border);font-size:13px"><span>${t.completed?'✅':'⭕'}</span><span style="${t.completed?'text-decoration:line-through;color:var(--text-muted)':''}">${t.title}</span>${t.priority==='high'?'<span class="tag tag-red">高优</span>':''}${t.time_slot?`<span class="tag tag-pink">${t.time_slot==='morning'?'上午':t.time_slot==='afternoon'?'下午':t.time_slot==='evening'?'傍晚':'晚上'}</span>`:''}</div>`).join('');if(ts.length>5)el.innerHTML+=`<p style="text-align:center;margin-top:8px;font-size:12px;color:var(--text-muted)">还有 ${ts.length-5} 项，点击查看全部</p>`}}catch(e){}
   }catch(e){m.innerHTML='<div class="empty-state"><div class="icon">🔌</div><p>无法连接服务器</p></div>'}
 }
 async function openTaskDetail(){
@@ -494,7 +498,7 @@ async function openTaskDetail(){
   else{
     const done=ts.filter(t=>t.completed),undone=ts.filter(t=>!t.completed);
     h+=`<div style="margin-bottom:12px"><span style="color:var(--success);font-weight:600">✅ 已完成 ${done.length}</span> | <span style="color:var(--text-light)">⭕ 未完成 ${undone.length}</span></div>`;
-    if(undone.length>0){h+='<div class="card-title">⭕ 未完成</div>'+undone.map(t=>`<div style="padding:6px 0;font-size:14px">⭕ ${t.title} ${t.priority==='high'?'<span class="tag tag-red">高优</span>':''}${t.time_slot?`<span class="tag tag-blue">${t.time_slot==='morning'?'上午':t.time_slot==='afternoon'?'下午':t.time_slot==='evening'?'傍晚':'晚上'}</span>`:''}${t.description?`<div style="font-size:11px;color:var(--text-muted);margin-left:20px">${t.description}</div>`:''}</div>`).join('')}
+    if(undone.length>0){h+='<div class="card-title">⭕ 未完成</div>'+undone.map(t=>`<div style="padding:6px 0;font-size:14px">⭕ ${t.title} ${t.priority==='high'?'<span class="tag tag-red">高优</span>':''}${t.time_slot?`<span class="tag tag-pink">${t.time_slot==='morning'?'上午':t.time_slot==='afternoon'?'下午':t.time_slot==='evening'?'傍晚':'晚上'}</span>`:''}${t.description?`<div style="font-size:11px;color:var(--text-muted);margin-left:20px">${t.description}</div>`:''}</div>`).join('')}
     if(done.length>0){h+='<div class="card-title" style="margin-top:16px">✅ 已完成</div>'+done.map(t=>`<div style="padding:6px 0;font-size:14px;text-decoration:line-through;color:var(--text-muted)">${t.title}</div>`).join('')}
   }
   h+='<div style="margin-top:16px"><button class="btn btn-primary btn-sm" onclick="navigate(\'tasks\');closeDetail()">前往管理</button></div>';
@@ -521,7 +525,7 @@ async function renderTasks(){
 async function loadTasks(){
   const d=document.getElementById('taskDate')?.value||today();const r=await fetch(API+'/api/tasks?date='+d);const ts=await r.json();const el=document.getElementById('taskList');if(!el)return;
   if(ts.length===0){el.innerHTML='<div class="empty-state"><div class="icon">📝</div><p>没有待办</p></div>';return}
-  el.innerHTML=ts.map(t=>`<div style="padding:8px 0;border-bottom:1px solid var(--border)"><div class="task-detail-row" onclick="this.nextElementSibling?.classList.toggle(\'show\')"><label class="checkbox-wrap" onclick="event.stopPropagation()"><input type="checkbox" ${t.completed?'checked':''} onchange="toggleTask(${t.id},this.checked)"></label><span style="flex:1;font-size:14px;${t.completed?'text-decoration:line-through;color:var(--text-muted)':''}">${t.title}</span><span class="tag ${t.priority==='high'?'tag-red':t.priority==='low'?'tag-green':'tag-yellow'}">${t.priority==='high'?'高':t.priority==='low'?'低':'中'}</span>${t.time_slot?`<span class="tag tag-blue">${t.time_slot==='morning'?'上午':t.time_slot==='afternoon'?'下午':t.time_slot==='evening'?'傍晚':'晚上'}</span>`:''}<button class="btn btn-sm btn-outline" onclick="event.stopPropagation();editTask(${t.id})">编辑</button><button class="btn btn-sm btn-danger" onclick="event.stopPropagation();deleteTask(${t.id})">删除</button></div><div class="task-expand">${t.description?`<div>📝 ${t.description}</div>`:'<div style="color:var(--text-muted)">暂无备注</div>'}<div style="margin-top:4px">🕐 创建于 ${t.created_at||'--'}</div></div></div>`).join('')}
+  el.innerHTML=ts.map(t=>`<div style="padding:8px 0;border-bottom:1px solid var(--border)"><div class="task-detail-row" onclick="this.nextElementSibling?.classList.toggle(\'show\')"><label class="checkbox-wrap" onclick="event.stopPropagation()"><input type="checkbox" ${t.completed?'checked':''} onchange="toggleTask(${t.id},this.checked)"></label><span style="flex:1;font-size:14px;${t.completed?'text-decoration:line-through;color:var(--text-muted)':''}">${t.title}</span><span class="tag ${t.priority==='high'?'tag-red':t.priority==='low'?'tag-green':'tag-yellow'}">${t.priority==='high'?'高':t.priority==='low'?'低':'中'}</span>${t.time_slot?`<span class="tag tag-pink">${t.time_slot==='morning'?'上午':t.time_slot==='afternoon'?'下午':t.time_slot==='evening'?'傍晚':'晚上'}</span>`:''}<button class="btn btn-sm btn-outline" onclick="event.stopPropagation();editTask(${t.id})">编辑</button><button class="btn btn-sm btn-danger" onclick="event.stopPropagation();deleteTask(${t.id})">删除</button></div><div class="task-expand">${t.description?`<div>📝 ${t.description}</div>`:'<div style="color:var(--text-muted)">暂无备注</div>'}<div style="margin-top:4px">🕐 创建于 ${t.created_at||'--'}</div></div></div>`).join('')}
 async function toggleTask(id,c){await fetch(API+'/api/tasks/'+id,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({completed:c?1:0})});if(c){catAct('happy');spawnConfetti();toast('完成！🎉')}loadTasks()}
 function showAddTask(t){
   const is=!!t;const o=document.createElement('div');o.className='modal-overlay';
@@ -832,7 +836,7 @@ async function loadKContent(){
   if(kMode==='vocab'){
     el.innerHTML='<div class="level-tabs">'+[1,2,3,4].map(function(l){return '<button class="level-tab'+(l===kLevel?' active':'')+'" onclick="swKL('+l+')">TOPIK '+l+'级</button>'}).join('')+'</div><div id="vList">加载中...</div>';
     const r=await fetch(API+'/api/korean/vocab?level='+kLevel);const v=await r.json();
-    var h='';for(var i=0;i<v.length;i++){var w=v[i];h+='<div class="card" style="padding:14px;margin-bottom:8px"><div style="display:flex;align-items:center;justify-content:space-between"><div><span style="font-size:22px;font-weight:700;color:var(--primary-dark)">'+w.korean+'</span><span style="font-size:13px;color:var(--text-light);margin-left:8px">['+w.pronunciation+']</span><button class="speaker-btn" style="width:22px;height:22px;font-size:12px;margin-left:4px" onclick="speakKorean(\''+w.korean+'\',this)">🔊</button></div><span class="tag tag-blue">'+(w.part_of_speech||'')+'</span></div><div style="margin-top:6px;font-size:14px;color:var(--text)">'+w.meaning+'</div></div>'}
+    var h='';for(var i=0;i<v.length;i++){var w=v[i];h+='<div class="card" style="padding:14px;margin-bottom:8px"><div style="display:flex;align-items:center;justify-content:space-between"><div><span style="font-size:22px;font-weight:700;color:var(--primary-dark)">'+w.korean+'</span><span style="font-size:13px;color:var(--text-light);margin-left:8px">['+w.pronunciation+']</span><button class="speaker-btn" style="width:22px;height:22px;font-size:12px;margin-left:4px" onclick="speakKorean(\''+w.korean+'\',this)">🔊</button></div><span class="tag tag-pink">'+(w.part_of_speech||'')+'</span></div><div style="margin-top:6px;font-size:14px;color:var(--text)">'+w.meaning+'</div></div>'}
     document.getElementById('vList').innerHTML=h;return
   }
   el.innerHTML='<div class="level-tabs">'+[1,2,3,4].map(function(l){return '<button class="level-tab'+(l===kLevel?' active':'')+'" onclick="swKL('+l+')">TOPIK '+l+'级</button>'}).join('')+'</div><div id="gList">加载中...</div>';
@@ -1109,8 +1113,8 @@ async function delNote(nid){await fetch(API+'/api/books/'+readerState.bookId+'/n
 async function renderMenu(){
   document.getElementById('mainContent').innerHTML=`<div class="fade-in"><div class="page-title">🍜 随机菜单</div><div class="card" style="text-align:center"><div style="font-size:48px;margin-bottom:8px" id="rRes">🍽️</div><div style="font-size:18px;font-weight:700;color:var(--primary-dark);margin-bottom:4px" id="rName">今天吃什么呢？</div><div id="rTags" style="font-size:12px;color:var(--text-light);margin-bottom:6px"></div><div style="display:flex;gap:6px;justify-content:center;flex-wrap:wrap;margin-bottom:10px"><button class="btn btn-primary" onclick="rMenu()">🎲 随机推荐</button></div><div style="display:flex;gap:6px;justify-content:center;flex-wrap:wrap;font-size:12px"><select class="select" id="rdCat" style="max-width:120px;padding:4px 8px;font-size:12px" onchange="rMenu()"><option value="全部">全部分类</option></select><select class="select" id="rdFlavor" style="max-width:100px;padding:4px 8px;font-size:12px" onchange="rMenu()"><option value="全部口味">全部口味</option></select></div></div><div class="card"><div style="display:flex;gap:10px;align-items:center;margin-bottom:12px"><span class="card-title" style="margin:0">📋 菜单列表</span><button class="btn btn-primary btn-sm" onclick="showAddMI()">+ 添加</button></div><div id="mList">加载中...</div></div></div>`;loadMI();loadRecipeFilters()}
 async function loadRecipeFilters(){try{const r=await fetch(API+'/api/recipes/categories');const d=await r.json();const cs=document.getElementById('rdCat');if(cs){cs.innerHTML='<option value="全部">全部分类</option>'+d.categories.map(c=>`<option value="${c}">${c}</option>`).join('')}const fs=document.getElementById('rdFlavor');if(fs){fs.innerHTML='<option value="全部口味">全部口味</option>'+d.flavors.map(f=>`<option value="${f}">${f}</option>`).join('')}}catch(e){}}
-async function rMenu(){const c=document.getElementById('rdCat')?.value||'全部';const f=document.getElementById('rdFlavor')?.value||'全部口味';const qs=new URLSearchParams();if(c!=='全部')qs.set('category',c);if(f!=='全部口味')qs.set('flavor',f);const r=await fetch(API+'/api/menu/random?'+qs.toString());const d=await r.json();if(!d){document.getElementById('rName').textContent='没有找到符合条件的菜~';document.getElementById('rRes').textContent='😿';document.getElementById('rTags').innerHTML='';return}document.getElementById('rRes').textContent='🍽️';document.getElementById('rName').innerHTML=`<a style="color:var(--primary-dark);cursor:pointer;text-decoration:underline" onclick="navigate('recipes');setTimeout(()=>viewRecipe(${d.id}),500)">${d.name}</a>`;document.getElementById('rTags').innerHTML=`<span class="tag tag-primary">${d.category||'家常'}</span> <span class="tag tag-blue">🏷 ${d.flavor_tags||''}</span>`;catAct('happy')}
-async function loadMI(){const r=await fetch(API+'/api/menu');const is=await r.json();const el=document.getElementById('mList');if(!el)return;if(is.length===0){el.innerHTML='<div class="empty-state"><div class="icon">🍜</div><p>还没有添加</p></div>';return}el.innerHTML=is.map(i=>`<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border)"><span style="flex:1;font-size:14px">${i.name}</span><span class="tag tag-blue">${i.meal_type==='breakfast'?'早餐':i.meal_type==='lunch'?'午餐':i.meal_type==='dinner'?'晚餐':i.meal_type==='snack'?'小吃':'不限'}</span><span class="tag tag-primary">${i.category==='home'?'家常':i.category==='takeout'?'外卖':'餐厅'}</span><button class="btn btn-sm btn-danger" onclick="delMI(${i.id})">删除</button></div>`).join('')}
+async function rMenu(){const c=document.getElementById('rdCat')?.value||'全部';const f=document.getElementById('rdFlavor')?.value||'全部口味';const qs=new URLSearchParams();if(c!=='全部')qs.set('category',c);if(f!=='全部口味')qs.set('flavor',f);const r=await fetch(API+'/api/menu/random?'+qs.toString());const d=await r.json();if(!d){document.getElementById('rName').textContent='没有找到符合条件的菜~';document.getElementById('rRes').textContent='😿';document.getElementById('rTags').innerHTML='';return}document.getElementById('rRes').textContent='🍽️';document.getElementById('rName').innerHTML=`<a style="color:var(--primary-dark);cursor:pointer;text-decoration:underline" onclick="navigate('recipes');setTimeout(()=>viewRecipe(${d.id}),500)">${d.name}</a>`;document.getElementById('rTags').innerHTML=`<span class="tag tag-primary">${d.category||'家常'}</span> <span class="tag tag-pink">🏷 ${d.flavor_tags||''}</span>`;catAct('happy')}
+async function loadMI(){const r=await fetch(API+'/api/menu');const is=await r.json();const el=document.getElementById('mList');if(!el)return;if(is.length===0){el.innerHTML='<div class="empty-state"><div class="icon">🍜</div><p>还没有添加</p></div>';return}el.innerHTML=is.map(i=>`<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border)"><span style="flex:1;font-size:14px">${i.name}</span><span class="tag tag-pink">${i.meal_type==='breakfast'?'早餐':i.meal_type==='lunch'?'午餐':i.meal_type==='dinner'?'晚餐':i.meal_type==='snack'?'小吃':'不限'}</span><span class="tag tag-primary">${i.category==='home'?'家常':i.category==='takeout'?'外卖':'餐厅'}</span><button class="btn btn-sm btn-danger" onclick="delMI(${i.id})">删除</button></div>`).join('')}
 function showAddMI(){const o=document.createElement('div');o.className='modal-overlay';o.innerHTML=`<div class="modal"><div class="modal-title">添加菜单</div><div class="form-group"><label>名称</label><input class="input" id="miName"></div><div class="form-row"><div class="form-group"><label>餐别</label><select class="select" id="miMeal"><option value="any">不限</option><option value="breakfast">早餐</option><option value="lunch">午餐</option><option value="dinner">晚餐</option><option value="snack">小吃</option></select></div><div class="form-group"><label>类型</label><select class="select" id="miCat"><option value="home">家常</option><option value="takeout">外卖</option><option value="restaurant">餐厅</option></select></div></div><div style="display:flex;gap:10px;justify-content:flex-end"><button class="btn btn-outline btn-sm" onclick="this.closest('.modal-overlay').remove()">取消</button><button class="btn btn-primary btn-sm" onclick="saveMI()">添加</button></div></div>`;o.addEventListener('click',e=>{if(e.target===o)o.remove()});document.body.appendChild(o)}
 async function saveMI(){const n=document.getElementById('miName').value.trim();if(!n)return toast('请输入名称');await fetch(API+'/api/menu',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name:n,meal_type:document.getElementById('miMeal').value,category:document.getElementById('miCat').value})});document.querySelector('.modal-overlay')?.remove();loadMI()}
 async function delMI(id){showConfirm('确定删除这个菜单项吗？',async()=>{await fetch(API+'/api/menu/'+id,{method:'DELETE'});loadMI()})}
@@ -1119,7 +1123,7 @@ async function delMI(id){showConfirm('确定删除这个菜单项吗？',async()
 async function renderRecipes(){
   document.getElementById('mainContent').innerHTML=`<div class="fade-in"><div class="page-title">👩‍🍳 家常菜谱</div><div class="card"><div style="display:flex;gap:10px;align-items:center;margin-bottom:12px;flex-wrap:wrap"><input class="input" id="rcSearch" placeholder="搜索菜谱..." style="max-width:200px" oninput="loadRecipes()"><select class="select" id="rcCat" style="max-width:130px;padding:4px 8px;font-size:12px" onchange="loadRecipes()"><option value="">全部分类</option></select><button class="btn btn-primary btn-sm" onclick="showAddRecipe()">+ 新增</button><button class="btn btn-outline btn-sm" onclick="searchWebRecipe()">🔍 搜索更多</button></div><div id="rcList">加载中...</div></div></div>`;loadRecipes();loadCatFilter()}
 async function loadCatFilter(){try{const r=await fetch(API+'/api/recipes/categories');const d=await r.json();const s=document.getElementById('rcCat');if(s)s.innerHTML='<option value="">全部分类</option>'+d.categories.map(c=>`<option value="${c}">${c}</option>`).join('')}catch(e){}}
-async function loadRecipes(){const s=document.getElementById('rcSearch')?.value||'';const c=document.getElementById('rcCat')?.value||'';const p=new URLSearchParams();if(s)p.set('search',s);if(c)p.set('category',c);const u=API+'/api/recipes?'+p.toString();const r=await fetch(u);const rs=await r.json();const el=document.getElementById('rcList');if(!el)return;if(rs.length===0){el.innerHTML='<div class="empty-state"><div class="icon">👩‍🍳</div><p>还没有菜谱，试试搜索功能</p></div>';return}el.innerHTML=rs.map(rc=>`<div class="card" style="padding:16px;margin-bottom:10px;cursor:pointer" onclick="viewRecipe(${rc.id})"><div style="display:flex;justify-content:space-between;align-items:center"><span style="font-weight:600">🍳 ${rc.name}</span><span style="display:flex;gap:4px;flex-wrap:wrap"><span class="tag tag-primary">${rc.category||'家常'}</span><span class="tag tag-yellow">⏱${rc.cook_time}min</span><span class="tag tag-blue">${rc.difficulty==='easy'?'简单':rc.difficulty==='medium'?'中等':'困难'}</span></span></div>${rc.flavor_tags?`<div style="margin-top:6px;font-size:12px;color:var(--text-light)">🏷 ${rc.flavor_tags}</div>`:''}</div>`).join('')}
+async function loadRecipes(){const s=document.getElementById('rcSearch')?.value||'';const c=document.getElementById('rcCat')?.value||'';const p=new URLSearchParams();if(s)p.set('search',s);if(c)p.set('category',c);const u=API+'/api/recipes?'+p.toString();const r=await fetch(u);const rs=await r.json();const el=document.getElementById('rcList');if(!el)return;if(rs.length===0){el.innerHTML='<div class="empty-state"><div class="icon">👩‍🍳</div><p>还没有菜谱，试试搜索功能</p></div>';return}el.innerHTML=rs.map(rc=>`<div class="card" style="padding:16px;margin-bottom:10px;cursor:pointer" onclick="viewRecipe(${rc.id})"><div style="display:flex;justify-content:space-between;align-items:center"><span style="font-weight:600">🍳 ${rc.name}</span><span style="display:flex;gap:4px;flex-wrap:wrap"><span class="tag tag-primary">${rc.category||'家常'}</span><span class="tag tag-yellow">⏱${rc.cook_time}min</span><span class="tag tag-pink">${rc.difficulty==='easy'?'简单':rc.difficulty==='medium'?'中等':'困难'}</span></span></div>${rc.flavor_tags?`<div style="margin-top:6px;font-size:12px;color:var(--text-light)">🏷 ${rc.flavor_tags}</div>`:''}</div>`).join('')}
 function searchWebRecipe(){
   const s=document.getElementById('rcSearch')?.value.trim();
   if(!s)return toast('请先输入菜名搜索');
@@ -1135,12 +1139,12 @@ async function saveRecipe(){
   await fetch(API+'/api/recipes',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name:n,category:document.getElementById('rcCat2').value,ingredients:document.getElementById('rcIng').value,steps:document.getElementById('rcStep').value,flavor_tags:document.getElementById('rcTags').value,difficulty:document.getElementById('rcDiff').value,cook_time:parseInt(document.getElementById('rcTime').value)||30})});
   document.querySelector('.modal-overlay')?.remove();loadRecipes();toast('菜谱已保存')}
 async function viewRecipe(id){const r=await fetch(API+'/api/recipes');const rs=await r.json();const rc=rs.find(x=>x.id===id);if(!rc)return;
-  openDetail(`<h3 style="margin-bottom:12px">🍳 ${rc.name}</h3><div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap"><span class="tag tag-primary">${rc.category||'家常'}</span><span class="tag tag-green">${rc.difficulty==='easy'?'简单':rc.difficulty==='medium'?'中等':'困难'}</span><span class="tag tag-yellow">⏱ ${rc.cook_time}分钟</span>${rc.flavor_tags?`<span class="tag tag-blue">🏷 ${rc.flavor_tags}</span>`:''}</div><div class="card-title">🥬 食材</div><p style="white-space:pre-wrap;font-size:13px;line-height:1.6;margin-bottom:12px">${rc.ingredients||'暂无'}</p><div class="card-title">📝 步骤</div><p style="white-space:pre-wrap;font-size:13px;line-height:1.8">${rc.steps||'暂无'}</p><div style="margin-top:16px;display:flex;gap:10px;justify-content:flex-end"><button class="btn btn-outline btn-sm" onclick="closeDetail();editRecipeModal(${rc.id})">编辑</button><button class="btn btn-danger btn-sm" onclick="delRecipe(${rc.id});closeDetail()">删除</button></div>`)}
+  openDetail(`<h3 style="margin-bottom:12px">🍳 ${rc.name}</h3><div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap"><span class="tag tag-primary">${rc.category||'家常'}</span><span class="tag tag-green">${rc.difficulty==='easy'?'简单':rc.difficulty==='medium'?'中等':'困难'}</span><span class="tag tag-yellow">⏱ ${rc.cook_time}分钟</span>${rc.flavor_tags?`<span class="tag tag-pink">🏷 ${rc.flavor_tags}</span>`:''}</div><div class="card-title">🥬 食材</div><p style="white-space:pre-wrap;font-size:13px;line-height:1.6;margin-bottom:12px">${rc.ingredients||'暂无'}</p><div class="card-title">📝 步骤</div><p style="white-space:pre-wrap;font-size:13px;line-height:1.8">${rc.steps||'暂无'}</p><div style="margin-top:16px;display:flex;gap:10px;justify-content:flex-end"><button class="btn btn-outline btn-sm" onclick="closeDetail();editRecipeModal(${rc.id})">编辑</button><button class="btn btn-danger btn-sm" onclick="delRecipe(${rc.id});closeDetail()">删除</button></div>`)}
 
 // ========== SHOPPING ==========
 async function renderShopping(){
   document.getElementById('mainContent').innerHTML=`<div class="fade-in"><div class="page-title">🛒 待购清单</div><div class="card"><div style="display:flex;gap:10px;align-items:center;margin-bottom:12px"><button class="btn btn-primary btn-sm" onclick="showAddShop()">+ 添加</button><label style="font-size:12px;cursor:pointer"><input type="checkbox" id="shPurchased" onchange="loadShop()">显示已购</label></div><div id="shCats" style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px"></div><div id="shList">加载中...</div></div></div>`;loadShop();loadShopCats()}
-async function loadShop(){const sp=document.getElementById('shPurchased')?.checked,cat=shCatSel||'';let u=API+'/api/shopping';const p=[];if(sp)p.push('show_purchased=true');if(cat&&cat!=='全部')p.push('category='+encodeURIComponent(cat));if(p.length)u+='?'+p.join('&');const r=await fetch(u);const is=await r.json();const el=document.getElementById('shList');if(!el)return;if(is.length===0){el.innerHTML='<div class="empty-state"><div class="icon">🛒</div><p>清单为空</p></div>';return}el.innerHTML=is.map(i=>`<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border)"><label class="checkbox-wrap" style="flex:1"><input type="checkbox" ${i.purchased?'checked':''} onchange="toggleShop(${i.id},this.checked)"><span style="${i.purchased?'text-decoration:line-through;color:var(--text-muted)':''}">${i.name}</span></label><span class="tag ${i.priority==='high'?'tag-red':i.priority==='low'?'tag-green':'tag-yellow'}">${i.priority==='high'?'高':i.priority==='low'?'低':'中'}</span><span class="tag tag-blue">${i.category}</span><button class="btn btn-sm btn-danger" onclick="delShop(${i.id})">删除</button></div>`).join('')}
+async function loadShop(){const sp=document.getElementById('shPurchased')?.checked,cat=shCatSel||'';let u=API+'/api/shopping';const p=[];if(sp)p.push('show_purchased=true');if(cat&&cat!=='全部')p.push('category='+encodeURIComponent(cat));if(p.length)u+='?'+p.join('&');const r=await fetch(u);const is=await r.json();const el=document.getElementById('shList');if(!el)return;if(is.length===0){el.innerHTML='<div class="empty-state"><div class="icon">🛒</div><p>清单为空</p></div>';return}el.innerHTML=is.map(i=>`<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border)"><label class="checkbox-wrap" style="flex:1"><input type="checkbox" ${i.purchased?'checked':''} onchange="toggleShop(${i.id},this.checked)"><span style="${i.purchased?'text-decoration:line-through;color:var(--text-muted)':''}">${i.name}</span></label><span class="tag ${i.priority==='high'?'tag-red':i.priority==='low'?'tag-green':'tag-yellow'}">${i.priority==='high'?'高':i.priority==='low'?'低':'中'}</span><span class="tag tag-pink">${i.category}</span><button class="btn btn-sm btn-danger" onclick="delShop(${i.id})">删除</button></div>`).join('')}
 async function toggleShop(id,c){await fetch(API+'/api/shopping/'+id,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({purchased:c?1:0})});if(c){catAct('happy');toast('买到啦！')}loadShop()}
 function loadShopCats(){fetch(API+'/api/shopping/categories').then(r=>r.json()).then(d=>{var el=document.getElementById('shCats'),cat=shCatSel||'全部';if(!el)return;var all=d.defaults.concat(d.custom);el.innerHTML='<button class="btn btn-sm '+(cat==='全部'?'btn-primary':'btn-outline')+'" style="font-size:11px;padding:4px 10px" onclick="shCatSel=\'全部\';loadShop();loadShopCats()">全部</button>'+all.map(c=>'<button class="btn btn-sm '+(cat===c?'btn-primary':'btn-outline')+'" style="font-size:11px;padding:4px 10px" onclick="shCatSel=\''+c+'\';loadShop();loadShopCats()">'+c+'</button>').join('')})}
 function showAddShop(){const o=document.createElement('div');o.className='modal-overlay';fetch(API+'/api/shopping/categories').then(r=>r.json()).then(d=>{var cats=d.defaults.concat(d.custom);o.innerHTML=`<div class="modal"><div class="modal-title">添加物品</div><div class="form-group"><label>名称</label><input class="input" id="shName"></div><div class="form-row"><div class="form-group"><label>分类</label><select class="select" id="shCat"><option value="">选择分类</option>${cats.map(c=>`<option value="${c}">${c}</option>`).join('')}</select><input class="input" id="shCatNew" placeholder="或输入新分类" style="font-size:11px;margin-top:6px"></div><div class="form-group"><label>优先级</label><select class="select" id="shPri"><option value="high">高</option><option value="medium" selected>中</option><option value="low">低</option></select></div></div><div style="display:flex;gap:10px;justify-content:flex-end"><button class="btn btn-outline btn-sm" onclick="this.closest('.modal-overlay').remove()">取消</button><button class="btn btn-primary btn-sm" onclick="saveShop()">添加</button></div></div>`;o.addEventListener('click',e=>{if(e.target===o)o.remove()});document.body.appendChild(o)})}
@@ -1304,6 +1308,166 @@ async function delNote(id){
   showConfirm('确定删除这条灵感吗？',async function(){await fetch(API+'/api/notes/'+id,{method:'DELETE'});loadNotes();toast('已删除')})
 }
 
+
+// ========== SWIM MODULE ==========
+var swimTab='pre';
+function renderSwim(){
+  document.getElementById('mainContent').innerHTML='<div class="fade-in"><div class="page-title">🏊 游泳专区</div>'+
+    '<div class="card" style="padding:16px"><div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">'+
+    '<span style="font-weight:600;font-size:14px;color:var(--text)">🏊 游泳打卡</span>'+
+    '<input type="date" class="input" id="swimDate" value="'+today()+'" style="max-width:150px">'+
+    '<input type="number" class="input" id="swimDur" placeholder="时长(分钟)" style="max-width:120px" min="1">'+
+    '<button class="btn btn-primary btn-sm" onclick="swimCheckin()">打卡</button>'+
+    '<span id="swimStats" style="font-size:12px;color:var(--text-muted);margin-left:auto">加载中...</span>'+
+    '</div></div>'+
+    '<div class="level-tabs" style="margin-bottom:16px">'+
+    '<button class="level-tab'+(swimTab==='pre'?' active':'')+'" onclick="swimSwitchTab(\'pre\')">📋 事前注意事项</button>'+
+    '<button class="level-tab'+(swimTab==='strokes'?' active':'')+'" onclick="swimSwitchTab(\'strokes\')">🏊‍♂️ 泳姿教程</button>'+
+    '<button class="level-tab'+(swimTab==='post'?' active':'')+'" onclick="swimSwitchTab(\'post\')">✅ 事后注意事项</button>'+
+    '</div><div id="swimContent">加载中...</div></div>';
+  swimLoadStats();
+  swimSwitchTab(swimTab);
+}
+function swimSwitchTab(tab){
+  swimTab=tab;
+  document.querySelectorAll('.level-tab').forEach(function(b,i){
+    var tabs=['pre','strokes','post'];
+    b.classList.toggle('active',tabs[i]===tab);
+  });
+  if(tab==='strokes'){swimRenderStrokes();return}
+  var endpoint=tab==='pre'?'/api/swim/pre-tips':'/api/swim/post-tips';
+  fetch(API+endpoint).then(function(r){return r.json()}).then(function(items){
+    var el=document.getElementById('swimContent');
+    if(!el)return;
+    var addBtn='<button class="btn btn-sm btn-outline" onclick="swimAddTip(\''+(tab==='pre'?'pre':'post')+'\')" style="margin-bottom:12px">+ 添加注意事项</button>';
+    el.innerHTML=addBtn+'<div id="swimTipList"></div>';
+    swimRenderTipCards(items,tab);
+  });
+}
+function swimRenderTipCards(items,type){
+  var list=document.getElementById('swimTipList');if(!list)return;
+  list.innerHTML=items.map(function(t){
+    return'<div class="card" style="padding:16px;cursor:pointer" onclick="this.classList.toggle(\'expanded\')">'+
+      '<div style="display:flex;align-items:center;gap:10px;font-weight:600;font-size:15px;color:var(--text)">'+
+      '<span style="font-size:24px">'+t.icon+'</span><span>'+t.title+'</span>'+
+      '<span style="margin-left:auto;font-size:11px;color:var(--text-muted)">点击展开▼</span>'+
+      '<button class="btn btn-sm btn-outline" style="font-size:10px;padding:2px 8px" onclick="event.stopPropagation();swimEditTip('+t.id+',\''+type+'\')">编辑</button>'+
+      '<button class="btn btn-sm btn-danger" style="font-size:10px;padding:2px 8px" onclick="event.stopPropagation();swimDelTip('+t.id+',\''+type+'\')">删除</button>'+
+      '</div><div class="swim-detail" style="display:none;margin-top:12px;padding-top:12px;border-top:1px solid var(--border);font-size:14px;line-height:1.8;color:var(--text)">'+t.content+'</div></div>';
+  }).join('');
+}
+function swimAddTip(type){
+  var t=type==='pre'?'事前':'事后',endpoint=type==='pre'?'/api/swim/pre-tips':'/api/swim/post-tips';
+  var o=document.createElement('div');o.className='modal-overlay';
+  o.innerHTML='<div class="modal"><div class="modal-title">添加'+t+'注意事项</div>'+
+    '<div class="form-group"><label>图标 Emoji</label><input class="input" id="swimTipIcon" placeholder="💡"></div>'+
+    '<div class="form-group"><label>标题</label><input class="input" id="swimTipTitle" placeholder="标题"></div>'+
+    '<div class="form-group"><label>详细说明 (支持HTML)</label><textarea class="textarea" id="swimTipContent" rows="6" placeholder="输入详细说明..."></textarea></div>'+
+    '<div style="display:flex;gap:10px;justify-content:flex-end">'+
+    '<button class="btn btn-outline btn-sm" onclick="this.closest(\'.modal-overlay\').remove()">取消</button>'+
+    '<button class="btn btn-primary btn-sm" onclick="swimSaveTip(\''+endpoint+'\')">保存</button></div></div>';
+  o.addEventListener('click',function(e){if(e.target===o)o.remove()});document.body.appendChild(o);
+}
+function swimSaveTip(endpoint){
+  var title=document.getElementById('swimTipTitle').value.trim();
+  if(!title)return toast('标题不能为空');
+  fetch(API+endpoint,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({
+    title:title,icon:document.getElementById('swimTipIcon').value||'💡',
+    content:document.getElementById('swimTipContent').value
+  })}).then(function(){swimSwitchTab(swimTab)});
+  document.querySelector('.modal-overlay')?.remove();toast('已添加！');
+}
+function swimEditTip(id,type){
+  var endpoint=type==='pre'?'/api/swim/pre-tips':'/api/swim/post-tips';
+  fetch(API+endpoint).then(function(r){return r.json()}).then(function(items){
+    var t=items.find(function(x){return x.id===id});if(!t)return;
+    var o=document.createElement('div');o.className='modal-overlay';
+    o.innerHTML='<div class="modal"><div class="modal-title">编辑注意事项</div>'+
+      '<div class="form-group"><label>图标 Emoji</label><input class="input" id="swimETIcon" value="'+t.icon+'"></div>'+
+      '<div class="form-group"><label>标题</label><input class="input" id="swimETTitle" value="'+t.title+'"></div>'+
+      '<div class="form-group"><label>详细说明</label><textarea class="textarea" id="swimETContent" rows="6">'+t.content+'</textarea></div>'+
+      '<div style="display:flex;gap:10px;justify-content:flex-end">'+
+      '<button class="btn btn-outline btn-sm" onclick="this.closest(\'.modal-overlay\').remove()">取消</button>'+
+      '<button class="btn btn-primary btn-sm" onclick="swimUpdateTip('+id+',\''+endpoint+'\')">保存</button></div></div>';
+    o.addEventListener('click',function(e){if(e.target===o)o.remove()});document.body.appendChild(o);
+  });
+}
+function swimUpdateTip(id,endpoint){
+  fetch(API+endpoint+'/'+id,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({
+    title:document.getElementById('swimETTitle').value,
+    icon:document.getElementById('swimETIcon').value,
+    content:document.getElementById('swimETContent').value
+  })}).then(function(){swimSwitchTab(swimTab)});
+  document.querySelector('.modal-overlay')?.remove();toast('已更新！');
+}
+function swimDelTip(id,type){
+  showConfirm('确定删除这条注意事项吗？',function(){
+    var endpoint=type==='pre'?'/api/swim/pre-tips/'+id:'/api/swim/post-tips/'+id;
+    fetch(API+endpoint,{method:'DELETE'}).then(function(){swimSwitchTab(swimTab);toast('已删除')});
+  });
+}
+function swimLoadStats(){
+  fetch(API+'/api/swim/checkins').then(function(r){return r.json()}).then(function(rows){
+    var total=rows.length,minutes=rows.reduce(function(s,r){return s+(r.duration||0)},0);
+    document.getElementById('swimStats').textContent='累计 '+total+' 次 · '+minutes+' 分钟';
+  });
+}
+function swimCheckin(){
+  var date=document.getElementById('swimDate').value;
+  var dur=parseInt(document.getElementById('swimDur').value)||0;
+  if(!date)return toast('请选择日期');
+  if(!dur)return toast('请输入时长');
+  fetch(API+'/api/swim/checkins',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({date:date,duration:dur})})
+    .then(function(){swimLoadStats();toast('🏊 打卡成功！游了 '+dur+' 分钟');document.getElementById('swimDur').value=''});
+}
+function swimRenderStrokes(){
+  var strokes=[
+    {name:'蛙泳',icon:'🐸',sections:[
+      {title:'腿部动作',steps:['<strong>收腿：</strong>双腿自然并拢，屈膝收小腿，脚跟靠近臀部，膝盖分开与肩同宽','<strong>翻脚：</strong>脚掌外翻，脚趾指向两侧，呈"W"形，为蹬水准备','<strong>蹬夹：</strong>双脚向两侧后方弧形蹬出，双腿从弯曲到伸直，用力夹水','<strong>并拢滑行：</strong>蹬夹完成后双腿伸直并拢，保持流线型滑行1-2秒'],video:'蛙泳腿部动作 教学'},
+      {title:'手部动作',steps:['<strong>外划：</strong>双手从并拢前伸开始，手掌向外翻转约45°，向外后方划水','<strong>内划抱水：</strong>手划到与肩同宽时，手掌转向内、向下、向后划水抱水','<strong>前伸：</strong>双手在胸前合拢后快速向前伸出，头同时埋入水中，恢复流线型'],video:'蛙泳手部动作 教学'},
+      {title:'呼吸配合',steps:['<strong>划手抬头吸气：</strong>外划时借助水的反作用力自然抬头，嘴巴露出水面快速吸气','<strong>伸手低头吐气：</strong>双手前伸时头埋入水中，用鼻子或口鼻同时缓慢均匀吐气'],video:'蛙泳呼吸配合 教学'},
+      {title:'完整配合节奏',steps:['<strong>一次划手 + 一次蹬腿 + 一次呼吸</strong><br>口诀：<em>划手腿不动，收手再收腿；先伸手臂再蹬腿，并拢伸直漂一会儿</em>'],video:'蛙泳完整配合 教学'}
+    ]},
+    {name:'自由泳',icon:'🏊',sections:[
+      {title:'打腿',steps:['<strong>大腿带动小腿：</strong>以髋关节为轴，大腿发力带动小腿上下交替打水','<strong>鞭状打水：</strong>脚踝放松，像鞭子一样由上至下甩动，脚背压水','<strong>频率节奏：</strong>通常2次或6次打腿配合一次划手，初学者建议6次打腿'],video:'自由泳打腿 教学'},
+      {title:'划手',steps:['<strong>入水：</strong>手指先入水，位置在肩的延长线上','<strong>抱水：</strong>屈腕屈肘，像抱住一个球一样向后对水','<strong>推水：</strong>手臂加速向后推水到大腿侧（核心推进力来源）','<strong>出水移臂：</strong>肘部先出水，手臂放松以肩为轴前移，保持高肘'],video:'自由泳划手 教学'},
+      {title:'换气',steps:['<strong>侧头换气：</strong>手臂推水时身体自然向该侧转动，侧头出水吸气','<strong>一只泳镜在水中：</strong>换气时保持一只泳镜在水面下，不要抬头过高','<strong>节奏：</strong>单侧换气（每2划）或双侧换气（每3划），根据体力选择'],video:'自由泳换气 教学'},
+      {title:'身体转动',steps:['<strong>脊柱为轴：</strong>身体围绕脊柱纵轴自然滚动，每次划手向同侧转30-45°','<strong>作用：</strong>减少阻力、加长划水路线、便于换气，头部保持稳定不上下晃'],video:'自由泳身体转动 教学'}
+    ]},
+    {name:'仰泳',icon:'🛟',sections:[
+      {title:'身体位置',steps:['<strong>仰卧水面：</strong>身体仰卧，头部保持稳定，耳朵刚好没入水中','<strong>身体要平：</strong>胸腹微收，髋部贴近水面，不要"坐着游"（臀部下沉增加阻力）'],video:'仰泳身体位置 教学'},
+      {title:'打腿',steps:['<strong>上踢下压：</strong>大腿带动小腿，由下向上踢水，脚背踢出水面产生水花','<strong>要点：</strong>膝盖不露出水面，脚踝放松，打腿幅度30-40cm，保持连续快速'],video:'仰泳打腿 教学'},
+      {title:'划手',steps:['<strong>入水：</strong>手臂伸直小指先入水，位置在肩的延长线上','<strong>抓水推水：</strong>入水后手臂下沉抓水，呈S形路线向后推水至大腿侧','<strong>出水移臂：</strong>大拇指先出水，手臂伸直在空中前移，两臂交替进行'],video:'仰泳划手 教学'}
+    ]},
+    {name:'蝶泳',icon:'🦋',sections:[
+      {title:'身体波浪',steps:['<strong>从头到脚：</strong>头下压→胸下压→髋上抬→腿下沉，形成波浪传导','<strong>节奏：</strong>一个完整身体波浪配合一次划手和两次打腿'],video:'蝶泳身体波浪 教学'},
+      {title:'打腿',steps:['<strong>两次打腿一次划手：</strong>第一次打腿在手臂入水时（帮助前冲），第二次在推水结束时（帮助换气）','<strong>要点：</strong>双腿并拢同时上下打水，幅度大力量强，脚背用力压水'],video:'蝶泳打腿 教学'},
+      {title:'划手',steps:['<strong>入水抱水：</strong>双手同时入水与肩同宽，向外向后划水抱水','<strong>推水：</strong>双手加速向大腿推水（核心推进力）','<strong>出水移臂：</strong>双手同时出水，手臂放松从两侧向前移臂'],video:'蝶泳划手 教学'},
+      {title:'呼吸',steps:['<strong>推水时抬头吸气：</strong>第二次打腿+推水阶段，借助身体上扬力抬头吸气','<strong>前伸时低头：</strong>手臂移臂前伸时头低下，下巴贴近胸部','<strong>节奏：</strong>可每划一次换气，也可每划两次换气'],video:'蝶泳呼吸 教学'}
+    ]}
+  ];
+  var el=document.getElementById('swimContent');
+  var html=strokes.map(function(stroke,si){
+    var sections=stroke.sections.map(function(sec,sei){
+      var id='swimSec_'+si+'_'+sei;
+      var steps=sec.steps.map(function(s){return'<div style="margin:6px 0;padding:8px 12px;background:var(--bg);border-radius:var(--radius-sm);font-size:13px;line-height:1.7">'+s+'</div>'}).join('');
+      var isOpen=si===0?'block':'none';
+      return'<div class="card" style="padding:14px;margin-bottom:10px;cursor:pointer" onclick="var d=document.getElementById(\''+id+'\');d.style.display=d.style.display===\'none\'?\'block\':\'none\'">'+
+        '<div style="display:flex;align-items:center;gap:8px;font-weight:600;font-size:14px;color:var(--primary-dark)">'+
+        '<span style="font-size:12px">◀</span><span>'+sec.title+'</span><span style="font-size:11px;color:var(--text-muted);margin-left:auto">展开/收起</span></div>'+
+        '<div id="'+id+'" style="display:'+isOpen+';margin-top:10px;padding-top:10px;border-top:1px solid var(--border)">'+steps+
+        '<div style="margin-top:10px;padding:10px 14px;background:var(--primary-light);border-radius:var(--radius-sm);font-size:12px;color:var(--text-light);line-height:1.6">'+
+        '🎬 <strong>视频教程</strong>：在 B站 / 小红书 / 抖音 搜索 "<strong>'+sec.video+'</strong>"'+
+        '<br><span style="font-size:11px">复制上方关键词到对应 App 搜索观看教学视频</span></div>'+
+        '</div></div>';
+    }).join('');
+    return'<div class="card" style="margin-bottom:14px;border-left:4px solid var(--primary)">'+
+      '<div class="card-title" style="cursor:pointer;font-size:18px;margin-bottom:0" onclick="var c=this.nextElementSibling;c.style.display=c.style.display===\'none\'?\'block\':\'none\'">'+
+      stroke.icon+' '+stroke.name+'<span style="font-size:12px;color:var(--text-muted);margin-left:12px">'+(si===0?'默认展开':'点击展开')+'</span></div>'+
+      '<div style="display:'+(si===0?'block':'none')+';padding-top:8px">'+sections+'</div></div>';
+  }).join('');
+  el.innerHTML=html;
+}
 
 // ========== INIT ==========
 document.addEventListener('DOMContentLoaded',()=>{renderNav();navigate('dashboard')});
