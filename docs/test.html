@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>网络诊断</title>
+<style>
+body{font-family:-apple-system,sans-serif;background:#FFF0F5;padding:20px;color:#5D4E5D}
+.card{background:#fff;border-radius:16px;padding:16px;margin:12px 0;box-shadow:0 2px 12px rgba(255,154,175,.12)}
+.green{color:#7ECB9A} .red{color:#FF6B7A} .orange{color:#FFB347}
+.status{font-size:24px;margin-left:8px}
+h2{font-size:18px;margin:0 0 8px}
+.result{font-family:monospace;font-size:12px;background:#f9f9f9;padding:8px;border-radius:8px;margin:4px 0;word-break:break-all;max-height:100px;overflow:auto}
+</style>
+</head>
+<body>
+<h2>🔍 网络诊断 - WorkBuddy</h2>
+<div id="results"></div>
+<script>
+const API='https://workbuddy-production-706a.up.railway.app';
+const ALT='https://763a82c198bc4f4486a18f66a40ed036.sh2.agentos-app.net';
+const GH='https://zhong11-prog.github.io/workbuddy/';
+const r=document.getElementById('results');
+
+function add(title,status,detail){
+  const icon=status==='ok'?'✅':status==='warn'?'⚠️':'❌';
+  const color=status==='ok'?'green':status==='warn'?'orange':'red';
+  r.innerHTML+=`<div class="card"><h2>${icon} ${title}</h2><div class="result ${color}">${detail}</div></div>`;
+}
+
+async function test(name,url,isJson){
+  try{
+    const t0=Date.now();
+    const res=await fetch(url,{signal:AbortSignal.timeout(8000)});
+    const ms=Date.now()-t0;
+    const body=isJson?await res.json():await res.text();
+    add(name+' ('+ms+'ms)','ok',JSON.stringify(body).substring(0,200));
+    return true;
+  }catch(e){
+    add(name,'error',e.message||'连接失败');
+    return false;
+  }
+}
+
+async function run(){
+  add('浏览器信息','ok',navigator.userAgent);
+  add('当前页面','ok',location.href);
+  add('时间','ok',new Date().toString());
+  
+  const apiOk=await test('Railway API 直连',API+'/api/dashboard',true);
+  await test('GitHub Pages 页面',GH,false);
+  await test('CloudStudio 页面',ALT,false);
+  
+  const linkList=[];
+  if(apiOk)linkList.push('<a href="'+API+'" style="color:#E8738A;font-weight:600">Railway 原始地址（数据完整）</a>');
+  linkList.push('<a href="'+GH+'" style="color:#E8738A">GitHub Pages</a>');
+  linkList.push('<a href="'+ALT+'" style="color:#E8738A">CloudStudio 腾讯云</a>');
+  
+  add('推荐使用','ok','<div style="font-size:14px;line-height:2">'+linkList.join('<br>')+'</div>');
+  
+  if(!apiOk){
+    add('⚠️ 诊断结论','warn','Railway 后端在你当前网络无法访问。建议使用 VPN 或切换网络后再试。');
+  }else{
+    add('✅ 诊断结论','ok','网络正常！如果刚才打不开可能是缓存，请刷新页面。');
+  }
+}
+run();
+</script>
+</body>
+</html>
