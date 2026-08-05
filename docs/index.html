@@ -10,12 +10,12 @@
 <link rel="apple-touch-icon" href="/icons/icon-192.png">
 <title>钟雁羚的工作台</title>
 <style>
-:root{--bg:#FFF0F5;--card-bg:#fff;--primary:#FF9AAF;--primary-light:#FFD6E0;--primary-dark:#E8738A;--text:#5D4E5D;--text-light:#9B8E9B;--text-muted:#C4B8C4;--border:#F0E0E8;--shadow:0 2px 12px rgba(255,154,175,.12);--shadow-lg:0 8px 30px rgba(255,154,175,.18);--radius:16px;--radius-sm:10px;--sidebar-w:220px;--success:#7ECB9A;--warning:#FFB347;--danger:#FF6B7A;--info:#7EB8FF;--transition:.25s cubic-bezier(.4,0,.2,1)}
+:root{--bg:#f5f6f8;--card-bg:#fff;--primary:#3b82f6;--primary-light:#dbeafe;--primary-dark:#1d4ed8;--text:#1e293b;--text-light:#64748b;--text-muted:#94a3b8;--border:#e2e8f0;--shadow:0 1px 3px rgba(0,0,0,.06);--shadow-lg:0 4px 16px rgba(0,0,0,.1);--radius:12px;--radius-sm:8px;--sidebar-w:220px;--success:#22c55e;--warning:#f59e0b;--danger:#ef4444;--info:#3b82f6;--transition:.2s ease}
 *{margin:0;padding:0;box-sizing:border-box}
 body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Hiragino Sans GB','Microsoft YaHei',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden}
 a{color:var(--primary-dark);text-decoration:none}
 .app{display:flex;min-height:100vh}
-.sidebar{width:var(--sidebar-w);background:var(--card-bg);border-right:1px solid var(--border);position:fixed;top:0;left:0;bottom:0;z-index:100;box-shadow:2px 0 20px rgba(255,154,175,.08);display:flex;flex-direction:column;transition:transform var(--transition)}
+.sidebar{width:var(--sidebar-w);background:var(--card-bg);border-right:1px solid var(--border);position:fixed;top:0;left:0;bottom:0;z-index:100;box-shadow:1px 0 8px rgba(0,0,0,.04);display:flex;flex-direction:column;transition:transform var(--transition)}
 .sidebar-header{padding:24px 20px 16px;text-align:center;border-bottom:1px solid var(--border)}
 .sidebar-header h2{font-size:16px;color:var(--primary-dark);font-weight:700}
 .sidebar-header .sub{font-size:11px;color:var(--text-muted)}
@@ -43,7 +43,7 @@ a{color:var(--primary-dark);text-decoration:none}
 .input:focus,.select:focus,.textarea:focus{outline:none;border-color:var(--primary)}
 .textarea{resize:vertical;min-height:60px}
 .tag{display:inline-block;padding:3px 10px;border-radius:12px;font-size:11px;font-weight:500}
-.tag-pink{background:var(--primary-light);color:var(--primary-dark)}.tag-yellow{background:#FFF3CD;color:#856404}
+.tag-primary{background:var(--primary-light);color:var(--primary-dark)}.tag-yellow{background:#fef3c7;color:#92400e}
 .tag-green{background:#D4EDDA;color:#155724}.tag-blue{background:#D6EAF8;color:#1A5276}.tag-red{background:#FADBD8;color:#922B21}
 .form-group{margin-bottom:14px}.form-group label{display:block;font-size:12px;font-weight:600;color:var(--text-light);margin-bottom:5px}
 .form-row{display:flex;gap:10px}.form-row>*{flex:1}
@@ -106,7 +106,7 @@ td{padding:10px 12px;border-bottom:1px solid var(--border)}
 .speaker-btn.playing{background:var(--primary);color:#fff;animation:pulse .6s infinite}
 @keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.15)}}
 /* Dictation area */
-.dictation-box{background:#FFFAFD;border:2px dashed var(--primary-light);border-radius:var(--radius);padding:20px;margin-top:16px}
+.dictation-box{background:var(--bg);border:2px dashed var(--border);border-radius:var(--radius);padding:20px;margin-top:16px}
 .dictation-score{font-size:13px;color:var(--primary-dark);font-weight:600;text-align:center;margin-bottom:8px}
 /* Korean keyboard */
 .kr-keyboard{display:none;background:#FFF8FA;border-radius:var(--radius-sm);padding:8px;margin-top:8px;border:1px solid var(--border)}
@@ -120,25 +120,31 @@ td{padding:10px 12px;border-bottom:1px solid var(--border)}
 .confetti{position:fixed;z-index:10000;font-size:20px;animation:confettiFall 2.5s ease-out forwards;pointer-events:none}
 @keyframes confettiFall{0%{transform:translateY(-10px)rotate(0);opacity:1}100%{transform:translateY(100vh)rotate(720deg);opacity:0}}
 .mood-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
-.mood-cell{aspect-ratio:1;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:14px;cursor:pointer;background:#FAF5F8}.mood-cell.today{border:2px solid var(--primary)}
+.mood-cell{aspect-ratio:1;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:14px;cursor:pointer;background:var(--bg)}.mood-cell.today{border:2px solid var(--primary)}
 .period-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px}
-.period-day{padding:8px 2px;border-radius:50%;font-size:12px;text-align:center}.period-day.normal{background:#F8F4F8}.period-day.period{background:#FFCDD2;color:#C62828;font-weight:600}.period-day.ovulation{background:#BBDEFB;color:#1565C0;font-weight:600}.period-day.predicted{background:#FFE0E6;color:#D32F2F;border:1px dashed #E57373}.period-day.today{border:2px solid var(--primary)}
+.period-day{padding:8px 2px;border-radius:50%;font-size:12px;text-align:center}.period-day.normal{background:var(--bg)}.period-day.period{background:#fee2e2;color:#991b1b;font-weight:600}.period-day.ovulation{background:#dbeafe;color:#1e40af;font-weight:600}.period-day.predicted{background:#fef3c7;color:#92400e;border:1px dashed #f59e0b}.period-day.today{border:2px solid var(--primary)}
 .sound-grid{display:flex;gap:8px;flex-wrap:wrap}
 .sound-btn{padding:8px 14px;border-radius:20px;border:1.5px solid var(--border);background:var(--card-bg);cursor:pointer;font-size:12px;font-family:inherit}.sound-btn.active{background:var(--primary);color:#fff;border-color:var(--primary)}
 .task-detail-row{cursor:pointer;padding:8px 12px;margin:4px 0;border-radius:8px;transition:background .2s;display:flex;align-items:center;gap:8px;font-size:13px}
 .task-detail-row:hover{background:var(--primary-light)}
 .task-expand{display:none;padding:8px 12px 8px 36px;font-size:12px;color:var(--text-light);border-bottom:1px solid var(--border)}
 .task-expand.show{display:block}
-@media(max-width:768px){.sidebar{transform:translateX(-100%);width:260px}.sidebar.open{transform:translateX(0)}.main{margin-left:0}.page{padding:16px}.menu-toggle{display:flex!important;position:fixed;top:12px;left:12px;z-index:200;width:36px;height:36px;border-radius:50%;background:var(--primary);color:#fff;border:none;font-size:18px;cursor:pointer;align-items:center;justify-content:center;box-shadow:var(--shadow)}.cat-container{bottom:16px;right:8px;transform:scale(.7)}.note-float-btn{bottom:160px;right:8px}.dash-grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:480px){.page{padding:12px}.dash-grid{grid-template-columns:repeat(2,1fr);gap:8px}.stat-card{padding:12px}.card{padding:12px}.book-grid{grid-template-columns:repeat(auto-fill,minmax(120px,1fr))}.page-title{font-size:18px}}
+@media(max-width:768px){.sidebar{transform:translateX(-100%);width:260px}.sidebar.open{transform:translateX(0)}.main{margin-left:0}.page{padding:16px}.menu-toggle{display:flex!important;position:fixed;top:12px;left:12px;z-index:200;width:36px;height:36px;border-radius:50%;background:var(--primary);color:#fff;border:none;font-size:18px;cursor:pointer;align-items:center;justify-content:center;box-shadow:var(--shadow)}.cat-container{bottom:16px;right:8px;transform:scale(.7)}.note-float-btn{bottom:160px;right:8px}.dash-grid{grid-template-columns:repeat(2,1fr)}.detail-panel{width:100vw}.reader-dual{flex-direction:column}.reader-dual>*{width:100%!important}}
 @media(min-width:769px){.menu-toggle{display:none}}
-::-webkit-scrollbar{width:6px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:var(--primary-light);border-radius:3px}
+@media(min-width:1024px){.dash-grid{grid-template-columns:repeat(4,1fr)}}
 
 /* Detail panel */
-.detail-panel{position:fixed;right:0;top:0;bottom:0;width:380px;max-width:90vw;background:var(--card-bg);z-index:500;box-shadow:-4px 0 30px rgba(0,0,0,.1);transform:translateX(100%);transition:transform .3s;overflow-y:auto;padding:24px}
+.detail-panel{position:fixed;right:0;top:0;bottom:0;width:420px;max-width:90vw;background:var(--card-bg);z-index:500;box-shadow:-4px 0 30px rgba(0,0,0,.1);transform:translateX(100%);transition:transform .3s;overflow-y:auto;padding:24px}
 .detail-panel.show{transform:translateX(0)}
-.detail-panel .close-btn{position:absolute;top:12px;right:12px;width:32px;height:32px;border-radius:50%;border:none;background:var(--bg);cursor:pointer;font-size:16px}
+.detail-panel .close-btn{position:absolute;top:12px;right:12px;width:32px;height:32px;border-radius:50%;border:none;background:var(--bg);cursor:pointer;font-size:16px;color:var(--text-light)}
 .detail-overlay{position:fixed;inset:0;background:rgba(0,0,0,.2);z-index:499;display:none}
 .detail-overlay.show{display:block}
+/* Reader dual column */
+.reader-dual{display:flex;gap:20px;align-items:flex-start}
+.reader-dual .reader-left{flex:1;min-width:0}
+.reader-dual .reader-right{width:340px;flex-shrink:0;position:sticky;top:20px;max-height:calc(100vh - 40px);overflow-y:auto}
+::-webkit-scrollbar{width:6px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:var(--primary-light);border-radius:3px}
 /* Flip card */
 .kc-inner.flipped{transform:rotateY(180deg)!important}
 /* Cat drag */
@@ -538,7 +544,7 @@ async function loadFinances(){
   const mo=document.getElementById('finMonth')?.value||today().substring(0,7);const r=await fetch(API+'/api/finances?month='+mo);const d=await r.json();const b=d.summary.income-d.summary.expense;
   const se=document.getElementById('finSum');if(se)se.innerHTML=`<div style="display:flex;gap:14px;flex-wrap:wrap"><div style="flex:1;min-width:110px;text-align:center;padding:12px;background:var(--primary-light);border-radius:var(--radius-sm)"><div style="font-size:11px;color:var(--text-light)">收入</div><div style="font-size:22px;font-weight:700;color:#E8738A">¥${d.summary.income.toFixed(0)}</div></div><div style="flex:1;min-width:110px;text-align:center;padding:12px;background:#E8F8E8;border-radius:var(--radius-sm)"><div style="font-size:11px;color:var(--text-light)">支出</div><div style="font-size:22px;font-weight:700;color:var(--success)">¥${d.summary.expense.toFixed(0)}</div></div><div style="flex:1;min-width:110px;text-align:center;padding:12px;background:${b>=0?'#FFF0F5':'#FFE8E8'};border-radius:var(--radius-sm)"><div style="font-size:11px;color:var(--text-light)">结余</div><div style="font-size:22px;font-weight:700;color:${b>=0?'var(--primary-dark)':'var(--danger)'}">¥${b.toFixed(0)}</div></div></div>`;
   const le=document.getElementById('finList');if(!le)return;if(d.records.length===0){le.innerHTML='<div class="empty-state"><div class="icon">💰</div><p>本月无记录</p></div>';return}
-  le.innerHTML='<div class="table-wrap"><table><tr><th>日期</th><th>类型</th><th>分类</th><th>金额</th><th>备注</th><th>操作</th></tr>'+d.records.map(r=>`<tr><td>${r.date}</td><td>${r.type==='income'?'<span class="tag tag-pink">收入</span>':'<span class="tag tag-green">支出</span>'}</td><td>${r.category}</td><td style="font-weight:600;color:${r.type==='income'?'#E8738A':'#7ECB9A'}">${r.type==='income'?'+':'-'}¥${r.amount.toFixed(2)}</td><td>${r.note||'-'}</td><td><button class="btn btn-sm btn-danger" onclick="deleteFinance(${r.id})">删除</button></td></tr>`).join('')+'</table></div>'}
+  le.innerHTML='<div class="table-wrap"><table><tr><th>日期</th><th>类型</th><th>分类</th><th>金额</th><th>备注</th><th>操作</th></tr>'+d.records.map(r=>`<tr><td>${r.date}</td><td>${r.type==='income'?'<span class="tag tag-primary">收入</span>':'<span class="tag tag-green">支出</span>'}</td><td>${r.category}</td><td style="font-weight:600;color:${r.type==='income'?'#E8738A':'#7ECB9A'}">${r.type==='income'?'+':'-'}¥${r.amount.toFixed(2)}</td><td>${r.note||'-'}</td><td><button class="btn btn-sm btn-danger" onclick="deleteFinance(${r.id})">删除</button></td></tr>`).join('')+'</table></div>'}
 function showAddFinance(){
   const o=document.createElement('div');o.className='modal-overlay';
   o.innerHTML=`<div class="modal"><div class="modal-title">记一笔</div>
@@ -714,7 +720,7 @@ async function loadDaily(el){
   const vs=s%Math.max(1,allV.length-20);todayVocab=allV.slice(vs,vs+20);if(todayVocab.length<20)todayVocab=[...todayVocab,...allV.slice(0,20-todayVocab.length)];
   const gs=(s*7)%Math.max(1,allG.length-2);todayGrammar=allG.slice(gs,gs+2);if(todayGrammar.length<2)todayGrammar=[...todayGrammar,...allG.slice(0,2-todayGrammar.length)];
   _ci=0;const w=todayVocab[0];
-  el.innerHTML='<div style="text-align:center;margin-bottom:12px"><span class="tag tag-pink">📖 今日'+todayVocab.length+'词 | 📐 '+todayGrammar.length+'语法</span> <span style="font-size:11px;color:var(--text-muted);margin-left:8px">🃏 点击卡片翻转</span></div>'+
+  el.innerHTML='<div style="text-align:center;margin-bottom:12px"><span class="tag tag-primary">📖 今日'+todayVocab.length+'词 | 📐 '+todayGrammar.length+'语法</span> <span style="font-size:11px;color:var(--text-muted);margin-left:8px">🃏 点击卡片翻转</span></div>'+
     '<div class="card" style="text-align:center;cursor:pointer;padding:24px" onclick="var f=document.getElementById(\'kcFlip\');if(f)f.classList.toggle(\'flipped\')">'+
       '<div style="position:relative;min-height:180px;perspective:1000px">'+
         '<div class="kc-inner" id="kcFlip" style="position:relative;width:100%;transition:transform .6s;transform-style:preserve-3d">'+
@@ -822,22 +828,26 @@ function renderReader(book){
     '<button class="btn btn-sm btn-outline" onclick="toggleDark()">'+(rs.darkMode?'☀️':'🌙')+'</button>'+
     '<button class="btn btn-sm btn-outline" onclick="changeFS(-2)">A-</button>'+
     '<button class="btn btn-sm btn-outline" onclick="changeFS(2)">A+</button>'+
-    '<button class="btn btn-sm btn-outline" onclick="showNotes()">📝笔记</button>'+
     '</div></div>'+
-    '<div class="card" id="readerContent" style="'+(rs.darkMode?'background:#2D2430;color:#E8DCE8;':'')+'min-height:60vh;font-size:'+rs.fontSize+'px;line-height:2.0;letter-spacing:0.5px;padding:32px 24px;white-space:pre-wrap;user-select:text;cursor:text"'+
+    '<div class="reader-dual">'+
+    '<div class="reader-left">'+
+    '<div class="card" id="readerContent" style="'+(rs.darkMode?'background:#1e293b;color:#e2e8f0;':'')+'min-height:60vh;font-size:'+rs.fontSize+'px;line-height:2.0;letter-spacing:0.5px;padding:32px 24px;white-space:pre-wrap;user-select:text;cursor:text"'+
     ' onmouseup="onTextSelect()">'+
-    '<div style="text-align:center;font-weight:700;font-size:'+(rs.fontSize+4)+'px;margin-bottom:16px">'+ch.title+'</div>'+
+    '<div style="text-align:center;font-weight:700;font-size:'+(rs.fontSize+4)+'px;margin-bottom:16px;border-bottom:1px solid var(--border);padding-bottom:12px">'+ch.title+'</div>'+
     '<div id="chapterText">'+(ch.text||'').replace(/\\n\\n+/g,'</p><p style="margin-bottom:1em;text-indent:2em">')+'</div>'+
     '</div>'+
     '<div style="display:flex;gap:10px;justify-content:center;margin-top:12px">'+
-    '<button class="btn btn-outline" '+(rs.chIdx===0?'disabled':'')+' onclick="prevChapter()">⬅️ 上一章</button>'+
-    '<button class="btn btn-outline" '+(rs.chIdx>=rs.chapters.length-1?'disabled':'')+' onclick="nextChapter()">下一章 ➡️</button>'+
-    '</div></div>';
-  // Also show cat reading
-  setTimeout(function(){catAct('greet')},1000)
+    '<button class="btn btn-outline" '+(rs.chIdx===0?'disabled':'')+' onclick="prevChapter()">← 上一章</button>'+
+    '<button class="btn btn-outline" '+(rs.chIdx>=rs.chapters.length-1?'disabled':'')+' onclick="nextChapter()">下一章 →</button>'+
+    '</div></div>'+
+    '<div class="reader-right">'+
+    '<div class="card"><div class="card-title">📝 同步笔记 <button class="btn btn-sm btn-outline" onclick="addNoteInline()" style="margin-left:auto">+ 新建</button></div>'+
+    '<div id="readerNotes">加载中...</div></div>'+
+    '</div></div></div>';
+  loadReaderNotes()
 }
 function changeFS(d){readerState.fontSize=Math.max(12,Math.min(28,readerState.fontSize+d));var c=document.getElementById('readerContent');if(c)c.style.fontSize=readerState.fontSize+'px'}
-function toggleDark(){readerState.darkMode=!readerState.darkMode;var c=document.getElementById('readerContent');if(c)c.style.background=readerState.darkMode?'#2D2430':'#fff';if(c)c.style.color=readerState.darkMode?'#E8DCE8':'var(--text)'}
+function toggleDark(){readerState.darkMode=!readerState.darkMode;var c=document.getElementById('readerContent');if(c)c.style.background=readerState.darkMode?'#1e293b':'#fff';if(c)c.style.color=readerState.darkMode?'#e2e8f0':'var(--text)'}
 async function prevChapter(){if(readerState.chIdx>0){readerState.chIdx--;await saveProgress();var br=await fetch(API+'/api/books');var bs=await br.json();var b=bs.find(function(x){return x.id===readerState.bookId});renderReader(b||{})}}
 async function nextChapter(){if(readerState.chIdx<readerState.chapters.length-1){readerState.chIdx++;await saveProgress();var br=await fetch(API+'/api/books');var bs=await br.json();var b=bs.find(function(x){return x.id===readerState.bookId});renderReader(b||{})}}
 async function saveProgress(){await fetch(API+'/api/books/'+readerState.bookId+'/progress',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({current_page:readerState.chIdx+1})})}
@@ -856,8 +866,45 @@ function onTextSelect(){
 }
 async function saveNote(selectedText){
   var content=document.getElementById('noteContent').value.trim();if(!content)return toast('请写点内容');
-  await fetch(API+'/api/books/'+readerState.bookId+'/notes',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({content:content,position:readerState.chIdx+1,chapter:readerState.chapters[readerState.chIdx].title,note_type:'highlight',selected_text:selectedText})});
-  document.getElementById('noteModal')?.remove();toast('笔记已保存！📝')
+  try{await fetch(API+'/api/books/'+readerState.bookId+'/notes',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({content:content,position:readerState.chIdx+1,chapter:readerState.chapters[readerState.chIdx].title,note_type:'highlight',selected_text:selectedText})});
+  document.getElementById('noteModal')?.remove();toast('笔记已保存');loadReaderNotes()}catch(e){toast('保存失败')}
+}
+async function loadReaderNotes(){
+  var el=document.getElementById('readerNotes');if(!el)return;
+  try{var r=await fetch(API+'/api/books/'+readerState.bookId+'/notes');var notes=await r.json();
+  var chNotes=notes.filter(function(n){return n.position===readerState.chIdx+1||n.note_type==='global'});
+  if(chNotes.length===0){el.innerHTML='<p style="color:var(--text-muted);font-size:13px;padding:16px;text-align:center">当前章节暂无笔记<br>选中文字即可添加</p>';return}
+  el.innerHTML=chNotes.map(function(n){
+    var isGlobal=n.note_type==='global';
+    return'<div class="note-item" style="padding:10px 0;border-bottom:1px solid var(--border)" id="note-'+n.id+'">'+
+    '<div style="font-size:11px;color:var(--text-muted);margin-bottom:4px">'+(isGlobal?'全局':'第'+n.position+'章')+' · '+new Date(n.created_at).toLocaleDateString('zh-CN')+
+    '<button class="btn btn-sm btn-danger" onclick="delNote('+n.id+')" style="float:right;padding:2px 8px;font-size:10px">删</button></div>'+
+    (n.selected_text?'<div style="background:var(--bg);padding:4px 8px;border-radius:4px;margin:4px 0;font-size:12px;font-style:italic;color:var(--text-light)">"'+n.selected_text+'"</div>':'')+
+    '<div class="note-content" style="font-size:13px;margin:4px 0;cursor:pointer" onclick="editNoteInline('+n.id+',\''+(n.content||'').replace(/'/g,"\\'")+'\')">'+n.content+'</div></div>';
+  }).join('')}catch(e){el.innerHTML='<p style="color:var(--text-muted);font-size:13px;padding:16px;text-align:center">加载笔记失败</p>'}
+}
+function editNoteInline(id,oldContent){
+  var el=document.getElementById('note-'+id);if(!el)return;
+  el.innerHTML='<textarea class="textarea" id="editNote_'+id+'" style="min-height:60px;font-size:13px">'+oldContent+'</textarea>'+
+  '<div style="display:flex;gap:6px;margin-top:6px"><button class="btn btn-primary btn-sm" onclick="saveEditInline('+id+')">保存</button>'+
+  '<button class="btn btn-outline btn-sm" onclick="loadReaderNotes()">取消</button></div>';
+  setTimeout(function(){var ta=document.getElementById('editNote_'+id);if(ta)ta.focus()},100)
+}
+async function saveEditInline(id){
+  var content=document.getElementById('editNote_'+id).value.trim();
+  if(!content)return toast('内容不能为空');
+  try{await fetch(API+'/api/books/'+readerState.bookId+'/notes/'+id,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({content:content})});
+  toast('已保存');loadReaderNotes()}catch(e){toast('保存失败')}
+}
+function addNoteInline(){
+  var o=document.createElement('div');o.className='modal-overlay';o.id='noteModal';
+  o.innerHTML='<div class="modal"><div class="modal-title">新建笔记</div><div class="form-group"><label>内容</label><textarea class="textarea" id="noteContent" rows="4" placeholder="写下你的想法..."></textarea></div><div style="display:flex;gap:10px;justify-content:flex-end"><button class="btn btn-outline btn-sm" onclick="this.closest(\'.modal-overlay\').remove()">取消</button><button class="btn btn-primary btn-sm" onclick="saveInlineNote()">保存</button></div></div>';
+  o.addEventListener('click',function(e){if(e.target===o)o.remove()});document.body.appendChild(o)
+}
+async function saveInlineNote(){
+  var content=document.getElementById('noteContent').value.trim();if(!content)return toast('请写点内容');
+  try{await fetch(API+'/api/books/'+readerState.bookId+'/notes',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({content:content,position:readerState.chIdx+1,chapter:readerState.chapters[readerState.chIdx].title,note_type:'global'})});
+  document.getElementById('noteModal')?.remove();toast('已保存');loadReaderNotes()}catch(e){toast('保存失败')}
 }
 async function showNotes(){
   var r=await fetch(API+'/api/books/'+readerState.bookId+'/notes');var notes=await r.json();
@@ -878,8 +925,8 @@ async function delNote(nid){await fetch(API+'/api/books/'+readerState.bookId+'/n
 async function renderMenu(){
   document.getElementById('mainContent').innerHTML=`<div class="fade-in"><div class="page-title">🍜 随机菜单</div><div class="card" style="text-align:center"><div style="font-size:48px;margin-bottom:8px" id="rRes">🍽️</div><div style="font-size:18px;font-weight:700;color:var(--primary-dark);margin-bottom:4px" id="rName">今天吃什么呢？</div><div id="rTags" style="font-size:12px;color:var(--text-light);margin-bottom:6px"></div><div style="display:flex;gap:6px;justify-content:center;flex-wrap:wrap;margin-bottom:10px"><button class="btn btn-primary" onclick="rMenu()">🎲 随机推荐</button></div><div style="display:flex;gap:6px;justify-content:center;flex-wrap:wrap;font-size:12px"><select class="select" id="rdCat" style="max-width:120px;padding:4px 8px;font-size:12px" onchange="rMenu()"><option value="全部">全部分类</option></select><select class="select" id="rdFlavor" style="max-width:100px;padding:4px 8px;font-size:12px" onchange="rMenu()"><option value="全部口味">全部口味</option></select></div></div><div class="card"><div style="display:flex;gap:10px;align-items:center;margin-bottom:12px"><span class="card-title" style="margin:0">📋 菜单列表</span><button class="btn btn-primary btn-sm" onclick="showAddMI()">+ 添加</button></div><div id="mList">加载中...</div></div></div>`;loadMI();loadRecipeFilters()}
 async function loadRecipeFilters(){try{const r=await fetch(API+'/api/recipes/categories');const d=await r.json();const cs=document.getElementById('rdCat');if(cs){cs.innerHTML='<option value="全部">全部分类</option>'+d.categories.map(c=>`<option value="${c}">${c}</option>`).join('')}const fs=document.getElementById('rdFlavor');if(fs){fs.innerHTML='<option value="全部口味">全部口味</option>'+d.flavors.map(f=>`<option value="${f}">${f}</option>`).join('')}}catch(e){}}
-async function rMenu(){const c=document.getElementById('rdCat')?.value||'全部';const f=document.getElementById('rdFlavor')?.value||'全部口味';const qs=new URLSearchParams();if(c!=='全部')qs.set('category',c);if(f!=='全部口味')qs.set('flavor',f);const r=await fetch(API+'/api/menu/random?'+qs.toString());const d=await r.json();if(!d){document.getElementById('rName').textContent='没有找到符合条件的菜~';document.getElementById('rRes').textContent='😿';document.getElementById('rTags').innerHTML='';return}document.getElementById('rRes').textContent='🍽️';document.getElementById('rName').innerHTML=`<a style="color:var(--primary-dark);cursor:pointer;text-decoration:underline" onclick="navigate('recipes');setTimeout(()=>viewRecipe(${d.id}),500)">${d.name}</a>`;document.getElementById('rTags').innerHTML=`<span class="tag tag-pink">${d.category||'家常'}</span> <span class="tag tag-blue">🏷 ${d.flavor_tags||''}</span>`;catAct('happy')}
-async function loadMI(){const r=await fetch(API+'/api/menu');const is=await r.json();const el=document.getElementById('mList');if(!el)return;if(is.length===0){el.innerHTML='<div class="empty-state"><div class="icon">🍜</div><p>还没有添加</p></div>';return}el.innerHTML=is.map(i=>`<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border)"><span style="flex:1;font-size:14px">${i.name}</span><span class="tag tag-blue">${i.meal_type==='breakfast'?'早餐':i.meal_type==='lunch'?'午餐':i.meal_type==='dinner'?'晚餐':i.meal_type==='snack'?'小吃':'不限'}</span><span class="tag tag-pink">${i.category==='home'?'家常':i.category==='takeout'?'外卖':'餐厅'}</span><button class="btn btn-sm btn-danger" onclick="delMI(${i.id})">删除</button></div>`).join('')}
+async function rMenu(){const c=document.getElementById('rdCat')?.value||'全部';const f=document.getElementById('rdFlavor')?.value||'全部口味';const qs=new URLSearchParams();if(c!=='全部')qs.set('category',c);if(f!=='全部口味')qs.set('flavor',f);const r=await fetch(API+'/api/menu/random?'+qs.toString());const d=await r.json();if(!d){document.getElementById('rName').textContent='没有找到符合条件的菜~';document.getElementById('rRes').textContent='😿';document.getElementById('rTags').innerHTML='';return}document.getElementById('rRes').textContent='🍽️';document.getElementById('rName').innerHTML=`<a style="color:var(--primary-dark);cursor:pointer;text-decoration:underline" onclick="navigate('recipes');setTimeout(()=>viewRecipe(${d.id}),500)">${d.name}</a>`;document.getElementById('rTags').innerHTML=`<span class="tag tag-primary">${d.category||'家常'}</span> <span class="tag tag-blue">🏷 ${d.flavor_tags||''}</span>`;catAct('happy')}
+async function loadMI(){const r=await fetch(API+'/api/menu');const is=await r.json();const el=document.getElementById('mList');if(!el)return;if(is.length===0){el.innerHTML='<div class="empty-state"><div class="icon">🍜</div><p>还没有添加</p></div>';return}el.innerHTML=is.map(i=>`<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border)"><span style="flex:1;font-size:14px">${i.name}</span><span class="tag tag-blue">${i.meal_type==='breakfast'?'早餐':i.meal_type==='lunch'?'午餐':i.meal_type==='dinner'?'晚餐':i.meal_type==='snack'?'小吃':'不限'}</span><span class="tag tag-primary">${i.category==='home'?'家常':i.category==='takeout'?'外卖':'餐厅'}</span><button class="btn btn-sm btn-danger" onclick="delMI(${i.id})">删除</button></div>`).join('')}
 function showAddMI(){const o=document.createElement('div');o.className='modal-overlay';o.innerHTML=`<div class="modal"><div class="modal-title">添加菜单</div><div class="form-group"><label>名称</label><input class="input" id="miName"></div><div class="form-row"><div class="form-group"><label>餐别</label><select class="select" id="miMeal"><option value="any">不限</option><option value="breakfast">早餐</option><option value="lunch">午餐</option><option value="dinner">晚餐</option><option value="snack">小吃</option></select></div><div class="form-group"><label>类型</label><select class="select" id="miCat"><option value="home">家常</option><option value="takeout">外卖</option><option value="restaurant">餐厅</option></select></div></div><div style="display:flex;gap:10px;justify-content:flex-end"><button class="btn btn-outline btn-sm" onclick="this.closest('.modal-overlay').remove()">取消</button><button class="btn btn-primary btn-sm" onclick="saveMI()">添加</button></div></div>`;o.addEventListener('click',e=>{if(e.target===o)o.remove()});document.body.appendChild(o)}
 async function saveMI(){const n=document.getElementById('miName').value.trim();if(!n)return toast('请输入名称');await fetch(API+'/api/menu',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name:n,meal_type:document.getElementById('miMeal').value,category:document.getElementById('miCat').value})});document.querySelector('.modal-overlay')?.remove();loadMI()}
 async function delMI(id){showConfirm('确定删除这个菜单项吗？',async()=>{await fetch(API+'/api/menu/'+id,{method:'DELETE'});loadMI()})}
@@ -888,7 +935,7 @@ async function delMI(id){showConfirm('确定删除这个菜单项吗？',async()
 async function renderRecipes(){
   document.getElementById('mainContent').innerHTML=`<div class="fade-in"><div class="page-title">👩‍🍳 家常菜谱</div><div class="card"><div style="display:flex;gap:10px;align-items:center;margin-bottom:12px;flex-wrap:wrap"><input class="input" id="rcSearch" placeholder="搜索菜谱..." style="max-width:200px" oninput="loadRecipes()"><select class="select" id="rcCat" style="max-width:130px;padding:4px 8px;font-size:12px" onchange="loadRecipes()"><option value="">全部分类</option></select><button class="btn btn-primary btn-sm" onclick="showAddRecipe()">+ 新增</button><button class="btn btn-outline btn-sm" onclick="searchWebRecipe()">🔍 搜索更多</button></div><div id="rcList">加载中...</div></div></div>`;loadRecipes();loadCatFilter()}
 async function loadCatFilter(){try{const r=await fetch(API+'/api/recipes/categories');const d=await r.json();const s=document.getElementById('rcCat');if(s)s.innerHTML='<option value="">全部分类</option>'+d.categories.map(c=>`<option value="${c}">${c}</option>`).join('')}catch(e){}}
-async function loadRecipes(){const s=document.getElementById('rcSearch')?.value||'';const c=document.getElementById('rcCat')?.value||'';const p=new URLSearchParams();if(s)p.set('search',s);if(c)p.set('category',c);const u=API+'/api/recipes?'+p.toString();const r=await fetch(u);const rs=await r.json();const el=document.getElementById('rcList');if(!el)return;if(rs.length===0){el.innerHTML='<div class="empty-state"><div class="icon">👩‍🍳</div><p>还没有菜谱，试试搜索功能</p></div>';return}el.innerHTML=rs.map(rc=>`<div class="card" style="padding:16px;margin-bottom:10px;cursor:pointer" onclick="viewRecipe(${rc.id})"><div style="display:flex;justify-content:space-between;align-items:center"><span style="font-weight:600">🍳 ${rc.name}</span><span style="display:flex;gap:4px;flex-wrap:wrap"><span class="tag tag-pink">${rc.category||'家常'}</span><span class="tag tag-yellow">⏱${rc.cook_time}min</span><span class="tag tag-blue">${rc.difficulty==='easy'?'简单':rc.difficulty==='medium'?'中等':'困难'}</span></span></div>${rc.flavor_tags?`<div style="margin-top:6px;font-size:12px;color:var(--text-light)">🏷 ${rc.flavor_tags}</div>`:''}</div>`).join('')}
+async function loadRecipes(){const s=document.getElementById('rcSearch')?.value||'';const c=document.getElementById('rcCat')?.value||'';const p=new URLSearchParams();if(s)p.set('search',s);if(c)p.set('category',c);const u=API+'/api/recipes?'+p.toString();const r=await fetch(u);const rs=await r.json();const el=document.getElementById('rcList');if(!el)return;if(rs.length===0){el.innerHTML='<div class="empty-state"><div class="icon">👩‍🍳</div><p>还没有菜谱，试试搜索功能</p></div>';return}el.innerHTML=rs.map(rc=>`<div class="card" style="padding:16px;margin-bottom:10px;cursor:pointer" onclick="viewRecipe(${rc.id})"><div style="display:flex;justify-content:space-between;align-items:center"><span style="font-weight:600">🍳 ${rc.name}</span><span style="display:flex;gap:4px;flex-wrap:wrap"><span class="tag tag-primary">${rc.category||'家常'}</span><span class="tag tag-yellow">⏱${rc.cook_time}min</span><span class="tag tag-blue">${rc.difficulty==='easy'?'简单':rc.difficulty==='medium'?'中等':'困难'}</span></span></div>${rc.flavor_tags?`<div style="margin-top:6px;font-size:12px;color:var(--text-light)">🏷 ${rc.flavor_tags}</div>`:''}</div>`).join('')}
 function searchWebRecipe(){
   const s=document.getElementById('rcSearch')?.value.trim();
   if(!s)return toast('请先输入菜名搜索');
@@ -904,7 +951,7 @@ async function saveRecipe(){
   await fetch(API+'/api/recipes',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name:n,category:document.getElementById('rcCat2').value,ingredients:document.getElementById('rcIng').value,steps:document.getElementById('rcStep').value,flavor_tags:document.getElementById('rcTags').value,difficulty:document.getElementById('rcDiff').value,cook_time:parseInt(document.getElementById('rcTime').value)||30})});
   document.querySelector('.modal-overlay')?.remove();loadRecipes();toast('菜谱已保存')}
 async function viewRecipe(id){const r=await fetch(API+'/api/recipes');const rs=await r.json();const rc=rs.find(x=>x.id===id);if(!rc)return;
-  openDetail(`<h3 style="margin-bottom:12px">🍳 ${rc.name}</h3><div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap"><span class="tag tag-pink">${rc.category||'家常'}</span><span class="tag tag-green">${rc.difficulty==='easy'?'简单':rc.difficulty==='medium'?'中等':'困难'}</span><span class="tag tag-yellow">⏱ ${rc.cook_time}分钟</span>${rc.flavor_tags?`<span class="tag tag-blue">🏷 ${rc.flavor_tags}</span>`:''}</div><div class="card-title">🥬 食材</div><p style="white-space:pre-wrap;font-size:13px;line-height:1.6;margin-bottom:12px">${rc.ingredients||'暂无'}</p><div class="card-title">📝 步骤</div><p style="white-space:pre-wrap;font-size:13px;line-height:1.8">${rc.steps||'暂无'}</p><div style="margin-top:16px;display:flex;gap:10px;justify-content:flex-end"><button class="btn btn-outline btn-sm" onclick="closeDetail();editRecipeModal(${rc.id})">编辑</button><button class="btn btn-danger btn-sm" onclick="delRecipe(${rc.id});closeDetail()">删除</button></div>`)}
+  openDetail(`<h3 style="margin-bottom:12px">🍳 ${rc.name}</h3><div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap"><span class="tag tag-primary">${rc.category||'家常'}</span><span class="tag tag-green">${rc.difficulty==='easy'?'简单':rc.difficulty==='medium'?'中等':'困难'}</span><span class="tag tag-yellow">⏱ ${rc.cook_time}分钟</span>${rc.flavor_tags?`<span class="tag tag-blue">🏷 ${rc.flavor_tags}</span>`:''}</div><div class="card-title">🥬 食材</div><p style="white-space:pre-wrap;font-size:13px;line-height:1.6;margin-bottom:12px">${rc.ingredients||'暂无'}</p><div class="card-title">📝 步骤</div><p style="white-space:pre-wrap;font-size:13px;line-height:1.8">${rc.steps||'暂无'}</p><div style="margin-top:16px;display:flex;gap:10px;justify-content:flex-end"><button class="btn btn-outline btn-sm" onclick="closeDetail();editRecipeModal(${rc.id})">编辑</button><button class="btn btn-danger btn-sm" onclick="delRecipe(${rc.id});closeDetail()">删除</button></div>`)}
 
 // ========== SHOPPING ==========
 async function renderShopping(){
