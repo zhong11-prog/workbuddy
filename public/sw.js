@@ -1,5 +1,5 @@
 // Service Worker for 钟雁羚的工作台
-const CACHE_NAME = 'workbuddy-v2-' + new Date().toISOString().split('T')[0];
+const CACHE_NAME = 'workbuddy-v3';
 const STATIC_ASSETS = [
   '/',
   '/index.html',
@@ -16,36 +16,35 @@ self.addEventListener('install', event => {
   self.skipWaiting();
 });
 
-// Activate: clean old caches
+// Activate: clean ALL old caches
 self.addEventListener('activate', event => {
   event.waitUntil(
     caches.keys().then(keys => Promise.all(
-      keys.filter(k => k !== CACHE_NAME).map(k => caches.delete(k))
+      keys.map(k => caches.delete(k))
     ))
   );
   self.clients.claim();
 });
 
-// Fetch: network-first with cache fallback
+// Fetch: network-first, cache fallback
 self.addEventListener('fetch', event => {
   const url = new URL(event.request.url);
   
-  // API requests: network only, no caching
+  // API requests: network only
   if (url.pathname.startsWith('/api/')) {
-    return; // Let browser handle normally
+    return;
   }
   
-  // Static assets: cache-first
+  // Network-first strategy for all static assets
   event.respondWith(
-    caches.match(event.request).then(cached => {
-      const fetched = fetch(event.request).then(response => {
-        if (response.ok) {
-          const clone = response.clone();
-          caches.open(CACHE_NAME).then(cache => cache.put(event.request, clone));
-        }
-        return response;
-      });
-      return cached || fetched;
+    fetch(event.request).then(response => {
+      if (response.ok) {
+        const clone = response.clone();
+        caches.open(CACHE_NAME).then(cache => cache.put(event.request, clone));
+      }
+      return response;
+    }).catch(() => {
+      return caches.match(event.request);
     })
   );
 });
