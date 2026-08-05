@@ -559,42 +559,225 @@ async function saveFinance(){
 }
 async function deleteFinance(id){showConfirm('确定删除这条记录吗？',async()=>{await fetch(API+'/api/finances/'+id,{method:'DELETE'});loadFinances()})}
 
-// ========== FITNESS ==========
-let ftInt,ftSec=0,ftRun=false;
+// ========== FITNESS v2 ==========
+const FT_PLAN={mon:{label:'周一 · 臀腿塑形',exercises:[
+  {name:'相扑硬拉',sets:'4×12',note:'宽站距，主攻大腿内侧和臀大肌下沿',rest:90},
+  {name:'直腿硬拉',sets:'4×12',note:'膝盖微屈，感受大腿后侧拉伸',rest:90},
+  {name:'蚌式开合（弹力带）',sets:'每侧4×20',note:'左腿多做一组，纠正X型腿',rest:60},
+  {name:'仰卧举腿（反向卷腹）',sets:'4×15',note:'专攻下腹马甲线',rest:60,abs:true}
+],video:[
+  {name:'相扑硬拉',tip:'B站搜索"硬拉说明书第三期"'},
+  {name:'直腿硬拉',tip:'B站搜索"直腿硬拉保姆级教学"'},
+  {name:'蚌式开合',tip:'小红书搜索"居家练腿蚌式开合"'},
+  {name:'仰卧举腿',tip:'小红书搜索"仰卧卷腹教程"'}
+]},
+wed:{label:'周三 · 背部挺括+肩部',exercises:[
+  {name:'俯身杠铃划船（反手）',sets:'4×12',note:'练出背部中线沟壑',rest:90},
+  {name:'单臂哑铃划船',sets:'每侧4×12',note:'矫正左右背部对称',rest:90},
+  {name:'面拉（龙门架）',sets:'4×15',note:'必做！改善圆肩，挺胸显气质',rest:60},
+  {name:'T字/Y字伸展',sets:'3×15',note:'激活下斜方肌',rest:60},
+  {name:'绳索跪姿卷腹',sets:'4×15',note:'雕刻上腹块状马甲线',rest:60,abs:true}
+],video:[
+  {name:'俯身杠铃划船',tip:'小红书搜索"反手划船教学"'},
+  {name:'单臂哑铃划船',tip:'B站搜索"每天学会一个健身动作"'},
+  {name:'绳索跪姿卷腹',tip:'小红书搜索"绳索跪姿卷腹保姆级教程"'}
+]},
+fri:{label:'周五 · 臀腿力量+X型纠正',exercises:[
+  {name:'保加利亚分腿蹲（半程）',sets:'左4×10 / 右3×10',note:'下蹲至大腿与地面45°，左腿多做一组',rest:90},
+  {name:'单腿罗马尼亚硬拉',sets:'左4×10 / 右3×10',note:'重量减半，求稳不求重',rest:90},
+  {name:'坐姿大腿外展（器械）',sets:'4×15',note:'X型腿王牌动作',rest:60},
+  {name:'死虫式',sets:'3×每侧12',note:'收紧腰腹围度',rest:60,abs:true}
+],video:[
+  {name:'死虫式',tip:'B站搜索"欧阳春晓核心训练"'}
+]},
+weekend:{label:'周末 · 主动恢复',exercises:[
+  {name:'快走或椭圆机',sets:'30分钟',note:'心率120左右，只为了消化，不消耗肌肉',rest:0},
+  {name:'泡沫轴放松',sets:'10分钟',note:'重点滚大腿前侧和胸椎',rest:0}
+],video:[]}};
+const DIET_PLAN=[
+  {id:'breakfast',label:'早餐',time:'7:30-8:30',food:'燕麦粥1碗 + 全蛋2个 + 牛奶1杯 + 红薯1个',tip:'优质蛋白+复合碳水'},
+  {id:'snack1',label:'上午加餐',time:'10:30',food:'坚果1小把（核桃/杏仁）+ 香蕉1根',tip:'补充脂肪和快碳'},
+  {id:'lunch',label:'午餐',time:'12:30-13:00',food:'糙米饭1拳 + 鸡胸肉/牛肉200g + 西兰花/绿叶菜',tip:'蛋白质管够'},
+  {id:'pre_workout',label:'训练前',time:'训练前30-45分钟',food:'全麦面包1片或香蕉1根',tip:'提供训练能量'},
+  {id:'post_workout',label:'训练后',time:'训练结束30分钟内',food:'蛋白粉1勺 + 香蕉1根或红薯1个',tip:'黄金补充窗口！'},
+  {id:'dinner',label:'晚餐',time:'18:30-19:30',food:'红薯/地瓜 + 鱼肉/鸡胸肉150g + 蔬菜',tip:'清淡好消化'}
+];
+const FT_WARNINGS=[
+  {level:'red',title:'最重要的3条铁律',items:['"先左后右"原则：所有单侧动作，必须先做左腿，且左腿多做一组。','宁轻勿假：最后两个感到极度吃力才对，做完还有力气聊天就立刻加重。','膝盖不内扣：做下肢动作时低头看膝盖，内扣立刻停住调整。']},
+  {level:'yellow',title:'动作专项注意',items:['相扑硬拉：站距宽，脚尖和膝盖同方向；背部全程挺直；力量来自臀腿不是腰','直腿硬拉：背部保持挺直，重心在脚后跟；膝盖微屈即可','蚌式开合：脚后跟始终贴在一起，只动膝盖；发力在屁股侧面','绳索跪姿卷腹：臀部固定不动；用腹肌卷动不是手臂拉；吐气时把气呼干','死虫式：下背部紧贴地面；动作要慢，用核心控制']},
+  {level:'green',title:'日常习惯',items:['训练穿平底硬底鞋（帆布鞋或举重鞋），不穿厚底老爹鞋','走路脚尖朝前，每一步用臀部发力蹬出去','每天睡前左侧单腿站立刷牙2分钟，强化左腿本体感觉']}
+];
+
+let ftTab='plan',ftInt,ftSec=0,ftRun=false;
+
 async function renderFitness(){
-  document.getElementById('mainContent').innerHTML=`<div class="fade-in"><div class="page-title">🏃 健身</div>
-    <div class="card" style="text-align:center"><div class="card-title">⏱️ 运动计时器</div>
-      <div style="font-size:48px;font-weight:700;color:var(--primary-dark);margin:10px 0" id="ftDisp">00:00</div>
-      <div style="display:flex;gap:10px;justify-content:center"><button class="btn btn-primary" id="ftBtn" onclick="toggleFT()">▶ 开始</button><button class="btn btn-outline" onclick="resetFT()">↺ 重置</button><button class="btn btn-success" id="ftSave" disabled onclick="saveFT()">💾 保存</button></div>
-    </div>
-    <div class="card"><div class="card-title">🏋️ 快速开始</div>
-      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px" id="ftQuick">${[
-        {icon:'🏊',name:'游泳',cal:8},{icon:'🏋️',name:'力量训练',cal:6},
-        {icon:'🏸',name:'羽毛球',cal:7},{icon:'🏃',name:'有氧训练',cal:7}
-      ].map(e=>`<button class="btn-block" onclick="startQuickFT('${e.name}',${e.cal})"><span class="big-icon">${e.icon}</span>${e.name}<span style="font-size:10px;color:var(--text-muted);font-weight:400">约${e.cal}kcal/min</span></button>`).join('')}</div>
-    </div>
-    <div class="card"><div class="card-title">📊 运动记录</div>
-      <div style="display:flex;gap:10px;margin-bottom:12px"><select class="input" style="width:auto" id="ftView" onchange="loadFitness()"><option value="week">本周</option><option value="month">本月</option></select></div>
-      <div id="ftList">加载中...</div>
-    </div></div>`;loadFitness()}
-function toggleFT(){if(ftRun){clearInterval(ftInt);ftRun=false;document.getElementById('ftBtn').textContent='▶ 继续';document.getElementById('ftSave').disabled=false}else{ftRun=true;document.getElementById('ftBtn').textContent='⏸ 暂停';document.getElementById('ftSave').disabled=true;ftInt=setInterval(()=>{ftSec++;document.getElementById('ftDisp').textContent=String(Math.floor(ftSec/60)).padStart(2,'0')+':'+String(ftSec%60).padStart(2,'0')},1000)}}
-function resetFT(){clearInterval(ftInt);ftRun=false;ftSec=0;document.getElementById('ftDisp').textContent='00:00';document.getElementById('ftBtn').textContent='▶ 开始';document.getElementById('ftSave').disabled=true}
-function startQuickFT(name,cal){if(!ftRun){ftSec=0;document.getElementById('ftDisp').textContent='00:00'}toggleFT();toast(`开始${name}训练！`)}
+  var m=document.getElementById('mainContent');
+  m.innerHTML='<div class="fade-in"><div class="page-title">🏃 健身 · 三个月曲线雕刻</div>'+
+    renderFtWarnings()+
+    '<div class="card" style="margin-bottom:12px"><div style="display:flex;gap:8px">'+
+    '<button class="btn '+(ftTab==='plan'?'btn-primary':'btn-outline')+' btn-sm" onclick="switchFtTab(\'plan\')">📋 训练计划</button>'+
+    '<button class="btn '+(ftTab==='diet'?'btn-primary':'btn-outline')+' btn-sm" onclick="switchFtTab(\'diet\')">🍽️ 饮食计划</button>'+
+    '<button class="btn '+(ftTab==='progress'?'btn-primary':'btn-outline')+' btn-sm" onclick="switchFtTab(\'progress\')">📈 进度追踪</button>'+
+    '</div></div>'+
+    '<div id="ftTabContent"></div></div>';
+  switchFtTab(ftTab,true)
+}
+
+function renderFtWarnings(){
+  var h='';
+  FT_WARNINGS.forEach(function(w){
+    var bg=w.level==='red'?'#fef2f2':w.level==='yellow'?'#fffbeb':'#f0fdf4';
+    var bd=w.level==='red'?'#fecaca':w.level==='yellow'?'#fde68a':'#bbf7d0';
+    var cl=w.level==='red'?'#991b1b':w.level==='yellow'?'#92400e':'#166534';
+    var icon=w.level==='red'?'🔴':w.level==='yellow'?'🟡':'🟢';
+    h+='<div class="card" style="background:'+bg+';border:1px solid '+bd+';margin-bottom:10px"><div class="card-title" style="color:'+cl+'">'+icon+' '+w.title+'</div>';
+    w.items.forEach(function(item){
+      h+='<div style="font-size:12px;color:'+cl+';padding:2px 0">• '+item+'</div>';
+    });
+    h+='</div>';
+  });
+  return h
+}
+
+function switchFtTab(tab,init){
+  ftTab=tab;
+  var el=document.getElementById('ftTabContent');if(!el)return;
+  if(tab==='plan')renderFtPlan(el);
+  else if(tab==='diet')renderFtDiet(el);
+  else if(tab==='progress')renderFtProgress(el);
+  if(!init)renderFitness()
+}
+
+function renderFtPlan(el){
+  var days=['mon','wed','fri','weekend'];
+  var h='<div class="card"><div class="card-title">⏱️ 运动计时器</div>'+
+    '<div style="text-align:center"><div style="font-size:48px;font-weight:700;color:var(--primary-dark);margin:10px 0" id="ftDisp">00:00</div>'+
+    '<div style="display:flex;gap:10px;justify-content:center"><button class="btn btn-primary" id="ftBtn" onclick="toggleFT()">▶ 开始</button>'+
+    '<button class="btn btn-outline" onclick="resetFT()">↺ 重置</button>'+
+    '<button class="btn btn-success" id="ftSave" disabled onclick="saveFT()">💾 保存</button></div></div></div>';
+  days.forEach(function(d){
+    var p=FT_PLAN[d];
+    h+='<div class="card" style="margin-top:10px"><div class="card-title">📌 '+p.label;
+    h+=' <button class="btn btn-sm btn-primary" id="chk_'+d+'" onclick="checkTraining(\''+d+'\')" style="margin-left:auto">✅ 今日打卡</button>';
+    h+='</div><div style="overflow-x:auto"><table style="font-size:12px"><tr><th>动作</th><th>组数×次数</th><th>备注</th><th>休息</th><th>教学</th></tr>';
+    p.exercises.forEach(function(ex){
+      var vid=p.video.find(function(v){return v.name===ex.name||ex.name.includes(v.name)});
+      h+='<tr'+(ex.abs?' style="background:var(--bg)"':'')+'>'+
+        '<td>'+(ex.abs?'<span class="tag tag-primary" style="font-size:10px">腹部</span> ':'')+ex.name+'</td>'+
+        '<td style="font-weight:600">'+ex.sets+'</td>'+
+        '<td style="font-size:11px;color:var(--text-light)">'+ex.note+'</td>'+
+        '<td>'+(ex.rest?ex.rest+'s':'—')+'</td>'+
+        '<td>'+(vid?'<button class="btn btn-sm btn-outline" onclick="copyFtVideo(\''+vid.tip+'\')" style="font-size:10px;padding:2px 6px">🎬 观看</button>':'—')+'</td></tr>';
+    });
+    h+='</table></div></div>';
+  });
+  h+='<div class="card" style="margin-top:10px"><div class="card-title">📜 组间休息规则</div>'+
+    '<div style="font-size:12px;color:var(--text-light)">大项动作（硬拉、深蹲类）休息 <b>90秒</b>；小项（卷腹、外展等）休息 <b>60秒</b></div></div>';
+  el.innerHTML=h;
+  loadFtCheckins()
+}
+
+function renderFtDiet(el){
+  var h='<div class="card" style="margin-bottom:10px"><div class="card-title">🎯 每日营养目标</div>'+
+    '<div style="display:flex;gap:20px;flex-wrap:wrap;font-size:14px"><div>🔥 热量：<b>2300-2400</b> 大卡</div><div>🥩 蛋白质：<b>90g+</b></div><div>🍚 碳水：<b>250g+</b></div></div></div>';
+  DIET_PLAN.forEach(function(m,idx){
+    h+='<div class="card" style="margin-bottom:8px"><div style="display:flex;align-items:center;gap:10px">'+
+      '<input type="checkbox" id="diet_'+m.id+'" onchange="toggleDiet(\''+m.id+'\',this.checked)" style="width:18px;height:18px;flex-shrink:0">'+
+      '<div style="flex:1">'+
+      '<div style="font-size:13px;font-weight:600">'+m.label+' <span style="color:var(--text-muted);font-weight:400">'+m.time+'</span></div>'+
+      '<div style="font-size:12px;color:var(--text-light)">'+m.food+'</div>'+
+      '<div style="font-size:11px;color:var(--text-muted);font-style:italic">'+m.tip+'</div></div></div></div>';
+  });
+  h+='<div class="card" style="background:#fef2f2;border:1px solid #fecaca;margin-top:10px"><div class="card-title" style="color:#991b1b">🚫 饮食红线</div>'+
+    '<div style="font-size:12px;color:#991b1b;line-height:1.8">❌ 不喝含糖饮料、不吃精加工零食<br>❌ 不要害怕碳水！体脂率14.4%远低于正常值，碳水是增肌燃料<br>✅ 每天喝够<b>2L水</b></div></div>';
+  el.innerHTML=h;
+  loadDietLogs()
+}
+
+function renderFtProgress(el){
+  var h='<div class="card"><div class="card-title">📈 进度追踪时间线</div><div id="ftMilestones">加载中...</div></div>';
+  el.innerHTML=h;
+  loadFtMilestones()
+}
+
+async function checkTraining(day){
+  try{
+    var r=await fetch(API+'/api/fitness/checkins',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({date:today(),training_day:day,completed:1})});
+    var d=await r.json();
+    toast(FT_PLAN[day].label+' · 打卡成功！');
+    catAct('happy');spawnConfetti();
+    updateFtCheckBtn(day,d.completed)
+  }catch(e){toast('打卡失败，请检查网络')}
+}
+
+function updateFtCheckBtn(day,completed){
+  var btn=document.getElementById('chk_'+day);if(!btn)return;
+  if(completed){btn.textContent='✅ 已完成';btn.className='btn btn-sm btn-success';btn.disabled=true}
+  else{btn.textContent='✅ 今日打卡';btn.className='btn btn-sm btn-primary';btn.disabled=false}
+}
+
+async function loadFtCheckins(){
+  try{var r=await fetch(API+'/api/fitness/checkins?date='+today());var rs=await r.json();
+  rs.forEach(function(c){updateFtCheckBtn(c.training_day,c.completed)})}catch(e){}
+}
+
+function copyFtVideo(tip){
+  navigator.clipboard?.writeText(tip).then(function(){toast('已复制搜索关键词：'+tip)}).catch(function(){toast(tip)})
+}
+
+// Diet
+async function toggleDiet(meal,followed){
+  try{await fetch(API+'/api/diet',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({date:today(),meal_type:meal,followed:followed?1:0})});toast(followed?'已打卡 ✓':'已取消')}catch(e){toast('保存失败')}
+}
+
+async function loadDietLogs(){
+  try{var r=await fetch(API+'/api/diet?date='+today());var rs=await r.json();
+  rs.forEach(function(d){var cb=document.getElementById('diet_'+d.meal_type);if(cb)cb.checked=!!d.followed})}catch(e){}
+}
+
+// Milestones
+async function loadFtMilestones(){
+  var el=document.getElementById('ftMilestones');if(!el)return;
+  try{var r=await fetch(API+'/api/fitness/milestones');var ms=await r.json();
+  if(!ms.length){el.innerHTML='<div class="empty-state"><div class="icon">📈</div><p>暂无里程碑</p></div>';return}
+  var h='';
+  ms.forEach(function(m){
+    var icon=m.status==='completed'?'✅':m.status==='in_progress'?'🔄':'⭕';
+    var bg=m.status==='completed'?'#f0fdf4':'';
+    h+='<div style="padding:12px;margin:8px 0;background:'+bg+';border-radius:8px;border:1px solid var(--border)">'+
+      '<div style="display:flex;align-items:center;gap:8px"><span style="font-size:20px">'+icon+'</span><div style="flex:1"><b>'+m.milestone_week+'周后检查：'+m.title+'</b>'+
+      '<div style="font-size:12px;color:var(--text-light)">'+m.description+'</div></div>'+
+      '<button class="btn btn-sm btn-outline" onclick="recordMilestone('+m.id+',\''+(m.note||'').replace(/'/g,"\\'")+'\')">📝 记录</button></div>'+
+      (m.note?'<div style="margin-top:6px;font-size:12px;color:var(--text-light);padding-left:28px">💬 '+m.note+'</div>':'')+
+      '</div>';
+  });
+  el.innerHTML=h}catch(e){el.innerHTML='<div class="empty-state"><p>加载失败</p></div>'}
+}
+
+async function recordMilestone(id,oldNote){
+  var o=document.createElement('div');o.className='modal-overlay';
+  o.innerHTML='<div class="modal"><div class="modal-title">📝 记录进展</div>'+
+    '<div class="form-group"><label>状态</label><select class="select" id="msStatus"><option value="pending">未开始</option><option value="in_progress">进行中</option><option value="completed">已完成</option></select></div>'+
+    '<div class="form-group"><label>备注</label><textarea class="textarea" id="msNote" rows="3">'+oldNote+'</textarea></div>'+
+    '<div style="display:flex;gap:10px;justify-content:flex-end"><button class="btn btn-outline btn-sm" onclick="this.closest(\'.modal-overlay\').remove()">取消</button><button class="btn btn-primary btn-sm" onclick="saveMilestone('+id+')">保存</button></div></div>';
+  o.addEventListener('click',function(e){if(e.target===o)o.remove()});document.body.appendChild(o)
+}
+
+async function saveMilestone(id){
+  try{await fetch(API+'/api/fitness/milestones/'+id,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({status:document.getElementById('msStatus').value,note:document.getElementById('msNote').value})});
+  document.querySelector('.modal-overlay')?.remove();toast('已保存');loadFtMilestones()}catch(e){toast('保存失败')}
+}
+
+// Timer (kept from original)
+function toggleFT(){if(ftRun){clearInterval(ftInt);ftRun=false;document.getElementById('ftBtn').textContent='▶ 继续';document.getElementById('ftSave').disabled=false}else{ftRun=true;document.getElementById('ftBtn').textContent='⏸ 暂停';document.getElementById('ftSave').disabled=true;ftInt=setInterval(function(){ftSec++;var el=document.getElementById('ftDisp');if(el)el.textContent=String(Math.floor(ftSec/60)).padStart(2,'0')+':'+String(ftSec%60).padStart(2,'0')},1000)}}
+function resetFT(){clearInterval(ftInt);ftRun=false;ftSec=0;var el=document.getElementById('ftDisp');if(el)el.textContent='00:00';var btn=document.getElementById('ftBtn');if(btn)btn.textContent='▶ 开始';var sv=document.getElementById('ftSave');if(sv)sv.disabled=true}
 function saveFT(){if(ftSec<10)return toast('运动时间太短~');
-  const o=document.createElement('div');o.className='modal-overlay';
-  o.innerHTML=`<div class="modal"><div class="modal-title">保存记录</div>
-    <div class="form-group"><label>运动类型</label><select class="select" id="exType"><option>🏊 游泳</option><option>🏋️ 力量训练</option><option>🏸 羽毛球</option><option>🏃 有氧训练</option><option>🧘 瑜伽</option><option>🚴 骑行</option><option>其他</option></select></div>
-    <div class="form-row"><div class="form-group"><label>时长(分)</label><input class="input" type="number" id="exDur" value="${Math.round(ftSec/60)}" readonly></div><div class="form-group"><label>卡路里</label><input class="input" type="number" id="exCal" placeholder="约${Math.round(ftSec/60*6)}"></div></div>
-    <div style="display:flex;gap:10px;justify-content:flex-end"><button class="btn btn-outline btn-sm" onclick="this.closest('.modal-overlay').remove()">取消</button><button class="btn btn-primary btn-sm" onclick="confirmFT()">保存</button></div></div>`;
-  o.addEventListener('click',e=>{if(e.target===o)o.remove()});document.body.appendChild(o)}
+  var o=document.createElement('div');o.className='modal-overlay';
+  o.innerHTML='<div class="modal"><div class="modal-title">保存记录</div><div class="form-group"><label>运动类型</label><select class="select" id="exType"><option>🏊 游泳</option><option>🏋️ 力量训练</option><option>🏸 羽毛球</option><option>🏃 有氧训练</option><option>🧘 瑜伽</option><option>🚴 骑行</option><option>其他</option></select></div><div class="form-row"><div class="form-group"><label>时长(分)</label><input class="input" type="number" id="exDur" value="'+Math.round(ftSec/60)+'" readonly></div><div class="form-group"><label>卡路里</label><input class="input" type="number" id="exCal" placeholder="约'+Math.round(ftSec/60*6)+'"></div></div><div style="display:flex;gap:10px;justify-content:flex-end"><button class="btn btn-outline btn-sm" onclick="this.closest(\'.modal-overlay\').remove()">取消</button><button class="btn btn-primary btn-sm" onclick="confirmFT()">保存</button></div></div>';
+  o.addEventListener('click',function(e){if(e.target===o)o.remove()});document.body.appendChild(o)}
 async function confirmFT(){
-  await fetch(API+'/api/fitness',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({exercise_type:document.getElementById('exType').value,duration:Math.round(ftSec/60),calories:parseFloat(document.getElementById('exCal').value)||Math.round(ftSec/60*6),date:today()})});
-  document.querySelector('.modal-overlay')?.remove();resetFT();catAct('happy');spawnConfetti();toast('保存成功！');loadFitness()}
-async function loadFitness(){
-  const v=document.getElementById('ftView')?.value||'week';const r=await fetch(API+'/api/fitness?view='+v);const rs=await r.json();const el=document.getElementById('ftList');if(!el)return;
-  if(rs.length===0){el.innerHTML='<div class="empty-state"><div class="icon">🏃</div><p>暂无记录</p></div>';return}
-  el.innerHTML='<table><tr><th>日期</th><th>类型</th><th>时长</th><th>卡路里</th><th>操作</th></tr>'+rs.map(r=>`<tr><td>${r.date}</td><td>${r.exercise_type}</td><td>${r.duration}分钟</td><td>${r.calories}kcal</td><td><button class="btn btn-sm btn-danger" onclick="delFt(${r.id})">删除</button></td></tr>`).join('')+'</table>'}
-async function delFt(id){showConfirm('确定删除这条运动记录吗？',async()=>{await fetch(API+'/api/fitness/'+id,{method:'DELETE'});loadFitness()})}
+  try{await fetch(API+'/api/fitness',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({exercise_type:document.getElementById('exType').value,duration:Math.round(ftSec/60),calories:parseFloat(document.getElementById('exCal').value)||Math.round(ftSec/60*6),date:today()})});
+  document.querySelector('.modal-overlay')?.remove();resetFT();catAct('happy');spawnConfetti();toast('保存成功！')}catch(e){toast('保存失败')}}
 
 // ========== KOREAN ==========
 let kMode='daily',kLevel=1,todayVocab=[],todayGrammar=[],_ci=0;
