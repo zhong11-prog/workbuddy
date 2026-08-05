@@ -2,66 +2,87 @@
 <html lang="zh">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
 <title>网络诊断</title>
 <style>
-body{font-family:-apple-system,sans-serif;background:#FFF0F5;padding:20px;color:#5D4E5D}
-.card{background:#fff;border-radius:16px;padding:16px;margin:12px 0;box-shadow:0 2px 12px rgba(255,154,175,.12)}
-.green{color:#7ECB9A} .red{color:#FF6B7A} .orange{color:#FFB347}
-.status{font-size:24px;margin-left:8px}
-h2{font-size:18px;margin:0 0 8px}
-.result{font-family:monospace;font-size:12px;background:#f9f9f9;padding:8px;border-radius:8px;margin:4px 0;word-break:break-all;max-height:100px;overflow:auto}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif;background:#f5f6f8;color:#2c3e50;padding:20px;line-height:1.6}
+.container{max-width:640px;margin:0 auto}
+.card{background:#fff;border-radius:8px;padding:16px 20px;margin:12px 0;box-shadow:0 1px 4px rgba(0,0,0,.06);border:1px solid #e8eaed}
+.card h3{font-size:15px;font-weight:600;margin:0 0 6px;display:flex;align-items:center;gap:8px}
+.result{font-size:12px;color:#5f6b7a;background:#f8f9fb;padding:8px 12px;border-radius:6px;margin:4px 0;word-break:break-all;max-height:120px;overflow:auto;font-family:'SF Mono',Menlo,monospace}
+.green{color:#22c55e}.red{color:#ef4444}.orange{color:#f59e0b}.blue{color:#3b82f6}
+.btn{display:inline-block;padding:10px 24px;border-radius:6px;font-size:14px;font-weight:500;text-decoration:none;cursor:pointer;border:none;transition:all .2s}
+.btn-primary{background:#3b82f6;color:#fff}.btn-primary:hover{background:#2563eb}
+.btn-link{background:none;color:#3b82f6;padding:4px 0;font-size:13px;text-decoration:underline}
+.notice{background:#eff6ff;border:1px solid #bfdbfe;border-radius:8px;padding:14px 18px;margin:16px 0;font-size:13px;color:#1e40af;line-height:1.8}
+.notice strong{display:block;margin-bottom:4px}
+.loading{text-align:center;padding:40px 0;color:#94a3b8;font-size:14px}
+.spinner{display:inline-block;width:20px;height:20px;border:2px solid #e2e8f0;border-top-color:#3b82f6;border-radius:50%;animation:spin .6s linear infinite;vertical-align:middle;margin-right:8px}
+@keyframes spin{to{transform:rotate(360deg)}}
+@media (max-width:480px){body{padding:12px}.card{padding:12px 14px}}
 </style>
 </head>
 <body>
-<h2>🔍 网络诊断 - WorkBuddy</h2>
-<div id="results"></div>
+<div class="container">
+  <h2 style="font-size:18px;font-weight:600;margin-bottom:8px">网络诊断</h2>
+  <p style="font-size:13px;color:#94a3b8;margin-bottom:16px">检测后端连接状态，帮助定位访问问题</p>
+  <div id="results">
+    <div class="loading"><span class="spinner"></span>正在检测网络连接...</div>
+  </div>
+</div>
 <script>
 const API='https://workbuddy-production-706a.up.railway.app';
-const ALT='https://763a82c198bc4f4486a18f66a40ed036.sh2.agentos-app.net';
 const GH='https://zhong11-prog.github.io/workbuddy/';
 const r=document.getElementById('results');
 
-function add(title,status,detail){
-  const icon=status==='ok'?'✅':status==='warn'?'⚠️':'❌';
-  const color=status==='ok'?'green':status==='warn'?'orange':'red';
-  r.innerHTML+=`<div class="card"><h2>${icon} ${title}</h2><div class="result ${color}">${detail}</div></div>`;
+function card(title,status,detail,id){
+  var icon=status==='ok'?'<span class="green">✓</span>':status==='warn'?'<span class="orange">⚠</span>':'<span class="red">✗</span>';
+  var c='<div class="card"><h3>'+icon+' '+title+'</h3><div class="result">'+detail+'</div></div>';
+  if(id){var el=document.getElementById(id);if(el)el.innerHTML=c}
+  else r.innerHTML+=c;
 }
 
 async function test(name,url,isJson){
   try{
-    const t0=Date.now();
-    const res=await fetch(url,{signal:AbortSignal.timeout(8000)});
-    const ms=Date.now()-t0;
-    const body=isJson?await res.json():await res.text();
-    add(name+' ('+ms+'ms)','ok',JSON.stringify(body).substring(0,200));
-    return true;
+    var t0=Date.now();
+    var res=await fetch(url,{signal:AbortSignal.timeout(8000)});
+    var ms=Date.now()-t0;
+    var body=isJson?await res.json():await res.text();
+    card(name+' · '+ms+'ms','ok',JSON.stringify(body).substring(0,300));
+    return {ok:true,body:body};
   }catch(e){
-    add(name,'error',e.message||'连接失败');
-    return false;
+    card(name,'error',e.message||'连接失败');
+    return {ok:false,error:e.message};
   }
 }
 
 async function run(){
-  add('浏览器信息','ok',navigator.userAgent);
-  add('当前页面','ok',location.href);
-  add('时间','ok',new Date().toString());
+  r.innerHTML='';
   
-  const apiOk=await test('Railway API 直连',API+'/api/dashboard',true);
-  await test('GitHub Pages 页面',GH,false);
-  await test('CloudStudio 页面',ALT,false);
+  var info=navigator.userAgent||'';
+  var isWeChat=/MicroMessenger/i.test(info);
+  var isMobile=/Mobi|Android/i.test(info);
   
-  const linkList=[];
-  if(apiOk)linkList.push('<a href="'+API+'" style="color:#E8738A;font-weight:600">Railway 原始地址（数据完整）</a>');
-  linkList.push('<a href="'+GH+'" style="color:#E8738A">GitHub Pages</a>');
-  linkList.push('<a href="'+ALT+'" style="color:#E8738A">CloudStudio 腾讯云</a>');
+  card('设备信息','ok','<span class="blue">'+(isMobile?'移动端':'桌面端')+'</span> · '+(isWeChat?'微信内置浏览器':'系统浏览器')+'<br><span style="color:#94a3b8">'+info.substring(0,120)+'</span>');
   
-  add('推荐使用','ok','<div style="font-size:14px;line-height:2">'+linkList.join('<br>')+'</div>');
+  var apiResult=await test('Railway API 直连',API+'/api/dashboard',true);
   
-  if(!apiOk){
-    add('⚠️ 诊断结论','warn','Railway 后端在你当前网络无法访问。建议使用 VPN 或切换网络后再试。');
+  if(apiResult.ok){
+    await test('GitHub Pages 页面',GH,false);
+    
+    var links='<a href="'+GH+'" class="btn btn-primary" style="margin-right:8px">打开工作台</a>';
+    if(isWeChat){
+      card('<!--notice-->','warn','<div class="notice"><strong>检测到微信内置浏览器</strong>微信内置浏览器存在网络限制，部分功能可能无法正常使用。<br><br><strong>解决方法：</strong>点击右上角 ··· → 选择「在浏览器中打开」，使用手机自带浏览器（Safari / Chrome）访问。<br><br>'+links+'</div>');
+    }else if(isMobile){
+      card('推荐访问方式','ok','<div style="font-size:14px;line-height:2">网络连接正常！<br><br>'+links+'</div>');
+    }else{
+      card('推荐访问方式','ok','<div style="font-size:14px;line-height:2">网络连接正常，请使用以下链接访问：<br><br>'+links+'</div>');
+    }
+    
+    card('诊断结论','ok','后端服务正常运行，数据接口响应正常。建议将 <a href="'+GH+'" class="btn-link">GitHub Pages 链接</a> 添加到浏览器收藏夹。');
   }else{
-    add('✅ 诊断结论','ok','网络正常！如果刚才打不开可能是缓存，请刷新页面。');
+    card('诊断结论','error','无法连接到后端服务器。可能原因：<br>1. 当前网络无法访问境外服务<br>2. 防火墙或运营商限制<br><br>建议：尝试切换 WiFi / 使用移动数据 / 开启 VPN');
   }
 }
 run();
