@@ -1273,7 +1273,7 @@ async function loadNotes(){
     '<span>'+txt+'</span>'+
     '<div style="display:flex;gap:6px">'+
     '<button class="btn btn-sm btn-outline" onclick="pinNote('+n.id+','+(n.pinned?0:1)+')">'+(n.pinned?'📌取消置顶':'📌置顶')+'</button>'+
-    '<button class="btn btn-sm btn-outline" onclick="editNote('+n.id+',''+n.content.replace(/'/g,"\\'")+'',''+(n.color||'#FFF9C4')+'')">编辑</button>'+
+    '<button class="btn btn-sm btn-outline" onclick="editNote('+n.id+','+JSON.stringify(n.content)+','+JSON.stringify(n.color||'#FFF9C4')+')">编辑</button>'+
     '<button class="btn btn-sm btn-danger" onclick="delNote('+n.id+')">删除</button>'+
     '</div></div></div>'
   }).join('')
@@ -1288,8 +1288,12 @@ async function pinNote(id,pinned){
 }
 function editNote(id,content,color){
   var o=document.createElement('div');o.className='modal-overlay';
-  o.innerHTML='<div class="modal"><div class="modal-title">编辑灵感</div><div class="form-group"><label>内容</label><textarea class="textarea" id="nsContent" rows="4">'+content+'</textarea></div><div class="form-group"><label>颜色</label><select class="select" id="nsColor"><option value="#FFF9C4"'+(color==='#FFF9C4'?' selected':'')+'>💛 黄</option><option value="#FFE0E8"'+(color==='#FFE0E8'?' selected':'')+'>🌸 粉</option><option value="#E0F0FF"'+(color==='#E0F0FF'?' selected':'')+'>💙 蓝</option><option value="#E0FFE0"'+(color==='#E0FFE0'?' selected':'')+'>💚 绿</option><option value="#FFE8D0"'+(color==='#FFE8D0'?' selected':'')+'>🧡 橙</option></select></div><div style="display:flex;gap:10px;justify-content:flex-end"><button class="btn btn-outline btn-sm" onclick="this.closest('.modal-overlay').remove()">取消</button><button class="btn btn-primary btn-sm" onclick="saveEditNote('+id+')">保存</button></div></div>';
-  o.addEventListener('click',function(e){if(e.target===o)o.remove()});document.body.appendChild(o)
+  var colors=[['#FFF9C4','💛 黄'],['#FFE0E8','🌸 粉'],['#E0F0FF','💙 蓝'],['#E0FFE0','💚 绿'],['#FFE8D0','🧡 橙']];
+  var opts=colors.map(function(c){return '<option value="'+c[0]+'"'+(color===c[0]?' selected':'')+'>'+c[1]+'</option>'}).join('');
+  o.innerHTML='<div class="modal"><div class="modal-title">编辑灵感</div><div class="form-group"><label>内容</label><textarea class="textarea" id="nsContent" rows="4">'+content+'</textarea></div><div class="form-group"><label>颜色</label><select class="select" id="nsColor">'+opts+'</select></div><div style="display:flex;gap:10px;justify-content:flex-end"><button class="btn btn-outline btn-sm" id="nsCancel">取消</button><button class="btn btn-primary btn-sm" id="nsSave">保存</button></div></div>';
+  o.addEventListener('click',function(e){if(e.target===o)o.remove()});document.body.appendChild(o);
+  document.getElementById('nsCancel').onclick=function(){o.remove()};
+  document.getElementById('nsSave').onclick=function(){saveEditNote(id)}
 }
 async function saveEditNote(id){
   var c=document.getElementById('nsContent').value.trim();if(!c)return toast('内容不能为空');
